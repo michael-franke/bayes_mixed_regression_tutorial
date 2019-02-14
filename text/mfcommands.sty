@@ -1,0 +1,290 @@
+\ProvidesPackage{mycommands}
+
+% Math --------------------
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\tuple}[1]{\left \langle #1\right\rangle}
+\newcommand{\card}[1]{\left \lvert \, #1 \, \right\rvert}
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+\newcommand{\setbar}{\ensuremath{\thinspace \mid \thinspace}}
+\newcommand{\probbar}{\ensuremath{\mid}}
+% \DeclareMathOperator*{\argmax}{arg\,max}
+% \DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\df}{\rightarrow}
+\newcommand{\es}{\emptyset}
+\newcommand{\den}[1]{\left [\! \left [ #1 \right ]\! \right]}
+% \newcommand{\den}[1]{\left \llbracket #1  \right \rrbracket} % this would use fourier package which makes 'cases' environment bad
+\newcommand{\no}{\noindent}
+\newcommand{\hin}{"$\Rightarrow$" }
+\newcommand{\rueck}{"$\Leftarrow$" }
+\newcommand{\exs}{\vspace{.15cm}}
+\newcommand{\pow}[1]{\ensuremath{\mathcal{P}(#1)}}	% Powerset
+\newcommand{\restr}{{\restriction}}
+\newcommand{\implicates}{\ensuremath{\leadsto}}  % arrow for
+                                % implicatures in examples
+\newcommand{\update}[2]{\ensuremath{#1[#2]}}
+\newcommand{\myts}{\ensuremath{\thinspace}}
+\newcommand{\mycolon}{\ensuremath{\thinspace \colon \thinspace}}
+\newcommand{\mydot}{\ensuremath{\thinspace . \thinspace}}
+
+
+% \makeatletter
+% \newcommand{\prob}{\@ifstar
+%   \simpleprob%
+%   \condprob%
+% }
+% \def\simpleprob(#1){\ensuremath{\Pr(#1)}}
+% \def\condprob(#1|#2){\ensuremath{\Pr(#1 \,|\, #2)}}
+% \makeatother
+
+% General Text Markup--------------------
+\newcommand{\runex}[1]{\begin{center}#1\end{center}}
+\newcommand{\mydef}[1]{\textsc{#1}}  		% definitions
+\newcommand{\markdef}[1]{\textsc{#1}}  		% definitions; alternative
+\newcommand{\myment}[1]{\emph{#1}}  	% first mentions
+\newcommand{\myword}[1]{\textbf{\texttt{#1}}}	% refering to the word
+\newcommand{\myemph}[1]{\emph{#1}}			% emphasis
+\newenvironment{exnonum}{
+  \begin{list}{}{
+    \setlength{\leftmargin}{2.5em}
+    \setlength{\rightmargin}{2.5em}
+    %\setlength{\itemindent}{-1.5em}
+  }
+}{
+  \end{list}
+}
+
+
+% Slanted Fractions
+\newcommand{\myslantfrac}[2]{\msf{#1}{#2}}
+\newcommand{\msf}[2]{\ensuremath{\nicefrac{#1}{#2}}}
+\newcommand{\msftext}[2]{\nicefrac{#1}{#2}}
+
+
+% Symbols for Conditionals
+\newcommand{\cond}{\ensuremath{>}}
+\newcommand{\bicond}{\ensuremath{\Leftrightarrow}}
+\newcommand{\strcondWill}{\ensuremath{\boxRight}}
+\newcommand{\strcondMight}{\ensuremath{\DiamondRight}}
+
+% Signaling Games & IBR
+\newcommand{\sen}{\ensuremath{S}\xspace}		% Sender variable
+\newcommand{\mysen}[1]{\ensuremath{\sen^{#1}}} % Sender of type XYZ
+\newcommand{\rec}{\ensuremath{R}\xspace}		% Receiver variable
+\newcommand{\myrec}[1]{\ensuremath{\rec_{#1}}} % Receiver of type XYZ
+\newcommand{\States}{\ensuremath{T}\xspace}		% Set of States
+\newcommand{\state}{\ensuremath{t}\xspace}		% single states
+\newcommand{\mystate}[1]{\ensuremath{\state_{\text{#1}}}\xspace} %meaningful states
+\newcommand{\Messgs}{\ensuremath{M}\xspace}		% Set of Messages
+\newcommand{\messg}{\ensuremath{m}\xspace}		% single messages
+\newcommand{\mymessg}[1]{\ensuremath{\messg_{\text{#1}}}\xspace} %meaningful messages
+\newcommand{\cost}{\ensuremath\operatorname{C}} % cost function
+\newcommand{\Acts}{\ensuremath{A}\xspace}		% Set of R-actions
+\newcommand{\act}{\ensuremath{a}\xspace}		% single action
+\newcommand{\myact}[1]{\ensuremath{\act_{\text{#1}}}\xspace} %meaningful
+\newcommand{\Worlds}{\ensuremath{W}}		% Worlds
+\newcommand{\world}{\ensuremath{w}}		% single world
+\newcommand{\myworld}[1]{\ensuremath{\world_{\text{#1}}}} %named world
+\newcommand{\util}{\ensuremath{\operatorname{U}}}	% Utility function
+\newcommand{\Util}{\ensuremath{\operatorname{U}}}	% Utility function
+\newcommand{\utils}{\ensuremath{\operatorname{U}}}	% Utility function
+\newcommand{\Utils}{\ensuremath{\operatorname{U}}}	% Utility function
+\newcommand{\RealUtil}{\ensuremath{\operatorname{V}}}	% material payoffs
+\newcommand{\Sstrat}{\ensuremath{\sigma}} % Behav/Probab Sender strategy
+\newcommand{\Sstrats}{\ensuremath{\mathcal{S}}}	% Set of S-strategies
+\newcommand{\Spure}{\ensuremath{s}} % Pure sender strategy
+\newcommand{\Spures}{\ensuremath{\mathsf{S}}} % Set of pure sen strategies
+\newcommand{\Smixed}{\ensuremath{\tilde{s}}} % Mixed sender strategy
+\newcommand{\Smixeds}{\ensuremath{\Delta(\Messgs^\States)}}
+\newcommand{\SpuresW}{\ensuremath{\mathsf{S}}} 
+\newcommand{\SpuresS}{\ensuremath{\mathsf{S}^{{\mathrm{S}}}}}
+\newcommand{\Rstrat}{\ensuremath{\rho}} % Behav/Probab Receiver strategy
+\newcommand{\Rstrats}{\ensuremath{\mathcal{R}}}	% Set of R-Strategies
+\newcommand{\Rpure}{\ensuremath{r}} % Pure receiver strategy
+\newcommand{\Rpures}{\ensuremath{\mathsf{R}}} % Set of pure rec strategies
+\newcommand{\Rmixed}{\ensuremath{\tilde{r}}} % Mixed receiver strategy
+\newcommand{\Rmixeds}{\ensuremath{\Delta(\Acts^\Messgs)}} 
+\newcommand{\RpuresW}{\ensuremath{\mathsf{R}}} 
+\newcommand{\RpuresS}{\ensuremath{\mathsf{R}^{\mathrm{S}}}} 
+\newcommand{\PureBR}{\ensuremath{\operatorname{BR}}} % Set of pure best responses
+\newcommand{\ProbBR}{\ensuremath{\operatorname{BR_{Prob}}}} % Set of mixed best responses
+\newcommand{\bel}{\ensuremath{\pi}}
+\newcommand{\Bels}{\ensuremath{\Pi}}
+\newcommand{\Sbel}{\ensuremath{\pi_{\sen}}}
+\newcommand{\Sbels}{\ensuremath{\Pi_{\sen}}}
+\newcommand{\Rbel}{\ensuremath{\pi_{\rec}}}
+\newcommand{\Rbels}{\ensuremath{\Pi_{\rec}}}
+\newcommand{\EU}{\ensuremath{\operatorname{EU}}} % Expected Utility
+\newcommand{\EV}{\ensuremath{\operatorname{EV}}} % Expected Response Utility
+\newcommand{\BR}{\ensuremath{\operatorname{BR}}} % Best Response
+\newcommand{\QR}{\ensuremath{\operatorname{QR}}} % Quantal Response
+\newcommand{\WBR}{\ensuremath{\text{{\relsize{-1}W}BR}}} % Weak Best Response
+\newcommand{\SBR}{\ensuremath{\text{{\relsize{-1}W}BR}}} % Strong Best Response
+\newcommand{\interpr}{\ensuremath{\delta}} % Interpretation strategy
+
+% OT Stuff
+\newcommand{\Gen}{\ensuremath{\operatorname{Gen}}} % Generator
+\newcommand{\Eval}{\ensuremath{\operatorname{Eval}}} % Evaluator
+\newcommand{\Con}{\ensuremath{\operatorname{Con}}} % Constraints
+\newcommand{\metsuc}{\ensuremath{\succ}} % Symbol for BiOT metric
+\newcommand{\metsuceq}{\ensuremath{\succeq}} % Symbol for BiOT metric
+\newcommand{\Go}[1]{\operatorname{Pool}_{#1}}
+\newcommand{\Oo}[1]{\operatorname{Opt}_{#1}}
+\newcommand{\Bo}[1]{\operatorname{Blo}_{#1}}
+\newcommand{\Gr}[1]{\operatorname{GAM^{\rho}}_{#1}}
+\newcommand{\Or}[1]{\operatorname{OPT^{\rho}}_{#1}}
+\newcommand{\Br}[1]{\operatorname{BLO^{\rho}}_{#1}}
+
+% Abbreviations/Acronyms:
+\newcommand{\acro}[1]{\textsc{#1}\xspace}
+\newcommand{\acros}[1]{\textsc{#1}{\relsize{-1}s}\xspace}
+\newcommand{\bc}{\acro{bc}} % Biscuit Conditional(s)
+\newcommand{\bcs}{\acros{bc}}
+\newcommand{\cbc}{\acro{cbc}} % Counterfactual BCs
+\newcommand{\cbcs}{\acros{cbc}}
+\newcommand{\ibr}{\acro{ibr}} % IBR model
+\newcommand{\iqr}{\acro{iqr}} % IQR model
+\newcommand{\rsa}{\acro{rsa}} % RSA model
+\newcommand{\ot}{\acro{ot}} % BiOT
+\newcommand{\biot}{\acro{b{\relsize{-1}i}ot}} % BiOT
+\newcommand{\tom}{\acro{t{\relsize{-1}o}m}} % ToM
+\newcommand{\fc}{\acro{fc}} % Free Choice
+\newcommand{\cp}{\acro{cp}} % Conditional Perfection
+\newcommand{\uc}{\acro{uc}} % Unconditional Readings
+\newcommand{\pbe}{\acro{pbe}}   % Perfect Bayesian Equil.
+\newcommand{\pbes}{\acros{pbe}}
+\newcommand{\forind}{\acro{fi}} % forward induction
+\newcommand{\tcp}{\acro{tcp}} % truth ceteris paribus
+\newcommand{\cmr}{\acro{cmr}} % credible message rationalizability
+\newcommand{\cm}{\acro{cm}} % credible message (profile) (Rabin)
+\newcommand{\condition}[2]{\acro{#1}{#2}} % conditions 
+\newcommand{\br}{\acro{br}} % best response (property)
+\newcommand{\wbr}{\acro{{\relsize{-1}w}br}} % weak best response (property)
+\newcommand{\sbr}{\acro{{\relsize{-1}s}br}} % strong best response (property)
+\newcommand{\curb}{\acro{curb}} % curb sets
+\newcommand{\gtp}{\acro{gtp}} % game theoretic pragmatics
+\newcommand{\sda}{\acro{sda}} % simplification of disjunctive antecedents
+\newcommand{\decprob}{\ensuremath{\mathcal{D}}}
+\newcommand{\ques}{\ensuremath{\mathfrak{Q}}}
+\newcommand{\vsi}{\acro{vsi}}
+\newcommand{\evsi}{\acro{evsi}}
+\newcommand{\uv}{\acro{uv}}
+\newcommand{\qud}{\acro{qud}}
+\newcommand{\NE}{\acro{ne}}
+\newcommand{\NEs}{\acros{ne}}
+\newcommand{\SNE}{\acro{sne}}
+\newcommand{\SNEs}{\acros{sne}}
+\newcommand{\SG}{\acro{sg}}
+\newcommand{\SGs}{\acros{sg}}
+\newcommand{\KO}{\textsc{ko\relsize{-1}bs}} % Kennedy's observation
+\newcommand{\EVP}{\acro{evp}}    % extreme-value principle
+\newcommand{\illc}{\acro{illc}}
+
+% Evolution
+\newcommand{\EGT}{\acro{egt}}
+\newcommand{\ESS}{\acro{ess}}
+\newcommand{\ESSs}{\acros{ess}}
+\newcommand{\NSS}{\acro{nss}}
+\newcommand{\NSSs}{\acros{nss}}
+\newcommand{\sigsys}{\textsc{SigSys}\xspace} % signaling system
+\newcommand{\sigsyss}{\textsc{SigSys{\relsize{-1}s}}\xspace} % signaling system Plural
+
+\newcommand{\fin}{\rule{0mm}{1mm}\hfill{\rule{1.5cm}{0.2pt}}}
+
+%Properly typeset tilde for URLs
+\def\urltilde{\kern -.15em\lower .7ex\hbox{\~{}}\kern .04em}
+
+
+% Beamer footnote for references:
+\newcommand{\beamfn}[1]{
+  \vfill
+      \begin{footnotesize}
+        \leftskip 0.1in
+        \parindent -0.1in
+       \hspace{-0.3cm}\rule{2cm}{0.01cm}\\ \vspace{-0.15cm}
+        #1
+      \end{footnotesize}
+}
+
+\newcommand{\myvec}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\transpose}[1]{\ensuremath{\operatorname{T}(#1)}}
+\newcommand{\normalize}[1]{\ensuremath{\operatorname{N}(#1)}}
+
+\newcommand{\dn}[1]{\draftnote{#1}}
+\newcommand{\fn}[1]{\footnote{#1}}
+
+\newcommand{\stateunmarked}{\ensuremath{\state}\xspace}
+\newcommand{\statemarked}{\ensuremath{\state^*}\xspace}
+\newcommand{\messgunmarked}{\ensuremath{\messg}\xspace}
+\newcommand{\messgmarked}{\ensuremath{\messg^*}\xspace}
+\newcommand{\actunmarked}{\ensuremath{\act}\xspace}
+\newcommand{\actmarked}{\ensuremath{\act^*}\xspace}
+
+\newcommand{\sunmarked}{\ensuremath{\state}\xspace}
+\newcommand{\smarked}{\ensuremath{\state^*}\xspace}
+\newcommand{\munmarked}{\ensuremath{\messg}\xspace}
+\newcommand{\mmarked}{\ensuremath{\messg^*}\xspace}
+\newcommand{\aunmarked}{\ensuremath{\act}\xspace}
+\newcommand{\amarked}{\ensuremath{\act^*}\xspace}
+
+\newcommand{\ssome}{\mystate{\ensuremath{\exists\neg\forall}}}
+\newcommand{\sall}{\mystate{\ensuremath{\forall}}}
+\newcommand{\msome}{\mymessg{some}}
+\newcommand{\mall}{\mymessg{all}}
+\newcommand{\asome}{\myact{\ensuremath{\exists\neg\forall}}}
+\newcommand{\aall}{\myact{\ensuremath{\forall}}}
+
+% for repeating examples with gb4e
+
+\newcounter{myexememory}
+\newenvironment{exer}[1]
+{
+\setcounter{myexememory}{\value{exx}}
+\setcounter{exx}{\getrefnumber{#1}}
+\addtocounter{exx}{-1}  
+\begin{exe}
+}
+{
+\end{exe}
+\setcounter{exx}{\value{myexememory}}
+}
+
+\newenvironment{nakedlist}{
+  \begin{list}{\quad}{}
+}
+{
+  \end{list}
+}
+
+\DefineNamedColor{named}{mycol}{cmyk}{0.6,0.6,0,0}
+\DefineNamedColor{named}{mygray}{cmyk}{0.05,0.05,0.05,0.05}
+\DefineNamedColor{named}{mygraylight}{cmyk}{0.017,0.017,0.017,0.017}
+\DefineNamedColor{named}{mycol2}{cmyk}{0.8,0,0.8,0.2}
+\definecolor{Red}{RGB}{178,34,34}
+\newcommand{\mf}[1]{\textcolor{Red}{[#1]}} 
+\newcommand{\mycolh}[1]{{\textcolor{mycol2}{#1}}}
+\newcommand{\mymark}[1]{{\color{mycol}{#1}}}
+
+\DeclareMathOperator{\expo}{exp}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+
+
+
+% \usepackage{calc}
+\newsavebox\CBox
+\newcommand\msout[2][0.5pt]{%
+  \ifmmode\sbox\CBox{$#2$}\else\sbox\CBox{#2}\fi%
+  \makebox[0pt][l]{\usebox\CBox}%  
+  \rule[0.5\ht\CBox-#1/2]{\wd\CBox}{#1}}
+
+\newcommand{\greensquare}{\raisebox{1.5pt}{\textcolor{Green}{\Large{\ensuremath{\blacksquare}}}}}
+\newcommand{\bluecircle}{\textcolor{blue}{\Huge{\ensuremath{\bullet}}}}
+\newcommand{\greencircle}{\textcolor{Green}{\Huge{\ensuremath{\bullet}}}}
+
+\newcommand{\greensquareS}{\raisebox{1.5pt}{\textcolor{Green}{\normalsize{\ensuremath{\blacksquare}}}}}
+\newcommand{\greensquareSS}{\raisebox{1.5pt}{\textcolor{Green}{\footnotesize{\ensuremath{\blacksquare}}}}}
+\newcommand{\bluecircleS}{\textcolor{blue}{\Large{\ensuremath{\bullet}}}}
+\newcommand{\greencircleS}{\textcolor{Green}{\Large{\ensuremath{\bullet}}}}
+
+\newcommand{\soc}{\ensuremath{\theta}\xspace}

@@ -1,0 +1,49 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{myenvironments}[2010/03/29 Personal Environments]
+
+
+\newtheoremstyle{Satz}
+   {}                      %Space above
+   {1em}                  %Space below
+   {\normalfont}           %Body font
+   {}                      %Indent amount (empty = no indent,
+                           %\parindent = para indent)
+   {\normalfont}           %Thm head font
+   {.}                     %Punctuation after thm head
+   {.8em}                  %Space after thm head: " " = normal interword
+                           %space; \newline = linebreak
+   {\bfseries\thmname{#1}\thmnumber{ #2}\thmnote{ (#3)}}
+                           %Thm head spec (can be left empty, meaning
+                           %`normal')
+
+\theoremstyle{Satz}
+\newtheorem{theorem}{Theorem} 
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{fact}[theorem]{Fact}
+\newtheorem{claim}[theorem]{Claim} 
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{exercise}{Exercise} 
+\newtheorem{problem}{Problem}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{example}[theorem]{Example}
+
+\newtheoremstyle{Bsp}
+   {}                      %Space above
+   {1em}                  %Space below
+   {\itshape}           %Body font
+   {}                      %Indent amount (empty = no indent,
+                           %\parindent = para indent)
+   {\normalfont}           %Thm head font
+   {.}                     %Punctuation after thm head
+   {.8em}                  %Space after thm head: " " = normal interword
+                           %space; \newline = linebreak
+   {\thmname{#1}\thmnumber{ #2}\thmnote{ (#3)}}
+                           %Thm head spec (can be left empty, meaning
+                           %`normal')
+\theoremstyle{Bsp}
+% \newtheorem{example}[theorem]{Example}
+
+
+

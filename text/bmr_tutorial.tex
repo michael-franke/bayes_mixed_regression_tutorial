@@ -1,0 +1,144 @@
+\documentclass[fleqn,reqno,12pt]{article}
+
+%========================================
+% Packages
+%========================================
+
+\usepackage[]{mfpackages}
+\usepackage{mfenvironments}
+\usepackage{mfcommands}
+
+%========================================
+% Bibliography
+%========================================
+
+\bibliography{references.bib}
+
+%========================================
+% General Layout Tweaks
+%========================================
+
+\usepackage[margin=2cm]{geometry}
+% Itemize
+\renewcommand{\labelitemi}{\large{$\mathbf{\cdot}$}}    % itemize symbols
+\renewcommand{\labelitemii}{\large{$\mathbf{\cdot}$}}
+\renewcommand{\labelitemiii}{\large{$\mathbf{\cdot}$}}
+\renewcommand{\labelitemiv}{\large{$\mathbf{\cdot}$}}
+% Description
+\renewcommand{\descriptionlabel}[1]{\hspace\labelsep\textsc{#1}}
+
+% Figure Captions
+\usepackage{caption} % use corresponding myfiguresize!
+\setlength{\captionmargin}{20pt}
+\renewcommand{\captionfont}{\small}
+\setlength{\belowcaptionskip}{7pt} % standard is 0pt
+
+%========================================
+% Define colors and comment functions
+%========================================
+
+\usepackage{xcolor}
+\definecolor{firebrick}{RGB}{178,34,34}
+\definecolor{DarkGreen}{RGB}{34,178,34} 
+\definecolor{DarkOrange}{RGB}{255,100,50}
+\newcommand{\mht}[1]{\textcolor{DarkOrange}{[mht: #1]}}  
+
+%========================================
+% Configuring the R code presentation
+%========================================
+
+\usepackage{listings}
+\usepackage{color}
+% the following defines the layout for the R code
+\lstset{ %
+  language=R,                     % the language of the code
+  basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=1,                   % the step between two line-numbers. If it's 1, each line
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                 % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title
+  keywordstyle=\color{blue},      % keyword style
+  commentstyle=\color{DarkGreen}, % comment style
+  stringstyle=\color{DarkOrange}, % string literal style
+  escapeinside={\%*}{*)},         % if you want to add a comment within your code
+  morekeywords={*,...}            % if you want to add more keywords to the set
+}
+
+% this is for showing the R output
+\lstnewenvironment{rc}[1][]{\lstset{language=R}}{}
+
+% this is for inline R code
+\newcommand{\ri}[1]{\lstinline{#1}}  %% Short for 'R inline'
+
+%========================================
+% Article Header 
+%========================================
+
+
+\title{Hands-on non-technical tutorial for Bayesian mixed effects regression \\ \normalsize{(using R and the \texttt{brms} package (with a focus on factorial designs))}}
+\author{Michael Franke \& Timo Roettger}
+\date{}
+
+%========================================
+% Article Body
+%========================================
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  Generalized linear models with mixed effects are very versatile and handy tools for statistical inference. Bayesian approaches to applying these models have also recently become more popular. This tutorial provides an accessible, non-technical introduction to the use and feel of Bayesian mixed effects regression models. The focus is on data from a factorial-design experiment. \\
+  
+  \medskip
+  
+  This tutorial should take you about 1 hour.
+\end{abstract}
+
+Generalized linear regression models (GLMs) have become the new workhorse of statistical analyses. They are applicable in a wide variety of situation where otherwise a whole battery of statistical tests would be used, such as $t$-tests, ANOVA, binomial tests etc. But GLMs are more powerful than any one of these tests. Unfortunately, they are also a tad difficult to unde wmrstand, at least at first and when also considering hierarchical modeling (another way of saying ``mixed effects models''; more on this below). There is another thing that many people are talking about and many might be curious to learn more about. That is Bayesian approaches to statistical inference. Like GLMs, Bayesian data analysis has the (bad) reputation of being difficult (and obnoxiously subjective; whatever that may mean; again more below). This hands-on, ideology free and simple tutorial is here to the rescue. Based on a concrete standard use case, it tries to convey the very basics of Bayesian mixed effects models in a non-technical way.
+
+We have been inspired by a previous two-part tutorial by Bodo \citet{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~classical or frequentist--- paradigm. In a sense this could be considered part three of Bodo's nice and lofty introduction. But this tutorial is also readable without having read Bodo's stuff or, we hope, anything on either Bayesian data analysis or regression modeling. It's that basic we would like keep it. So no reason to be afraid! But also: no reason to be bored, because we \emph{will} cover all the essential concepts and we \emph{will} explain how to run and interpret the output of a Bayesian regression analysis using the excellent R package \texttt{brms} written by Paul CITE which makes Bayesian regression modeling 100\% accessible and ready-to-roll in the same way that another package has previously done for the non-Bayesian approaches (\texttt{lme4} CITE). 
+
+\section{The data}
+
+The tutorial by Bodo \citet{Winter2013:Linear-models-a} uses data from a paper on informal and polite speech in Korean \citep{WinterGrawunder2012:The-Phonetic-Pr}. Using R, let's first load the data by typing this into an R console (perhaps using RStudio \mf{insert URL})\footnote{If you are familiar with the previous tutorials by \citet{Winter2013:Linear-models-a}, it might help you to know that we have (cuteously) massaged the data a tiny little bit: we have already removed one line with missing data and we have changed the way the variable \texttt{scenario} is represented, so that it gets treated (correctly) as a factor later on without you having to manipulate it in some way or another.}
+
+\begin{lstlisting}[language=R]
+  # load the data into variable 'politeness_data'
+  politeness_data = read.csv(file = 'MyData.csv')     
+\end{lstlisting}
+
+If we now type \ri{x <- rnorm(20)}, you will see the first six lines of the data, probably looking just like so:
+
+\medskip
+
+
+\begin{rc}
+> head(politeness_data)
+# A tibble: 6 x 5
+  subject gender scenario attitude frequency
+  <fct>   <fct>  <fct>    <fct>        <dbl>
+1 F1      F      1        pol           213.
+2 F1      F      1        inf           204.
+3 F1      F      2        pol           285.
+4 F1      F      2        inf           260.
+5 F1      F      3        pol           204.
+6 F1      F      3        inf           287.
+\end{rc}
+
+
+\printbibliography[heading=bibintoc]
+
+\end{document}

@@ -1,0 +1,168 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mfpackages}[2010/03/29 Personalized Packages Michael Franke]
+
+\newif\ifpala
+\palafalse
+
+\newif\ifnobib
+\nobibtrue
+
+\newif\ifnosubcap
+\nosubcaptrue
+
+\newif\ifnohyper
+\nohypertrue
+
+\newif\ifnoams
+\noamstrue
+
+\newif\ifnotik
+\notiktrue
+
+\newif\ifnograph
+\nographtrue
+
+\newif\ifnoGB
+\noGBtrue
+
+\DeclareOption{palatino}{
+  \palatrue
+}
+
+\DeclareOption{nobiblatex}{
+  \nobibfalse
+}
+
+\DeclareOption{nosubcaption}{
+  \nosubcapfalse
+}
+
+\DeclareOption{nohyperref}{
+  \nohyperfalse
+}
+
+\DeclareOption{noamsthm}{
+  \noamsfalse
+}
+
+\DeclareOption{notikz}{
+  \notikfalse
+}
+
+\DeclareOption{nographicx}{
+  \nographfalse
+}
+
+\DeclareOption{nogb4e}{
+  \noGBfalse
+}
+
+\ProcessOptions\relax
+
+\RequirePackage{amsmath}            % Formeln
+\RequirePackage{amsfonts}           % Fonts for Formulas
+\RequirePackage{amssymb}
+
+\ifnoams
+  \RequirePackage{amsthm}
+\fi
+
+\RequirePackage{dsfont}             % double stroke fonts
+
+\ifnograph
+  \RequirePackage[final]{graphicx}
+\fi
+\RequirePackage{booktabs}
+\RequirePackage{enumerate}
+\RequirePackage{paralist}
+
+\RequirePackage[all]{xy}            
+\RequirePackage{url}
+
+\ifnoGB
+  \RequirePackage{gb4e}
+  \noautomath
+  \renewcommand{\eachwordtwo}{\relsize{-1}} % format translation in glosses
+  % \renewcommand{\trans}{\vskip.15\baselineskip\relsize{-1}}
+  \renewcommand{\trans}{\vskip.15\baselineskip}
+\fi
+
+
+
+% \RequirePackage{fourier}               % double brackets for \den{}
+
+\RequirePackage{lipsum}
+\RequirePackage{txfonts} % for strict implication symbols
+\RequirePackage{soul}
+\RequirePackage{relsize} % provides command \relsize{+/-x} for relative
+                     % font size changes
+\RequirePackage[ngerman,english]{babel}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc} 
+% \RequirePackage{subfig}
+\RequirePackage{xypic}
+\RequirePackage{multicol}
+
+
+\ifnosubcap
+  \RequirePackage{subcaption}
+\fi
+
+\ifnotik
+  \RequirePackage{tikz}
+  \usetikzlibrary{arrows,shapes,automata,backgrounds,petri,fit,decorations.pathmorphing}
+\fi
+
+\RequirePackage{units}
+
+\RequirePackage{refcount} % for proper repetition of gb4e examples 
+
+\RequirePackage{dialogue}
+
+% \RequirePackage{attrib} % for right-aligned references at the end of
+%                     % quotes; part of Frankenstein bundle, but 
+% \renewcommand\PreTrib {}   % overwrite these commands, from attrib.sty
+% \renewcommand\PostTrib {}  % to suppress additional brackets around
+%                            % attributions
+
+\RequirePackage{setspace}
+
+\RequirePackage[colorinlistoftodos,color=lightgray!20,bordercolor=blue,textsize=footnotesize]{todonotes}
+
+\RequirePackage{xspace} % for \xspace in definition of acronyms etc.
+
+\ifpala
+  \RequirePackage[sc,osf]{mathpazo}
+  \linespread{1.12}
+\fi
+
+\ifnobib
+  \RequirePackage[style=authoryear-comp, % Citation marks as [Jef65]
+            natbib=true,      % Natbib-style cite macros \citeauthor &c.
+            hyperref=true,    % Cites in pdf are links to bib
+                              % (hyperref conf.)
+            maxnames=3,       % truncate name lists if more than 2
+                              % names appear
+            doi=true,        % no doi's
+            url=true,        % no url's
+            sortcites=false,  % do NOT sort cites in the style of the
+                              % bibliography 
+            %backref=true     % insert backrefs in reference section
+            ]{biblatex}
+\fi
+
+
+
+
+\ifnohyper
+  \RequirePackage[final,            % override "draft" which means "no nothing"
+            colorlinks,       % rather than outlining them in boxes
+            linkcolor=black,   % override truly awful colour choices
+            citecolor=black,   %   (ditto)
+            urlcolor=black,    %   (ditto)
+            plainpages=false, % to overcome complaints with multiple
+            pdfpagelabels,    % multiple page 1-s due to preface
+            hypertexnames=false % solves warning, but interferes with
+                                % index and \autoref apparently
+            ]{hyperref}
+\fi
