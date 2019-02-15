@@ -25,13 +25,16 @@ head(politedata)
 #####################################################
 
 politedata %>% 
-  group_by(gender, attitude) %>% 
-  summarize(mean_frequency = mean(freq),
-            standard_error = std.error(freq)) %>% 
-  ggplot((aes(x = gender, y = mean_frequency, fill = attitude))) + 
-  geom_bar(stat = "identity", position = "dodge") +
-  geom_errorbar(aes(ymin = mean_frequency - standard_error,
-                    ymax = mean_frequency + standard_error), position = "dodge")
+    group_by(gender, attitude) %>% 
+    summarize(mean_frequency = mean(freq),
+              standard_error = std.error(freq)) %>% 
+    ggplot((aes(x = gender, 
+                y = mean_frequency, 
+                fill = attitude))) + 
+    geom_bar(stat = "identity", position = "dodge") +
+    geom_errorbar(aes(ymin = mean_frequency - standard_error,
+                      ymax = mean_frequency + standard_error), 
+                  position = "dodge")
 
 ggsave(filename = "../text/pics/basic_data_plot.pdf",
        plot = last_plot(),

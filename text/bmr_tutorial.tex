@@ -1,13 +1,17 @@
-\documentclass[fleqn,reqno,12pt]{article}
+\documentclass[nobib]{tufte-handout}
+% \documentclass[fleqn,reqno,12pt]{article}
 
 %========================================
 % Packages
 %========================================
 
-\usepackage[]{mfpackages}
+\usepackage[nographicx, nohyperref, nosubcaption, nogb4e]{mfpackages}
 \usepackage{mfenvironments}
 \usepackage{mfcommands}
-\usepackage{subcaption}
+% for info boxes
+\usepackage{newfloat, caption}
+\DeclareCaptionType{InfoBox}
+
 
 %========================================
 % Bibliography
@@ -19,7 +23,8 @@
 % General Layout Tweaks
 %========================================
 
-\usepackage[margin=2cm]{geometry}
+% \usepackage[margin=2cm]{geometry}
+
 % Itemize
 \renewcommand{\labelitemi}{\large{$\mathbf{\cdot}$}}    % itemize symbols
 \renewcommand{\labelitemii}{\large{$\mathbf{\cdot}$}}
@@ -90,7 +95,7 @@
 %========================================
 
 
-\title{Hands-on non-technical tutorial for Bayesian mixed effects regression \\ \normalsize{(using R and the \texttt{brms} package (with a focus on factorial designs))}}
+\title{Hands-on non-technical tutorial for Bayesian mixed effects regression}
 \author{Michael Franke \& Timo Roettger}
 \date{}
 
@@ -102,7 +107,7 @@
 \maketitle
 
 \begin{abstract}
-  Generalized linear models with mixed effects are very versatile and handy tools for statistical inference. Bayesian approaches to applying these models have also recently become more popular. This tutorial provides an accessible, non-technical introduction to the use and feel of Bayesian mixed effects regression models. The focus is on data from a factorial-design experiment. \\
+  \noindent Generalized linear models with mixed effects are very versatile and handy tools for statistical inference. Bayesian approaches to applying these models have also recently become more popular. This tutorial provides an accessible, non-technical introduction to the use and feel of Bayesian mixed effects regression models. The focus is on data from a factorial-design experiment. \\
   
   \medskip
   
@@ -162,23 +167,8 @@ What aspects of this data set are interesting from a theoretical point of view? 
 \item Do male speakers have a lower average pitch frequency in informal than female speakers have in polite contexts?
 \end{enumerate}
 
-\noindent The best starting point for data analysis is always: plotting. Figure~\ref{fig:BasicPlotData} shows a plot of the data which is obtained from the following R code (this is a bit more involved, but it is not at all essential for this tutorial to understand what's happening here; just lean back, enjoy the visual effects and focus on the content of the plot). \mf{I don't actually think it's even necessary to give the code here; Bodo doesn't do that either for most of his plots; I think we should just give a really nice plot (no barplots!) that we would also normally like to use; without explanation and argument; indoctrination by example.}
+\noindent The best starting point for data analysis is always: plotting. Figure~\ref{fig:BasicPlotData_data} shows a plot of the data which is obtained from the following R code (this is a bit more involved, but it is not at all essential for this tutorial to understand what's happening here; just lean back, enjoy the visual effects and focus on the content of the plot). \mf{I don't actually think it's even necessary to give the code here; Bodo doesn't do that either for most of his plots; I think we should just give a really nice plot (no barplots!) that we would also normally like to use; without explanation and argument; indoctrination by example.}
 
-\begin{figure}[t]
-  \centering
-  \begin{subfigure}[c]{0.495\textwidth}
-    \includegraphics[width = \textwidth]{pics/basic_data_plot.pdf}
-    \caption{Basic plot of the data. \mf{make me pretty}}
-     \label{fig:BasicPlotData_data}
-  \end{subfigure}
-  \begin{subfigure}[c]{0.495\textwidth}
-    \includegraphics[width = \textwidth]{pics/table_mean_hypotheses.png}
-    \caption{Means of each design cell \& research hypotheses.}
-    \label{fig:BasicPlotData_table}
-  \end{subfigure}
-  \caption{Different visualizations of the data and the research hypotheses.}
-  \label{fig:BasicPlotData}
-\end{figure}
 
 
 \medskip
@@ -193,14 +183,55 @@ politedata %>%
   group_by(gender, attitude) %>% 
   summarize(mean_frequency = mean(freq),
             standard_error = std.error(freq)) %>% 
-  ggplot((aes(x = gender, y = mean_frequency, fill = attitude))) + 
+  ggplot((aes(x = gender, 
+              y = mean_frequency, 
+              fill = attitude))) + 
   geom_bar(stat = "identity", position = "dodge") +
   geom_errorbar(aes(ymin = mean_frequency - standard_error,
-                ymax = mean_frequency + standard_error), position = "dodge")
+                    ymax = mean_frequency + standard_error), 
+                    position = "dodge")
 \end{lstlisting}
 
 
+\begin{figure}[t]
+  \centering
+    \includegraphics[width = \textwidth]{pics/basic_data_plot.pdf}
+    \caption{Basic plot of the data. \mf{make me pretty}}
+     \label{fig:BasicPlotData_data}
+\end{figure}
+
+Another way of looking at the data in connection with our research hyptheses is in Figure~\ref{fig:BasicPlotData_table}.
+
+\begin{figure}[h]
+  \centering
+    \includegraphics[width = \textwidth]{pics/table_mean_hypotheses.png}
+    \caption{Means of each design cell \& research hypotheses.}
+    \label{fig:BasicPlotData_table}
+\end{figure}
+
+
 \mf{Next steps: give the table of means; say how above comparisons translate into a comparison of cells in that table}
+
+\newpage
+
+\begin{InfoBox}[t]
+\centering
+\colorbox{mygray}{\centering
+  \begin{minipage}{1.0\textwidth}
+
+    \emph{Bayesian inference: priors, likelihoods and posteriors}
+    \medskip
+
+    Here is some general information about Bayesian data analysis in a cool Info Box.
+  \end{minipage} \par
+  } \par
+  \begin{center}
+    Info Box 1: Asymptotic approximation of a binomial confidence interval
+  \end{center}
+  % \caption{\label{InfoBox:asymptotic_CIs} Here is my caption}  
+\end{InfoBox}
+
+
 
 
 
