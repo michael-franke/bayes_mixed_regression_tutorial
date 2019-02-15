@@ -74,7 +74,7 @@
   commentstyle=\color{DarkGreen}, % comment style
   stringstyle=\color{DarkOrange}, % string literal style
   escapeinside={\%*}{*)},         % if you want to add a comment within your code
-  morekeywords={*,...}            % if you want to add more keywords to the set
+  morekeywords={*, ...}            % if you want to add more keywords to the set
 }
 
 % this is for showing the R output
@@ -117,16 +117,16 @@ The tutorial by Bodo \citet{Winter2013:Linear-models-a} uses data from a paper o
 
 \begin{lstlisting}[language=R]
   # load the data into variable 'politeness_data'
-  politeness_data = read.csv(file = 'MyData.csv')     
+  politedata = read.csv(file = 'MyData.csv')     
 \end{lstlisting}
 
-If we now type \ri{x <- rnorm(20)}, you will see the first six lines of the data, probably looking just like so:
+If we now type \ri{head(politedata)}, you will see the first six lines of the data, probably looking just like so:
 
 \medskip
 
 
 \begin{rc}
-> head(politeness_data)
+> head(politedata)
 # A tibble: 6 x 5
   subject gender scenario attitude frequency
   <fct>   <fct>  <fct>    <fct>        <dbl>
