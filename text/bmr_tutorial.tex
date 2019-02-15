@@ -7,6 +7,7 @@
 \usepackage[]{mfpackages}
 \usepackage{mfenvironments}
 \usepackage{mfcommands}
+\usepackage{subcaption}
 
 %========================================
 % Bibliography
@@ -165,8 +166,17 @@ What aspects of this data set are interesting from a theoretical point of view? 
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width = 0.7\textwidth]{pics/basic_data_plot.pdf}
-  \caption{Basic plot of the data. \mf{make me pretty}}
+  \begin{subfigure}[c]{0.495\textwidth}
+    \includegraphics[width = \textwidth]{pics/basic_data_plot.pdf}
+    \caption{Basic plot of the data. \mf{make me pretty}}
+     \label{fig:BasicPlotData_data}
+  \end{subfigure}
+  \begin{subfigure}[c]{0.495\textwidth}
+    \includegraphics[width = \textwidth]{pics/table_mean_hypotheses.png}
+    \caption{Means of each design cell \& research hypotheses.}
+    \label{fig:BasicPlotData_table}
+  \end{subfigure}
+  \caption{Different visualizations of the data and the research hypotheses.}
   \label{fig:BasicPlotData}
 \end{figure}
 
