@@ -41,18 +41,19 @@
 \definecolor{firebrick}{RGB}{178,34,34}
 \definecolor{DarkGreen}{RGB}{34,178,34} 
 \definecolor{DarkOrange}{RGB}{255,100,50}
-\newcommand{\mht}[1]{\textcolor{DarkOrange}{[mht: #1]}}  
-
+\renewcommand{\mf}[1]{\textcolor{firebrick}{[mf: #1]}}  
+\newcommand{\tr}[1]{\textcolor{DarkOrange}{[tr: #1]}}  
 %========================================
 % Configuring the R code presentation
 %========================================
 
+\usepackage{courier}
 \usepackage{listings}
 \usepackage{color}
 % the following defines the layout for the R code
 \lstset{ %
   language=R,                     % the language of the code
-  basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+  basicstyle=\footnotesize\ttfamily, % size and type of the fonts that are used for the code
   numbers=left,                   % where to put the line-numbers
   numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
   stepnumber=1,                   % the step between two line-numbers. If it's 1, each line
@@ -104,49 +105,94 @@
   
   \medskip
   
-  This tutorial should take you about 1 hour.
+  \noindent \textbf{This tutorial should take you about 1 hour.}
 \end{abstract}
 
-\tr{TRs START (suggestion): This tutorial is a very basic introduction to Bayesian inference using R (cite). We wrote this tutorial with a particular reader in mind. If you have used R before and if you have a basic understanding of linear regression, this tutorial is for you. If you don’t, you can easily catch up and do a crash course, for example with Bodo Winter’s tutorials here (link). When you think you are ready, this tutorial will walk you through a very simple example of bayesian inference for factorial designs. We tried to write this document as a practical departure point for people that want to move towards Bayesian inference using the wonderful brms package (Bürkner 2016). In comparison to other introduction, this tutorial remains very conceptual. We don’t discuss reasons for or against Bayesian inference and we don’t scare you away with mathematical details. After this tutorial, we want you to have a basic tool set to apply Bayesian inference to your data set. Concretely, you will spend an hour or so working your way through this document. Afterwards, you will be able to run a Bayesian analysis on your 2x2 factorial design and extract numbers that tell you something about your  data.
+\section{Motivation \& intended audience}
 
-Now, what do we as experimental researchers often do? We often have a research hypothesis about how aspects of nature relate to each other. For example, we want to know whether voice pitch differs across females and males and whether it differs across social contexts and if so, we want to know how much, right?
+This tutorial provides a very basic introduction to Bayesian regression modeling using R \citep{Manual}. We wrote this tutorial with a particular reader in mind. If you have used R before and if you have a basic understanding of linear regression and now you want to find out what a Bayesian approach has to offer, this tutorial is for you. In comparison to other introductions \citep[e.g.][]{SorensenHohensteinb2016:Bayesian-linear}, this tutorial remains very conceptual. We don’t want to ``sell Bayes'' to you, and we do not want to scare you away with mathematical details. We just want to give you an impression of how a Bayesian regression analysis looks and feels. So no reason to be afraid! But also: no reason to be bored, because we \emph{will} cover all the essential concepts and we \emph{will} explain how to run and interpret the output of a Bayesian regression analysis using the wonderful R package \texttt{brms} written by Paul \citep{buerkner2016brms}.
 
-To answer our questions, we lure a group of people into your lab, we ask them to say different words in different social contexts, we record their voices, and extract their pitch values. Our data might
-look something like this}
+If you don’t have any experience with regression modeling, you will probably still be able to follow but you might also easily catch up by doing a crash course. To bring you up to speed, we recommend the excellent two-part tutorial by Bodo \citep{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~classical or frequentist--- paradigm. In a sense, this tutorial could be considered part three of Bodo's nice and lofty introduction. We will, for example use the same data set.
 
-
-Generalized linear regression models (GLMs) have become the new workhorse of statistical analyses. They are applicable in a wide variety of situation where otherwise a whole battery of statistical tests would be used, such as $t$-tests, ANOVA, binomial tests etc. But GLMs are more powerful than any one of these tests.  Unfortunately, they are also a tad difficult to understand, at least at first and when also considering hierarchical modeling (another way of saying ``mixed effects models''; more on this below). There is another thing that many people are talking about and many might be curious to learn more about. That is Bayesian approaches to statistical inference. Like GLMs, Bayesian data analysis has the (bad) reputation of being difficult (and obnoxiously subjective; whatever that may mean; again more below). This hands-on, ideology free and simple tutorial is here to the rescue. Based on a concrete standard use case, it tries to convey the very basics of Bayesian mixed effects models in a non-technical way.
-
-\tr{Comment on intro MF: ANOVAs are basically GLMs so, I would not separate them. If you want to mention them maybe we want to say that they do the same thing.}
-
-We have been inspired by a previous two-part tutorial by Bodo \citet{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~classical or frequentist--- paradigm. In a sense this could be considered part three of Bodo's nice and lofty introduction. But this tutorial is also readable without having read Bodo's stuff or, we hope, anything on either Bayesian data analysis or regression modeling. It's that basic we would like keep it. So no reason to be afraid! But also: no reason to be bored, because we \emph{will} cover all the essential concepts and we \emph{will} explain how to run and interpret the output of a Bayesian regression analysis using the excellent R package \texttt{brms} written by Paul CITE which makes Bayesian regression modeling 100\% accessible and ready-to-roll in the same way that another package has previously done for the non-Bayesian approaches (\texttt{lme4} CITE). 
 
 \section{The data}
+\label{sec:data}
 
-The tutorial by Bodo \citet{Winter2013:Linear-models-a} uses data from a paper on informal and polite speech in Korean \citep{WinterGrawunder2012:The-Phonetic-Pr}. Using R, let's first load the data by typing this into an R console (perhaps using RStudio \mf{insert URL})\footnote{If you are familiar with the previous tutorials by \citet{Winter2013:Linear-models-a}, it might help you to know that we have (cuteously) massaged the data a tiny little bit: we have already removed one line with missing data and we have changed the way the variable \texttt{scenario} is represented, so that it gets treated (correctly) as a factor later on without you having to manipulate it in some way or another.}
+Now, what do we as experimental researchers often do? We often have a research hypothesis about how aspects of nature relate to each other. For example, we might want to know whether voice pitch differs across female and male speakers, and whether it differs across social contexts (say: informal or polite contexts). --- To answer our questions, we lure a group of people into the lab, we ask them to say different words in different social contexts, we record their voices, and record some numbers, e.g., the pitch values.
+
+\citet{Winter2013:Linear-models-a} looks at data of this sort \citep[taken from][]{WinterGrawunder2012:The-Phonetic-Pr} and so will we. The data is obtainable from \dots \mf{how to get the data}. To load the data into R, copy the file \texttt{FILENAME} \dots \mf{describe set up} and type this into an R console (perhaps using
+RStudio \mf{insert URL})\footnote{If you are familiar with the previous tutorials by \citet{Winter2013:Linear-models-a}, it might help you to know that we have (courteously) massaged the data a tiny little bit: we have already removed one line with missing data and we have changed the way the variable
+\texttt{scenario} is represented, so that it gets treated (correctly) later on in the regression analysis without much further ado.}
+
+\medskip
 
 \begin{lstlisting}[language=R]
-  # load the data into variable 'politeness_data'
+  # load the data into variable 'politedata'
   politedata = read.csv(file = 'MyData.csv')     
 \end{lstlisting}
 
-If we now type \ri{head(politedata)}, you will see the first six lines of the data, probably looking just like so:
+\vspace*{-0.5cm}
+
+\noindent If we now type \ri{head(politedata)}, we see the first six lines of the data, like so:
 
 \medskip
 
 
 \begin{rc}
 > head(politedata)
-# A tibble: 6 x 5
-  subject gender scenario attitude frequency
-  <fct>   <fct>  <fct>    <fct>        <dbl>
-1 F1      F      1        pol           213.
-2 F1      F      1        inf           204.
-3 F1      F      2        pol           285.
-4 F1      F      2        inf           260.
-5 F1      F      3        pol           204.
-6 F1      F      3        inf           287.
+  subject gender scenario attitude  freq
+1      F1      F       S1      pol 213.3
+2      F1      F       S1      inf 204.5
+3      F1      F       S2      pol 285.1
+4      F1      F       S2      inf 259.7
+5      F1      F       S3      pol 203.9
+6      F1      F       S3      inf 286.9
 \end{rc}
+
+\medskip
+
+\noindent What is important for us here is that there are multiple measurements for the same subjects. We have a measurement of pitch frequency \mf{is that the right term?} for different subjects, who are (crudely) classified as either male or female, and different scenarios (e.g., words/sentences to pronounce). The experiment has manipulated whether the scenario took place in a polite or informal context. This is indicated by the variable \texttt{attitude}.
+
+What aspects of this data set are interesting from a theoretical point of view? --- Most often, we are interested in comparing a measurement, like pitch frequency, accross different conditions or groups. In the present case, we might have the following three hypotheses:
+
+\begin{enumerate}[{H}1:]
+\item Do female speakers have a lower average pitch frequency in polite than in informal contexts?
+\item Do male speakers have a lower average pitch frequency in polite than in informal contexts?
+\item Do male speakers have a lower average pitch frequency in informal than female speakers have in polite contexts?
+\end{enumerate}
+
+\noindent The best starting point for data analysis is always: plotting. Figure~\ref{fig:BasicPlotData} shows a plot of the data which is obtained from the following R code (this is a bit more involved, but it is not at all essential for this tutorial to understand what's happening here; just lean back, enjoy the visual effects and focus on the content of the plot). \mf{I don't actually think it's even necessary to give the code here; Bodo doesn't do that either for most of his plots; I think we should just give a really nice plot (no barplots!) that we would also normally like to use; without explanation and argument; indoctrination by example.}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width = 0.7\textwidth]{pics/basic_data_plot.pdf}
+  \caption{Basic plot of the data. \mf{make me pretty}}
+  \label{fig:BasicPlotData}
+\end{figure}
+
+
+\medskip
+
+\begin{lstlisting}[language=R]
+# load a package for data wrangling and plotting
+library(tidyverse)
+# load a package to obtain function 'std.error' for standard errors
+library(plotrix)
+# plot means for each group
+politedata %>% 
+  group_by(gender, attitude) %>% 
+  summarize(mean_frequency = mean(freq),
+            standard_error = std.error(freq)) %>% 
+  ggplot((aes(x = gender, y = mean_frequency, fill = attitude))) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin = mean_frequency - standard_error,
+                ymax = mean_frequency + standard_error), position = "dodge")
+\end{lstlisting}
+
+
+\mf{Next steps: give the table of means; say how above comparisons translate into a comparison of cells in that table}
+
+
 
 
 \printbibliography[heading=bibintoc]

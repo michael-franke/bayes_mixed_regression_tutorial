@@ -1,4 +1,4 @@
-subject,gender,scenario,attitude,frequency
+subject,gender,scenario,attitude,freq
 F1,F,S1,pol,213.3
 F1,F,S1,inf,204.5
 F1,F,S2,pol,285.1

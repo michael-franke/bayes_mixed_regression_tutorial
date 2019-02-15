@@ -10,29 +10,32 @@ library(brms)
 # option for Bayesian regression models: use all available cores for parallel computing
 options(mc.cores = parallel::detectCores())
 
+# package for function 'std.error' to obtain standard errors
+library(plotrix)
+
 #####################################################
 ## read and massage the data
 #####################################################
 
-politeness_data = read_csv('politeness_data.csv') %>% 
-  # we exclude missing data points
-  filter(!is.na(frequency)) %>% 
-  # we code column 'scenario' as a factor
-  mutate(scenario = as.factor(scenario))
-
+politedata = read.csv('politeness_data.csv') 
+head(politedata)
 
 #####################################################
 ## plot means for each group
 #####################################################
 
-politeness_data %>% 
+politedata %>% 
   group_by(gender, attitude) %>% 
-  summarize(mean_frequency = mean(frequency),
-            standard_error = plotrix::std.error(frequency)) %>% 
+  summarize(mean_frequency = mean(freq),
+            standard_error = std.error(freq)) %>% 
   ggplot((aes(x = gender, y = mean_frequency, fill = attitude))) + 
   geom_bar(stat = "identity", position = "dodge") +
   geom_errorbar(aes(ymin = mean_frequency - standard_error,
-                ymax = mean_frequency + standard_error), position = "dodge")
+                    ymax = mean_frequency + standard_error), position = "dodge")
+
+ggsave(filename = "../text/pics/basic_data_plot.pdf",
+       plot = last_plot(),
+       width = 6, height = 4)
 
 #####################################################
 ## run model with different random-effects structures
