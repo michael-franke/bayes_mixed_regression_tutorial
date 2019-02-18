@@ -75,14 +75,24 @@ extract_posterior_cell_means = function(model) {
   independent_variables = strsplit(x = as.character(formula(model)[[1]])[[3]],
                                    split =  "*",
                                    fixed = TRUE)[[1]] %>% trimws()
+  # stop this if there are not at least two factors
+  if (length(independent_variables) <= 1) {
+    stop("Oeps! There do not seem to be at least two factors. If you have no more than one factor, computing cell means is not necessary. Use the estimated coffeficients instead.")
+  }
   
   # construct three helpful representations of factors and their levels for the following
   ## factors :: a list with all factors and their levels
   factors = list()
+  n_levels = c()
   for (iv in independent_variables) {
-    factors = append(factors, list(levels(as.factor(model.frame(model) %>% pull(iv)))))
+    new_levels = list(levels(as.factor(model.frame(model) %>% pull(iv))))
+    factors = append(factors, new_levels)
+    n_levels = c(n_levels, length(new_levels[[1]]))
   }
   names(factors) = independent_variables
+  if (min(n_levels) <=1){
+    stop("Oeps! There seems to be a factor with less than 2 levels. Please check and possibly exclude that factor.")
+  }
   ## ref_levels_list :: a list with all factors and their refernce levels
   ref_levels_list = factors
   for (iv in independent_variables) {
@@ -168,6 +178,8 @@ extract_posterior_cell_means = function(model) {
   predictor_values %>% spread(key = cell, value = predictor_value)
 }
 
+extract_posterior_cell_means(model_gender)
+
 get_posterior_beliefs_about_hypotheses = function(model) {
   posterior_cell_means = extract_posterior_cell_means(model)
   tibble(hypothesis = c("Female-polite < Female-informal", 
@@ -210,13 +222,11 @@ extract_comparisons = function(model) {
 #####################################################
 
 get_posterior_beliefs_about_hypotheses(model_FE)
-get_posterior_beliefs_about_hypotheses(gender)
 # get_posterior_beliefs_about_hypotheses(model_interceptOnly)
 # get_posterior_beliefs_about_hypotheses(model_MaxRE)
 
 
 extract_comparisons(model_FE)
-extract_comparisons(gender)
 # extract_comparisons(model_interceptOnly)
 # extract_comparisons(model_MaxRE)
 
