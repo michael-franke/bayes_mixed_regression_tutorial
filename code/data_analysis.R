@@ -119,28 +119,51 @@ extract_comparisons_generic = function(model, factors) {
     unique(replace_with_ref_level_recursion(cell))
   }
   
-  cell = c("genderF", "attitudeinf")
+  # cells$out = "bla"
+  # 
+  # for (i in 1:nrow(cells)) {
+  #   coefficients_to_check = replace_with_ref_level(cells[i,1:(ncol(cells)-1)])
+  #   # out = 0
+  #   out = ""
+  #   for (j in 1:length(coefficients_to_check)) {
+  #     which_column = which(
+  #       map_lgl(coefficient_names, function(coefficient_in_question) {
+  #         all(map_lgl(coefficients_to_check[[j]], function(c) grepl(c, coefficient_in_question)))
+  #       }) == T  
+  #     )
+  #     if(length(which_column) > 1) {stop("something went wrong; there have been several columns in the posterior samples that match where only one should")}
+  #     # out = out + post_samples[coefficient_names[which_column]]
+  #     out = paste0(out, "+", coefficient_names[which_column])
+  #   }
+  #   cells$out[i] = out
+  # }
   
-  replace_with_ref_level(cell)
-  
-  cells$out = "bla"
-  
-  for (i in 1:nrow(cells)) {
-    coefficients_to_check = replace_with_ref_level(cells[i,1:(ncol(cells)-1)])
-    # out = 0
-    out = ""
-    for (j in 1:length(coefficients_to_check)) {
-      which_column = which(
-        map_lgl(coefficient_names, function(coefficient_in_question) {
-          all(map_lgl(coefficients_to_check[[j]], function(c) grepl(c, coefficient_in_question)))
-        }) == T  
+  predictor_values = map_df(
+    1:nrow(cells), 
+    function(i) {
+      cell = cells[i,1:(ncol(cells)-1)]
+      coefficients_to_check = replace_with_ref_level(cell)
+      out = 0
+      # out = ""
+      column_indices = map_dbl(1:length(coefficients_to_check), 
+              function(j){
+                which(
+                  map_lgl(coefficient_names, function(coefficient_in_question) {
+                    all(map_lgl(coefficients_to_check[[j]], function(c) grepl(c, coefficient_in_question)))
+                  }) == T  
+                )
+              }
+            )
+      # cbind(
+      #   as.tibble(cell), 
+      #   tibble(predictor_value = rowSums(post_samples[column_indices]))
+      # )
+      tibble(
+        cell = paste(map_chr(1:ncol(cell), function(j) as.character(cells[i,j])), collapse = "&"),
+        predictor_value = rowSums(post_samples[column_indices])
       )
-      if(length(which_column) > 1) {stop("something went wrong; there have been several columns in the posterior samples that match where only one should")}
-      # out = out + post_samples[coefficient_names[which_column]]
-      out = paste0(out, "+", coefficient_names[which_column])
     }
-    cells$out[i] = out
-  }
+  )
   
 }
 
