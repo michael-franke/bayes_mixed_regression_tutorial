@@ -51,16 +51,16 @@ model_FE = brm(formula = freq ~ gender * attitude, data = politedata)
 model_gender = brm(formula = freq ~ gender, data = politedata)
 
 # hierarchical model with random intercepts
-# model_interceptOnly = brm(formula = freq ~ gender * attitude +
-#                             (1 | scenario + subject), 
-#                           data = politedata)
+model_interceptOnly = brm(formula = freq ~ gender * attitude +
+                            (1 | scenario + subject),
+                          data = politedata)
 
 # hierarchical model with the maximial RE structure licensed by the design
 # (notice that factor 'gender' does not vary for a given value of variable 'subject')
-# model_MaxRE = brm(formula = freq ~ gender * attitude +
-#                     (1 + gender * attitude | scenario) +
-#                     (1 + attitude | subject), 
-#                   data = politedata)
+model_MaxRE = brm(formula = freq ~ gender * attitude +
+                    (1 + gender * attitude | scenario) +
+                    (1 + attitude | subject),
+                  data = politedata)
 
 #####################################################
 ## convenience function to extract predictor values &
@@ -70,11 +70,16 @@ model_gender = brm(formula = freq ~ gender, data = politedata)
 extract_posterior_cell_means = function(model) {
   
   # extract information about dependent and independent variables from formula
-  ## TODO :: check for and possibly trimm mixed effects!!!
+  ## TODO :: check extensively, especially for mixed effects models whether this stuff here works
   dependent_variable = as.character(formula(model)[[1]])[[2]]
-  independent_variables = strsplit(x = as.character(formula(model)[[1]])[[3]],
-                                   split =  "*",
-                                   fixed = TRUE)[[1]] %>% trimws()
+  independent_variables = strsplit(x = gsub(pattern = "\\(.*\\|.*\\)", "", as.character(formula(model)[[1]])[[3]]),
+                                   split =  "(\\*|\\+)",
+                                   fixed = FALSE)[[1]] %>% trimws()
+  independent_variables = independent_variables[-which(independent_variables == "")]
+  
+  
+  
+  
   # stop this if there are not at least two factors
   if (length(independent_variables) <= 1) {
     stop("Oeps! There do not seem to be at least two factors. If you have no more than one factor, computing cell means is not necessary. Use the estimated coffeficients instead.")
@@ -179,6 +184,8 @@ extract_posterior_cell_means = function(model) {
 }
 
 extract_posterior_cell_means(model_gender)
+extract_posterior_cell_means(model_FE)
+extract_posterior_cell_means(model_interceptOnly)
 
 get_posterior_beliefs_about_hypotheses = function(model) {
   posterior_cell_means = extract_posterior_cell_means(model)
@@ -221,14 +228,16 @@ extract_comparisons = function(model) {
 ## under different models
 #####################################################
 
+
+# new function that relies on generic extractions
 get_posterior_beliefs_about_hypotheses(model_FE)
-# get_posterior_beliefs_about_hypotheses(model_interceptOnly)
-# get_posterior_beliefs_about_hypotheses(model_MaxRE)
+get_posterior_beliefs_about_hypotheses(model_interceptOnly)
+get_posterior_beliefs_about_hypotheses(model_MaxRE)
 
-
+# old function that only works for this particular case
 extract_comparisons(model_FE)
-# extract_comparisons(model_interceptOnly)
-# extract_comparisons(model_MaxRE)
+extract_comparisons(model_interceptOnly)
+extract_comparisons(model_MaxRE)
 
 
 
