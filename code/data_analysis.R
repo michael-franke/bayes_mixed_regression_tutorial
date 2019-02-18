@@ -47,44 +47,71 @@ ggsave(filename = "../text/pics/basic_data_plot.pdf",
 # model with only fixed effects (non-hierarchical)
 model_FE = brm(formula = freq ~ gender * attitude, data = politedata)
 
+# model with only a fixed effect for gender (non-hierarchical)
+model_gender = brm(formula = freq ~ gender, data = politedata)
+
 # hierarchical model with random intercepts
-model_interceptOnly = brm(formula = frequency ~ gender * attitude +
-                            (1 | scenario + subject), 
-                          data = politedata)
+# model_interceptOnly = brm(formula = freq ~ gender * attitude +
+#                             (1 | scenario + subject), 
+#                           data = politedata)
 
 # hierarchical model with the maximial RE structure licensed by the design
 # (notice that factor 'gender' does not vary for a given value of variable 'subject')
-model_MaxRE = brm(formula = frequency ~ gender * attitude +
-                    (1 + gender * attitude | scenario) +
-                    (1 + attitude | subject), 
-                  data = politedata)
+# model_MaxRE = brm(formula = freq ~ gender * attitude +
+#                     (1 + gender * attitude | scenario) +
+#                     (1 + attitude | subject), 
+#                   data = politedata)
 
 #####################################################
 ## convenience function to extract predictor values &
 ## compute the probability of the relevant hypotheses
 #####################################################
 
-factors = list("gender" = c("F", "M"),
-               "attitude" = c("inf", "pol"))
-
-ref_levels_list = list("gender" = "F",
-                  "attitude" = "inf")
-
-extract_comparisons_generic = function(model, factors) {
+extract_posterior_cell_means = function(model) {
   
-  ref_levels = c("genderF", "attitudeinf")
+  # extract information about dependent and independent variables from formula
+  ## TODO :: check for and possibly trimm mixed effects!!!
+  dependent_variable = as.character(formula(model)[[1]])[[2]]
+  independent_variables = strsplit(x = as.character(formula(model)[[1]])[[3]],
+                                   split =  "*",
+                                   fixed = TRUE)[[1]] %>% trimws()
   
+  # construct three helpful representations of factors and their levels for the following
+  ## factors :: a list with all factors and their levels
+  factors = list()
+  for (iv in independent_variables) {
+    factors = append(factors, list(levels(as.factor(model.frame(model) %>% pull(iv)))))
+  }
+  names(factors) = independent_variables
+  ## ref_levels_list :: a list with all factors and their refernce levels
+  ref_levels_list = factors
+  for (iv in independent_variables) {
+    ref_levels_list[[iv]] = ref_levels_list[[iv]][1]
+  }
+  ## ref_levels :: a string representation of each factor and its reference level
+  ref_levels = c()
+  for (iv in independent_variables) {
+    ref_levels = c(ref_levels, paste0(iv, ref_levels_list[[iv]][1]))
+  }
+  
+  # get the posterior samples for all regression coefficients
   post_samples = posterior_samples(model) %>% select(starts_with("b_"))
   
-  # get a table of cells (factor-level combinations)
+  # get a table of cells (factor-level combinations) in an ugly format (for internal use)
   cells = expand.grid(factors) 
   for (j in 1:ncol(cells)) {
     levels(cells[,j]) = paste0(colnames(cells)[j], levels(cells[,j]))
   }
   
+  # get a table of cells (factor-level combinations) with more readable labels (for final output)
+  cells_readable = expand.grid(factors) 
+  for (j in 1:ncol(cells_readable)) {
+    levels(cells_readable[,j]) = paste0(colnames(cells_readable)[j], ":", levels(cells_readable[,j]))
+  }
+
+  # get the names of all estimated coefficients
   coefficient_names = names(post_samples)
-  
-  # add the reference levels to the coefficient names
+  # add the reference levels to the coefficient names (where it is missing/implicit)
   for (c in 1:length(coefficient_names)) {
     for (f in names(factors)) {
       if (!grepl(f, coefficient_names[c])) {
@@ -94,11 +121,7 @@ extract_comparisons_generic = function(model, factors) {
   }
   names(post_samples) = coefficient_names
   
-  # for each row in cells gather the columns in post_samples that contain the factor levels
-  # and all other columns that contain any replacement of the current levels with the reference levels
-  
-  ## helper function that returns all coefficients to be added
-  
+  # two convenience functions to get all coefficients that belong to a design cell
   replace_with_ref_level_recursion = function(cell) {
     which_fcts_are_at_ref_level = map_lgl(cell, function(fl) fl %in% ref_levels)
     if (all(which_fcts_are_at_ref_level)) {
@@ -119,32 +142,13 @@ extract_comparisons_generic = function(model, factors) {
     unique(replace_with_ref_level_recursion(cell))
   }
   
-  # cells$out = "bla"
-  # 
-  # for (i in 1:nrow(cells)) {
-  #   coefficients_to_check = replace_with_ref_level(cells[i,1:(ncol(cells)-1)])
-  #   # out = 0
-  #   out = ""
-  #   for (j in 1:length(coefficients_to_check)) {
-  #     which_column = which(
-  #       map_lgl(coefficient_names, function(coefficient_in_question) {
-  #         all(map_lgl(coefficients_to_check[[j]], function(c) grepl(c, coefficient_in_question)))
-  #       }) == T  
-  #     )
-  #     if(length(which_column) > 1) {stop("something went wrong; there have been several columns in the posterior samples that match where only one should")}
-  #     # out = out + post_samples[coefficient_names[which_column]]
-  #     out = paste0(out, "+", coefficient_names[which_column])
-  #   }
-  #   cells$out[i] = out
-  # }
-  
+  # get samples for the predictor values for each design cell
   predictor_values = map_df(
     1:nrow(cells), 
     function(i) {
-      cell = cells[i,1:(ncol(cells)-1)]
+      cell = cells[i,1:(ncol(cells))]
       coefficients_to_check = replace_with_ref_level(cell)
       out = 0
-      # out = ""
       column_indices = map_dbl(1:length(coefficients_to_check), 
               function(j){
                 which(
@@ -154,35 +158,43 @@ extract_comparisons_generic = function(model, factors) {
                 )
               }
             )
-      # cbind(
-      #   as.tibble(cell), 
-      #   tibble(predictor_value = rowSums(post_samples[column_indices]))
-      # )
       tibble(
-        cell = paste(map_chr(1:ncol(cell), function(j) as.character(cells[i,j])), collapse = "&"),
-        predictor_value = rowSums(post_samples[column_indices])
+        cell = paste(map_chr(1:ncol(cell), function(j) as.character(cells_readable[i,j])), collapse = "__"),
+        predictor_value = rowSums(post_samples[column_indices]),
+        n_sample = 1:length(predictor_value)
       )
     }
-  )
-  
+  ) 
+  predictor_values %>% spread(key = cell, value = predictor_value)
+}
+
+get_posterior_beliefs_about_hypotheses = function(model) {
+  posterior_cell_means = extract_posterior_cell_means(model)
+  tibble(hypothesis = c("Female-polite < Female-informal", 
+                        "Male-polite < Male-informal",
+                        "Male-informal < Female-polite"),
+         probability = c(
+           mean(posterior_cell_means$`gender:F__attitude:pol` < posterior_cell_means$`gender:F__attitude:inf`),
+           mean(posterior_cell_means$`gender:M__attitude:pol` < posterior_cell_means$`gender:M__attitude:inf`),
+           mean(posterior_cell_means$`gender:M__attitude:inf` < posterior_cell_means$`gender:F__attitude:pol`)
+         ))
 }
 
 
 extract_comparisons = function(model) {
   # get posterior samples
   post_samples = posterior_samples(model) %>% as.tibble()
-  post_samples %>% select(everything(contains("genderM", "attitudepol")))
   # mnemonic names for reconstructed predictor values for all cells in the design matrix
   F_inf = post_samples$b_Intercept
-  F_pol = post_samples$b_Intercept + 
+  F_pol = post_samples$b_Intercept +
     post_samples$b_attitudepol
-  M_inf = post_samples$b_Intercept + 
+  M_inf = post_samples$b_Intercept +
     post_samples$b_genderM
-  M_pol = post_samples$b_Intercept + 
-    post_samples$b_genderM + 
-    post_samples$b_attitudepol + 
-    post_samples$`b_genderM:attitudepol` 
-  tibble(hypothesis = c("Female-polite < Female-informal", 
+  M_pol = post_samples$b_Intercept +
+    post_samples$b_genderM +
+    post_samples$b_attitudepol +
+    post_samples$`b_genderM:attitudepol`
+  tibble(hypothesis = c("Female-polite < Female-informal",
                         "Male-polite < Male-informal",
                         "Male-informal < Female-polite"),
          probability = c(
@@ -197,9 +209,16 @@ extract_comparisons = function(model) {
 ## under different models
 #####################################################
 
+get_posterior_beliefs_about_hypotheses(model_FE)
+get_posterior_beliefs_about_hypotheses(gender)
+# get_posterior_beliefs_about_hypotheses(model_interceptOnly)
+# get_posterior_beliefs_about_hypotheses(model_MaxRE)
+
+
 extract_comparisons(model_FE)
-extract_comparisons(model_interceptOnly)
-extract_comparisons(model_MaxRE)
+extract_comparisons(gender)
+# extract_comparisons(model_interceptOnly)
+# extract_comparisons(model_MaxRE)
 
 
 
