@@ -232,7 +232,7 @@ Another way of looking at the data in connection with our research hyptheses is 
     generated the observed data. --- Sounds fancifully abstract? But is fairly intuitive.
     Consider this example.
     
-    \paragraph{Priors.} Jones initially believes that the coin is either fair or not, and that
+    \paragraph{Prior beliefs.} Jones initially believes that the coin is either fair or not, and that
     both of these possibilities are equally likely. She also believes that, if biased, the coin
     is either three times more likely to come up heads or three times more likely to come up
     tails; where she deems the former possibility twice as likely as the latter (because
@@ -247,7 +247,16 @@ Another way of looking at the data in connection with our research hyptheses is 
     potential outcomes of this experiment, namely $D = \set{\text{heads}, \text{tails}}$. The
     \emph{likelihood function} determines the likelihood of observing each datum $d \in D$ for
     each $\theta$, which in our case is just rather trivial: $P(D = \text{heads} \mid \theta) =
-    \theta$ and $P(D = \text{heads} \mid \theta) = \theta$ .
+    \theta$ and $P(D = \text{tails} \mid \theta) = 1 - \theta$.
+
+    \paragraph{Posterior beliefs.} Jones observes that the coin landed heads. What should she
+    believe now. By \emph{Bayes rule} her posterior beliefs are defined like so:
+    \begin{align*}
+      P(\theta \mid D = \text{heads}) = \frac{P(\theta) P(D = \text{heads} \mid \theta)}{\sum_{\theta'}P(\theta') P(D = \text{heads} \mid \theta')}
+    \end{align*}
+    
+
+
 
 
   \end{minipage} \par
