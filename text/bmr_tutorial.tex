@@ -222,11 +222,38 @@ Another way of looking at the data in connection with our research hyptheses is 
     \emph{Bayesian inference: priors, likelihoods and posteriors}
     \medskip
 
-    Here is some general information about Bayesian data analysis in a cool Info Box.
+    Jones is a rational scientist. She has recently inherited her grandma's lucky coin. Grandma
+    used this coin many times during Jones' childhood to determine whether Jones was allowed a
+    sweet or not. Jones suspects that grandma's coin might be a trick coin, but she is not
+    sure. She is determined to find out. How? Well, naturally, by rationally updating her
+    \emph{prior beliefs} about the coin's bias to obtain a new \emph{posterior belief} based on
+    emprical observation (outcomes of coin flips). Central to this updating is Jones'
+    \emph{likelihood function}, which encodes how likely each relevant coin bias may have
+    generated the observed data. --- Sounds fancifully abstract? But is fairly intuitive.
+    Consider this example.
+    
+    \paragraph{Priors.} Jones initially believes that the coin is either fair or not, and that
+    both of these possibilities are equally likely. She also believes that, if biased, the coin
+    is either three times more likely to come up heads or three times more likely to come up
+    tails; where she deems the former possibility twice as likely as the latter (because
+    grandma used to bet on heads, always). Numerically, Jones' \emph{prior beliefs} can be
+    written as, where $\theta \in [0;1]$ is the coin's bias: $P(\theta = 0.5) =
+    \nicefrac{1}{2}$, $P(\theta = \nicefrac{3}{4}) = \nicefrac{2}{6}$, and $P(\theta =
+    \nicefrac{1}{4}) = \nicefrac{1}{6}$.
+
+    \paragraph{Likelihood.} The bias $\theta$ is, by definition, the probability of the coin
+    landing heads on the next trial. Let's assume that Jones tosses the coin only once (hm,
+    maybe not so rational a scientist after all? or just too busy?). Let $D$ be the set of
+    potential outcomes of this experiment, namely $D = \set{\text{heads}, \text{tails}}$. The
+    \emph{likelihood function} determines the likelihood of observing each datum $d \in D$ for
+    each $\theta$, which in our case is just rather trivial: $P(D = \text{heads} \mid \theta) =
+    \theta$ and $P(D = \text{heads} \mid \theta) = \theta$ .
+
+
   \end{minipage} \par
   } \par
   \begin{center}
-    Info Box 1: Asymptotic approximation of a binomial confidence interval
+    Info Box 1: Priors, likelihood and posteriors in Bayesian inference.
   \end{center}
   % \caption{\label{InfoBox:asymptotic_CIs} Here is my caption}  
 \end{InfoBox}
