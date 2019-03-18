@@ -107,7 +107,7 @@
 \maketitle
 
 \begin{abstract}
-  \noindent Generalized linear models with mixed effects are very versatile and handy tools for statistical inference. Bayesian approaches to applying these models have also recently become more popular. This tutorial provides an accessible, non-technical introduction to the use and feel of Bayesian mixed effects regression models. The focus is on data from a factorial-design experiment. \\
+  \noindent Generalized linear mixed models are very versatile and handy tools for statistical inference. Bayesian approaches to applying these models have recently become increasingly popular. This tutorial provides an accessible, non-technical introduction to the use and feel of Bayesian mixed effects regression models. The focus is on data from a factorial-design experiment. \\
   
   \medskip
   
@@ -118,17 +118,19 @@
 
 This tutorial provides a very basic introduction to Bayesian regression modeling using R \citep{Manual}. We wrote this tutorial with a particular reader in mind. If you have used R before and if you have a basic understanding of linear regression and now you want to find out what a Bayesian approach has to offer, this tutorial is for you. In comparison to other introductions \citep[e.g.][]{SorensenHohensteinb2016:Bayesian-linear}, this tutorial remains very conceptual. We don’t want to ``sell Bayes'' to you, and we do not want to scare you away with mathematical details. We just want to give you an impression of how a Bayesian regression analysis looks and feels. So no reason to be afraid! But also: no reason to be bored, because we \emph{will} cover all the essential concepts and we \emph{will} explain how to run and interpret the output of a Bayesian regression analysis using the wonderful R package \texttt{brms} written by Paul \citep{buerkner2016brms}.
 
-If you don’t have any experience with regression modeling, you will probably still be able to follow but you might also easily catch up by doing a crash course. To bring you up to speed, we recommend the excellent two-part tutorial by Bodo \citep{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~classical or frequentist--- paradigm. In a sense, this tutorial could be considered part three of Bodo's nice and lofty introduction. We will, for example use the same data set.
+If you don’t have any experience with regression modeling, you will probably still be able to follow but you might also want to consider doing a crash course. To bring you up to speed, we recommend the excellent two-part tutorial by Bodo \citep{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~classical or frequentist--- paradigm. In a sense, this tutorial could be considered part three of Bodo's nice and lofty introduction. We will, for example use the same data set.
+
+What you need right now: Please have R \mf{insert URL}) and RStudio \mf{insert URL}) downloaded and installed on your computer.
 
 
 \section{The data}
 \label{sec:data}
 
-Now, what do we as experimental researchers often do? We often have a research hypothesis about how aspects of nature relate to each other. For example, we might want to know whether voice pitch differs across female and male speakers, and whether it differs across social contexts (say: informal or polite contexts). --- To answer our questions, we lure a group of people into the lab, we ask them to say different words in different social contexts, we record their voices, and record some numbers, e.g., the pitch values.
+Now, what do we as experimental researchers do \tr{maybe introduce the experimentalist as target audience above}? We often have a question about how aspects of nature relate to each other and we want to answer this question. For example, we might want to know whether voice pitch differs across female and male speakers, and whether it differs across social contexts (say: informal or polite contexts). --- To answer our questions, we lure a group of people into the lab, we ask them to say different words in different social contexts, we record their voices, and record some numbers, e.g., the pitch values. We then want to find out whether our data provide evidence for these relationships.
 
-\citet{Winter2013:Linear-models-a} looks at data of this sort \citep[taken from][]{WinterGrawunder2012:The-Phonetic-Pr} and so will we. The data is obtainable from \dots \mf{how to get the data}. To load the data into R, copy the file \texttt{FILENAME} \dots \mf{describe set up} and type this into an R console (perhaps using
-RStudio \mf{insert URL})\footnote{If you are familiar with the previous tutorials by \citet{Winter2013:Linear-models-a}, it might help you to know that we have (courteously) massaged the data a tiny little bit: we have already removed one line with missing data and we have changed the way the variable
-\texttt{scenario} is represented, so that it gets treated (correctly) later on in the regression analysis without much further ado.}
+In this tutorial, we are looking at data just like this \citep[following[]{Winter2013:Linear-models-a} \citep[taken from][]{WinterGrawunder2012:The-Phonetic-Pr}. You can download the data here: \dots \mf{how to get the data}.  
+In order to load the data into R, copy the file \texttt{FILENAME} \dots \mf{describe set up} and type this into an R console (perhaps using RStudio \mf{insert URL})\footnote{If you are familiar with the previous tutorials by \citet{Winter2013:Linear-models-a}, be took the freedom to tidy the data a little bit: we have already removed one line with missing data and we have changed the way the variable
+\texttt{scenario} is represented, so that it is treated (correctly) later on in the regression analysis without much further ado.\tr{maybe don't tell them about this? Not relevant for following the tutorial}}
 
 \medskip
 
@@ -139,7 +141,7 @@ RStudio \mf{insert URL})\footnote{If you are familiar with the previous tutorial
 
 \vspace*{-0.5cm}
 
-\noindent If we now type \ri{head(politedata)}, we see the first six lines of the data, like so:
+\noindent Type \ri{head(politedata)} and you should see the first six lines:
 
 \medskip
 
@@ -157,19 +159,19 @@ RStudio \mf{insert URL})\footnote{If you are familiar with the previous tutorial
 
 \medskip
 
-\noindent What is important for us here is that there are multiple measurements for the same subjects. We have a measurement of pitch frequency \mf{is that the right term?} for different subjects, who are (crudely) classified as either male or female, and different scenarios (e.g., words/sentences to pronounce). The experiment has manipulated whether the scenario took place in a polite or informal context. This is indicated by the variable \texttt{attitude}.
+\noindent Looking at the data, we have different subjects which either are F(emale) or M(ale). They produce words in different scenarios (e.g., words/sentences to pronounce). The experiment has manipulated whether the scenario took place in a polite or informal context. This is indicated by the variable \texttt{attitude}. Crucially, each row contains a measurement of pitch in Hz which is our dependent variable. 
 
-What aspects of this data set are interesting from a theoretical point of view? --- Most often, we are interested in comparing a measurement, like pitch frequency, accross different conditions or groups. In the present case, we might have the following three hypotheses:
+Often, we are interested in comparing a measurement (here pitch) across different conditions or groups. Before the data collection, we might have concrete predictions about the relationship between the measurement and these conditions. Here, we might have the following three hypotheses:
 
 \begin{enumerate}[{H}1:]
-\item Do female speakers have a lower average pitch frequency in polite than in informal contexts?
-\item Do male speakers have a lower average pitch frequency in polite than in informal contexts?
-\item Do male speakers have a lower average pitch frequency in informal than female speakers have in polite contexts?
+\item Do female speakers have a lower average pitch in polite than in informal contexts?
+\item Do male speakers have a lower average pitch in polite than in informal contexts?
+\item Do male speakers have a lower average pitch in informal than female speakers have in polite contexts?
 \end{enumerate}
 
-\noindent The best starting point for data analysis is always: plotting. Figure~\ref{fig:BasicPlotData_data} shows a plot of the data which is obtained from the following R code (this is a bit more involved, but it is not at all essential for this tutorial to understand what's happening here; just lean back, enjoy the visual effects and focus on the content of the plot). \mf{I don't actually think it's even necessary to give the code here; Bodo doesn't do that either for most of his plots; I think we should just give a really nice plot (no barplots!) that we would also normally like to use; without explanation and argument; indoctrination by example.}
+\noindent To get a first idea of these possible relationships, let's plot our data. Figure~\ref{fig:BasicPlotData_data} shows a plot showing the mean pitch values for each scenario for each gender and attitude. The solid points indicate the mean values for gender and attitude. We can see that female pitch values are generally higher than male values (points in left column are higher than in the right column) and we see that measurements from the informal condition are slightly higher than in the polite condition (blue points are higher than orange points). 
 
-
+\tr{agree with getting rid of simple plotting explanations, so delete code chunk?}. 
 
 \medskip
 
@@ -200,7 +202,7 @@ politedata %>%
      \label{fig:BasicPlotData_data}
 \end{figure}
 
-Another way of looking at the data in connection with our research hyptheses is in Figure~\ref{fig:BasicPlotData_table}.
+Another way of looking at the data in connection with our research hypotheses is in Figure~\ref{fig:BasicPlotData_table}.
 
 \begin{figure}[h]
   \centering

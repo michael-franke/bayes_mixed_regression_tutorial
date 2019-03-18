@@ -31,18 +31,48 @@ head(politedata)
 ## plot means for each group
 #####################################################
 
-politedata %>% 
-    group_by(gender, attitude) %>% 
-    summarize(mean_frequency = mean(freq),
-              standard_error = std.error(freq)) %>% 
-    ggplot((aes(x = gender, 
-                y = mean_frequency, 
-                fill = attitude))) + 
-    geom_bar(stat = "identity", position = "dodge") +
-    geom_errorbar(aes(ymin = mean_frequency - standard_error,
-                      ymax = mean_frequency + standard_error), 
-                  position = "dodge")
+politedata.agg <- 
+  politedata %>% 
+    group_by(gender, attitude, scenario) %>% 
+    summarize(mean_frequency = mean(freq))
 
+politedata.agg2 <- 
+  politedata%>%
+  group_by(gender, attitude) %>% 
+  summarize(mean_frequency = mean(freq))
+
+ggplot(data = politedata.agg, 
+       aes(x = gender, 
+           y = mean_frequency, 
+           colour = attitude)) + 
+  geom_point(position = position_dodge(0.5), alpha = 0.5, size = 3) +
+  geom_point(data = politedata.agg2, 
+             aes(x = gender, 
+                 y = mean_frequency, 
+                 colour = attitude),
+             position = position_dodge(0.5), size = 5) +
+  scale_y_continuous(expand = c(0, 0), breaks = (c(50,100,150,200,250,300)), limits = c(50,300)) +
+  scale_colour_manual(values = c("#0072B2", "#D55E00")) +
+  ylab("pitch in Hz\n") +
+  xlab("\nGender") +
+  theme_classic() +
+  theme(legend.position = "right",
+        legend.key.height = unit(2,"line"),
+        legend.title = element_text(size = 18, face = "bold"),
+        legend.text = element_text(size = 16),
+        legend.background = element_rect(fill = "transparent"),
+        strip.background = element_blank(),
+        strip.text = element_text(size = 18, face = "bold"),
+        axis.line.x = element_blank(),
+        panel.spacing = unit(2, "lines"),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        panel.background = element_rect(fill = "transparent"),
+        axis.text = element_text(size = 16),
+        axis.title = element_text(size = 18, face = "bold"),
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.margin = unit(c(0.2,0.1,0.2,0.1),"cm"))
+  
+  
 ggsave(filename = "../text/pics/basic_data_plot.pdf",
        plot = last_plot(),
        width = 6, height = 4)
@@ -100,7 +130,7 @@ extract_posterior_cell_means = function(model) {
     n_levels = c(n_levels, length(new_levels[[1]]))
   }
   names(factors) = independent_variables
-  if (min(n_levels) <=1){
+  if (min(n_levels) <= 1){
     stop("Oeps! There seems to be a factor with less than 2 levels. Please check and possibly exclude that factor.")
   }
   ## ref_levels_list :: a list with all factors and their refernce levels
@@ -145,7 +175,7 @@ extract_posterior_cell_means = function(model) {
   replace_with_ref_level_recursion = function(cell) {
     which_fcts_are_at_ref_level = map_lgl(cell, function(fl) fl %in% ref_levels)
     if (all(which_fcts_are_at_ref_level)) {
-      return (list(cell))
+      return(list(cell))
     } 
     else {
       factors_to_replace_with_ref_level = which(which_fcts_are_at_ref_level == F)
@@ -195,10 +225,12 @@ extract_posterior_cell_means(model_MaxRE)
 
 get_posterior_beliefs_about_hypotheses = function(model) {
   posterior_cell_means = extract_posterior_cell_means(model)
+  # insert the comparisons you are interested in as strings 
   tibble(hypothesis = c("Female-polite < Female-informal", 
                         "Male-polite < Male-informal",
                         "Male-informal < Female-polite"),
          probability = c(
+           # insert the comparisons you are interested in referring to the extracted samples
            mean(posterior_cell_means$`gender:F__attitude:pol` < posterior_cell_means$`gender:F__attitude:inf`),
            mean(posterior_cell_means$`gender:M__attitude:pol` < posterior_cell_means$`gender:M__attitude:inf`),
            mean(posterior_cell_means$`gender:M__attitude:inf` < posterior_cell_means$`gender:F__attitude:pol`)
