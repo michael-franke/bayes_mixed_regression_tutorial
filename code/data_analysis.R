@@ -13,6 +13,13 @@ options(mc.cores = parallel::detectCores())
 # package for function 'std.error' to obtain standard errors
 library(plotrix)
 
+# package to navigate to your source folder
+library(rstudioapi)
+
+## Getting the path of your current open file
+current_path = rstudioapi::getActiveDocumentContext()$path 
+setwd(dirname(current_path))
+
 #####################################################
 ## read and massage the data
 #####################################################
@@ -75,9 +82,7 @@ extract_posterior_cell_means = function(model) {
   independent_variables = strsplit(x = gsub(pattern = "\\(.*\\|.*\\)", "", as.character(formula(model)[[1]])[[3]]),
                                    split =  "(\\*|\\+)",
                                    fixed = FALSE)[[1]] %>% trimws()
-  independent_variables = independent_variables[-which(independent_variables == "")]
-  
-  
+  independent_variables = independent_variables[which(independent_variables != "")]
   
   
   # stop this if there are not at least two factors
@@ -186,6 +191,7 @@ extract_posterior_cell_means = function(model) {
 extract_posterior_cell_means(model_gender)
 extract_posterior_cell_means(model_FE)
 extract_posterior_cell_means(model_interceptOnly)
+extract_posterior_cell_means(model_MaxRE)
 
 get_posterior_beliefs_about_hypotheses = function(model) {
   posterior_cell_means = extract_posterior_cell_means(model)
