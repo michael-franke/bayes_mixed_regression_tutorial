@@ -116,17 +116,17 @@
 
 \section{Motivation \& intended audience}
 
-This tutorial provides a very basic introduction to Bayesian regression modeling using R \citep{Manual}. We wrote this tutorial with a particular reader in mind. If you have used R before and if you have a basic understanding of linear regression and now you want to find out what a Bayesian approach has to offer, this tutorial is for you. In comparison to other introductions \citep[e.g.][]{SorensenHohensteinb2016:Bayesian-linear}, this tutorial remains very conceptual. We don’t want to ``sell Bayes'' to you, and we do not want to scare you away with mathematical details. We just want to give you an impression of how a Bayesian regression analysis looks and feels. So no reason to be afraid! But also: no reason to be bored, because we \emph{will} cover all the essential concepts and we \emph{will} explain how to run and interpret the output of a Bayesian regression analysis using the wonderful R package \texttt{brms} written by Paul \citep{buerkner2016brms}.
+This tutorial provides a very basic introduction to Bayesian regression modeling using R \citep{Manual}. We wrote this tutorial with a particular reader in mind. If you have used R before and if you have a basic understanding of linear regression and now you want to find out what a Bayesian approach has to offer, this tutorial is for you. In comparison to other introductions \citep[e.g.][]{SorensenHohensteinb2016:Bayesian-linear}, this tutorial remains very conceptual. We don’t want to ``sell Bayes'' to you, and we do not want to scare you away with mathematical details. We just want to give you an impression of how a Bayesian regression analysis looks and feels. So no reason to be afraid! But also: no reason to be bored, because we \emph{will} cover all the essential concepts and we \emph{will} explain how to run and interpret the output of a Bayesian regression analysis using the wonderful R package \texttt{brms} written by Paul \citet{buerkner2016brms}.
 
-If you don’t have any experience with regression modeling, you will probably still be able to follow but you might also want to consider doing a crash course. To bring you up to speed, we recommend the excellent two-part tutorial by Bodo \citep{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~classical or frequentist--- paradigm. In a sense, this tutorial could be considered part three of Bodo's nice and lofty introduction. We will, for example use the same data set.
+If you don’t have any experience with regression modeling, you will probably still be able to follow but you might also want to consider doing a crash course. To bring you up to speed, we recommend the excellent two-part tutorial by Bodo \citet{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~classical or frequentist--- paradigm. In a sense, this tutorial could be considered part three of Bodo's nice and lofty introduction. We will, for example use the same data set.
 
 What you need right now: Please have R \mf{insert URL}) and RStudio \mf{insert URL}) downloaded and installed on your computer.
 
 
-\section{The data}
+\section{Our research question}
 \label{sec:data}
 
-Now, what do we as experimental researchers do \tr{maybe introduce the experimentalist as target audience above}? We often have a question about how aspects of nature relate to each other and we want to answer this question. For example, we might want to know whether voice pitch differs across female and male speakers, and whether it differs across social contexts (say: informal or polite contexts). --- To answer our questions, we lure a group of people into the lab, we ask them to say different words in different social contexts, we record their voices, and record some numbers, e.g., the pitch values. We then want to find out whether our data provide evidence for these relationships.
+Imagine we are experimental researchers. Now, what do we do as experimental researchers? We often have a research question about how aspects of nature relate to each other and we want to answer this question. For example, we might want to know whether voice pitch differs across female and male speakers, and whether it differs across social contexts (say: informal and polite contexts). --- To answer our questions, we come up with a nifty experimental design, we lure a group of people into the lab, we ask them to say different words in different social contexts, we record their voices, and extraxt some numbers from these recordings, for example, the pitch values of their voices. We then want to find out whether our data provide evidence for any assumed relationships. So far so good.
 
 In this tutorial, we are looking at data just like this \citep[following[]{Winter2013:Linear-models-a} \citep[taken from][]{WinterGrawunder2012:The-Phonetic-Pr}. You can download the data here: \dots \mf{how to get the data}.  
 In order to load the data into R, copy the file \texttt{FILENAME} \dots \mf{describe set up} and type this into an R console (perhaps using RStudio \mf{insert URL})\footnote{If you are familiar with the previous tutorials by \citet{Winter2013:Linear-models-a}, be took the freedom to tidy the data a little bit: we have already removed one line with missing data and we have changed the way the variable
@@ -159,17 +159,22 @@ In order to load the data into R, copy the file \texttt{FILENAME} \dots \mf{desc
 
 \medskip
 
-\noindent Looking at the data, we have different subjects which either are F(emale) or M(ale). They produce words in different scenarios (e.g., words/sentences to pronounce). The experiment has manipulated whether the scenario took place in a polite or informal context. This is indicated by the variable \texttt{attitude}. Crucially, each row contains a measurement of pitch in Hz which is our dependent variable. 
+\noindent Looking at the data, we have different subjects. Because voice pitch is highly dependent on gender, we stored whether our subjects are F(emale) or M(ale). Subjects produced words in different scenarios (e.g., words/sentences to pronounce) \tr{maybe we want to rename this column to sentence right away? one less leap to make from data set to concept}. In the experiment, we manipulated whether the scenario took place in a polite or in an informal context. This is indicated by the variable \texttt{attitude}. Crucially, each row contains a measurement of pitch in Hz which is our dependent variable. 
 
-Often, we are interested in comparing a measurement (here pitch) across different conditions or groups. Before the data collection, we might have concrete predictions about the relationship between the measurement and these conditions. Here, we might have the following three hypotheses:
+Often, we are interested in comparing a dependent variable (here pitch) across different conditions or groups, i.e. independent variables. Before our data collection, we might have formulated concrete predictions about the relationship between the dependent variable and independent variables. For example, we might have formulated the following three hypotheses:
 
 \begin{enumerate}[{H}1:]
-\item Do female speakers have a lower average pitch in polite than in informal contexts?
-\item Do male speakers have a lower average pitch in polite than in informal contexts?
-\item Do male speakers have a lower average pitch in informal than female speakers have in polite contexts?
+\item Female speakers have a lower average pitch in polite than in informal contexts.
+\item Male speakers have a lower average pitch in polite than in informal contexts.
+\item Male speakers have a lower average pitch in informal than female speakers have in polite contexts.
 \end{enumerate}
 
-\noindent To get a first idea of these possible relationships, let's plot our data. Figure~\ref{fig:BasicPlotData_data} shows a plot showing the mean pitch values for each scenario for each gender and attitude. The solid points indicate the mean values for gender and attitude. We can see that female pitch values are generally higher than male values (points in left column are higher than in the right column) and we see that measurements from the informal condition are slightly higher than in the polite condition (blue points are higher than orange points). 
+\noindent Maybe you are interested in other pairwise relationships, maybe you are interested in main effects of gender or attitude regardless of the other groupings. For exposition purposes, let's just go with these arbitrarily chosen hypotheses.
+
+To get a first idea of possible relationships in our data, let's plot them. Figure~\ref{fig:BasicPlotData_data} displays the mean pitch values for each scenario (semitransparent points) across gender and attitude; The solid points indicate the mean pitch values across gender and attitude. Looking at the plot, we can see that pitch values from female speakers are generally higher than values from male speakers (points in left column are higher than in the right column). We also see that pitch values in the informal condition are slightly higher than those in the polite condition (blue points are slightly higher than orange points). 
+
+Intuitively, these patterns might strike us as pretty obvious, but there is also quite a lot of variability between scenarios. For example, some values from the informal condition for female speakers (blue points in left column), are lower than their corresponding polite counterparts.  
+What we want is a precise estimates of potential differences between groups alongside a measure of certainty around these estimates. 
 
 \tr{agree with getting rid of simple plotting explanations, so delete code chunk?}. 
 
@@ -198,11 +203,11 @@ politedata %>%
 \begin{figure}[t]
   \centering
     \includegraphics[width = \textwidth]{pics/basic_data_plot.pdf}
-    \caption{Basic plot of the data. \mf{make me pretty}}
+    \caption{Basic plot of the data.}
      \label{fig:BasicPlotData_data}
 \end{figure}
 
-Another way of looking at the data in connection with our research hypotheses is in Figure~\ref{fig:BasicPlotData_table}.
+Another way of looking at the data in connection with our research hypotheses is in Figure~\ref{fig:BasicPlotData_table}. Each cell represent one unique combination of the gender and the attitude factor. Our hypotheses can be related to the comparison between some of these cells. H1 makes a statement about the comparison between quadrant 1 and 2 (the attitude effect for female speakers); H2 makes a statement about quadrant 3 and 4 (the attitude effect for male speakers); and H3 makes a statement about quadrant 2 and 3 (the difference between informal male speakers and polite female speakers).
 
 \begin{figure}[h]
   \centering
@@ -211,8 +216,42 @@ Another way of looking at the data in connection with our research hypotheses is
     \label{fig:BasicPlotData_table}
 \end{figure}
 
-
 \mf{Next steps: give the table of means; say how above comparisons translate into a comparison of cells in that table}
+
+Within the bayesian framework, we can estimate the values for each cell and, in turn, the differences between cells directly. Our aim is to get some values about voice pitch for males and females and polite and informal contexts. 
+
+We can express the relationship between pitch on the one hand and gender and attitude on the other as a regression formula like this one here: pitch ~ gender * attitude.
+
+Translated into the syntax of brms we end up with following function:
+
+\medskip
+
+\begin{lstlisting}[language=R]
+  # formulate regression model in brms
+  xmdl = brm(freq ~ gender * attitude, data = politedata)
+\end{lstlisting}
+
+\vspace*{-0.5cm}
+
+\noindent 
+
+The syntax of this function should look very familiar to anyone who has worked with (generalized) linear models in R. Now one important difference between traditional frequentist' inferences and a Bayesian framework is that we can take specific prior beliefs about the relationships between dependent and independent variables into account. 
+
+Priors are subjective pieces of information about your data that you have before analyzing the data. These priors might constrain values that your data can have. For example, mathematically, pitch values  cannot be lower than 0. Practically, human pitch values are within a certain range that is limited by bio mechanical constraints on our laryngeal system. In adults, values beyond, let's say 1000 Hz are very unlikely even when they use falsetto.
+Priors can also express our subjective beliefs about a relationship. For example, knowing what we know about gender differences in pitch, we might be already very certain that female speakers have higher pitch values than male speakers.
+
+But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. Although, they are cases in which we might want to specify very concrete priors about our data, practically we will restrict ourselves here to what we call weakly informative priors. Weakly informative priors are priors that constrain possible values of a variable (e.g. possible pitch values). These priors are also called regularizing priors, as they help the statistical model to converge on reasonable estimates. But these priors are also agnostic about possible relationships between variables. 
+
+
+
+\tr{Below is stuff to mention when we transition to hierarchical models}. 
+
+These mean values, however, are a very poor and abstract representation of all the pitch values that we have recorded. Different speakers have very different voice pitch ranges. Likewise, speakers are not machines. There is a substantial variability in how a single speaker pronounces an utterance. So we expect some variability here. Likewise,
+different scenarios might elicit very different pitch values due idiosyncratic aspects of the scenario that are not captured by our independent variables. 
+
+In our study, we took multiple measures per speaker. That is, each subject gave multiple polite responses and multiple informal responses. 
+Individual responses from one subject are thus dependent. Also, we took multiple measures per scenario, as each scenario was produced by all speakers. This introduces, again, dependencies between data points. These dependencies need to be taken into account when we try to estimate differences between groups.
+
 
 \newpage
 
@@ -231,7 +270,7 @@ Another way of looking at the data in connection with our research hypotheses is
     \emph{prior beliefs} about the coin's bias to obtain a new \emph{posterior belief} based on
     empirical observation (outcomes of coin flips). Central to this updating is Jones'
     \emph{likelihood function}, which encodes how likely each relevant coin bias may have
-    generated the observed data. --- Sounds fancifully abstract? But is fairly intuitive.
+    generated the observed data. --- Sounds fancifully abstract? It's actially fairly intuitive.
     Consider this example.
     
     \paragraph{Prior beliefs.} Jones initially believes that the coin is either biased towards
@@ -262,6 +301,8 @@ Another way of looking at the data in connection with our research hypotheses is
     \end{align*}
     After making her observation, rational Jones believes that the bias towards heads is twice
     more likely than the bias towards tails.
+    
+    \tr{I think this will make everyone run away from this tutorial. Can we keep it on a pure conceptual level and avoid any formulas?}. 
 
   \end{minipage} \par
   } \par

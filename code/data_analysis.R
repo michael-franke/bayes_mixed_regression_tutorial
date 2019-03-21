@@ -37,22 +37,35 @@ politedata.agg <-
     summarize(mean_frequency = mean(freq))
 
 politedata.agg2 <- 
-  politedata%>%
+  politedata %>%
   group_by(gender, attitude) %>% 
-  summarize(mean_frequency = mean(freq))
+  summarize(mean_frequency = round(mean(freq), 0))
 
 ggplot(data = politedata.agg, 
        aes(x = gender, 
            y = mean_frequency, 
            colour = attitude)) + 
-  geom_point(position = position_dodge(0.5), alpha = 0.5, size = 3) +
+  geom_point(position = position_dodge(0.5), 
+             alpha = 0.3, 
+             size = 3) +
   geom_point(data = politedata.agg2, 
              aes(x = gender, 
                  y = mean_frequency, 
-                 colour = attitude),
-             position = position_dodge(0.5), size = 5) +
+                 #colour = attitude,
+                 fill = attitude),
+             position = position_dodge(0.5), 
+             pch = 21, 
+             colour = "black",
+             size = 5) +
+  scale_x_discrete(breaks = c("F", "M"),
+                  labels = c("female", "male")) +
   scale_y_continuous(expand = c(0, 0), breaks = (c(50,100,150,200,250,300)), limits = c(50,300)) +
-  scale_colour_manual(values = c("#0072B2", "#D55E00")) +
+  scale_colour_manual(breaks = c("inf", "pol"),
+                      labels = c("informal", "polite"),
+                      values = c("#0072B2", "#D55E00")) +
+  scale_fill_manual(breaks = c("inf", "pol"),
+                      labels = c("informal", "polite"),
+                      values = c("#0072B2", "#D55E00")) +
   ylab("pitch in Hz\n") +
   xlab("\nGender") +
   theme_classic() +
