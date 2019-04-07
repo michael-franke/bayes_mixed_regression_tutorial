@@ -228,16 +228,66 @@ extract_posterior_cell_means = function(model) {
       )
     }
   ) 
-  predictor_values %>% spread(key = cell, value = predictor_value)
+
+  predictor_values = predictor_values %>% spread(key = cell, value = predictor_value)
+  
+  ## towards an alternative (more versatile) output which compares all cells
+
+  cells = expand.grid(factors)
+  for (j in 1:ncol(cells_readable)) {cells_readable[,j] = as.character(cells_readable[,j])}  
+  cells$cell_name = map_chr(
+    1:nrow(cells_readable), 
+    function(i) {paste(as.character(cells_readable[i,]), collapse = "__")}
+  )
+  for (j in 1:ncol(cells)) {cells[,j] = as.character(cells[,j])}
+  
+  cells_high = cells
+  cells_low = cells
+  names(cells_high) = map_chr(names(cells), function(c) {paste0(c, "_high")})
+  names(cells_low)  = map_chr(names(cells), function(c) {paste0(c, "_low")})
+  
+  # from here: https://stackoverflow.com/questions/11693599/alternative-to-expand-grid-for-data-frames
+  expand.grid.df <- function(...) Reduce(function(...) merge(..., by=NULL), list(...))
+  
+  all_cells_compared = expand.grid.df(cells_high, cells_low)
+  for (j in 1:ncol(all_cells_compared)) {all_cells_compared[,j] = as.character(all_cells_compared[,j])}  
+  all_cells_compared = all_cells_compared %>% filter(cell_name_high != cell_name_low)
+  
+  all_cells_compared$posterior = map_dbl(
+    1:nrow(all_cells_compared), 
+    function(i) {
+      mean(predictor_values[all_cells_compared$cell_name_high[i]] > 
+        predictor_values[all_cells_compared$cell_name_low[i]])
+    }  
+  )
+
+  ## output
+  
+  
+  
+  return(list(
+    predictor_values = predictor_values, 
+    all_cells_compared = all_cells_compared))
+  
 }
 
-extract_posterior_cell_means(model_gender)
-extract_posterior_cell_means(model_FE)
-extract_posterior_cell_means(model_interceptOnly)
-extract_posterior_cell_means(model_MaxRE)
+get_cell_comparison = function(model, cell_low, cell_high) {
+  cell_high = paste(names(cell_high), unlist(cell_high), sep = ":", collapse = "__")
+  cell_low = paste(names(cell_low), unlist(cell_low), sep = ":", collapse = "__")
+  all_cells_compared = extract_posterior_cell_means(model)$all_cells_compared
+  all_cells_compared %>% filter(cell_name_high == cell_high, cell_name_low == cell_low) %>% pull(posterior)
+}
+
+##################################
+## testing selected hypotheses
+#### two possibilities
+##################################
+
+## version 1 (old)
+#### uses `extract_posterior_cell_means(model)$predictor_values`
 
 get_posterior_beliefs_about_hypotheses = function(model) {
-  posterior_cell_means = extract_posterior_cell_means(model)
+  posterior_cell_means = extract_posterior_cell_means(model)$predictor_values
   # insert the comparisons you are interested in as strings 
   tibble(hypothesis = c("Female-polite < Female-informal", 
                         "Male-polite < Male-informal",
@@ -250,45 +300,27 @@ get_posterior_beliefs_about_hypotheses = function(model) {
          ))
 }
 
-
-extract_comparisons = function(model) {
-  # get posterior samples
-  post_samples = posterior_samples(model) %>% as.tibble()
-  # mnemonic names for reconstructed predictor values for all cells in the design matrix
-  F_inf = post_samples$b_Intercept
-  F_pol = post_samples$b_Intercept +
-    post_samples$b_attitudepol
-  M_inf = post_samples$b_Intercept +
-    post_samples$b_genderM
-  M_pol = post_samples$b_Intercept +
-    post_samples$b_genderM +
-    post_samples$b_attitudepol +
-    post_samples$`b_genderM:attitudepol`
-  tibble(hypothesis = c("Female-polite < Female-informal",
-                        "Male-polite < Male-informal",
-                        "Male-informal < Female-polite"),
-         probability = c(
-           mean(F_pol < F_inf),
-           mean(M_pol < M_inf),
-           mean(M_inf < F_pol)
-         ))
-}
-
-#####################################################
-## access probability of the relevant hypotheses
-## under different models
-#####################################################
-
-
-# new function that relies on generic extractions
 get_posterior_beliefs_about_hypotheses(model_FE)
 get_posterior_beliefs_about_hypotheses(model_interceptOnly)
 get_posterior_beliefs_about_hypotheses(model_MaxRE)
 
-# old function that only works for this particular case
-extract_comparisons(model_FE)
-extract_comparisons(model_interceptOnly)
-extract_comparisons(model_MaxRE)
+## version 2 (new)
+### uses new convenience function `get_cell_comparison`
 
+get_posterior_beliefs_about_hypotheses_new = function(model) {
+  # insert the comparisons you are interested in as strings 
+  tibble(hypothesis = c("Female-polite < Female-informal", 
+                        "Male-polite < Male-informal",
+                        "Male-informal < Female-polite"),
+         probability = c(
+           # insert the comparisons you are interested in referring to the extracted samples
+           get_cell_comparison(model, list(gender = "F", attitude = "pol"), list(gender = "F", attitude = "inf")),
+           get_cell_comparison(model, list(gender = "M", attitude = "pol"), list(gender = "M", attitude = "inf")),
+           get_cell_comparison(model, list(gender = "M", attitude = "inf"), list(gender = "F", attitude = "pol")) 
+         ))
+}
 
+get_posterior_beliefs_about_hypotheses_new(model_FE)
+get_posterior_beliefs_about_hypotheses_new(model_interceptOnly)
+get_posterior_beliefs_about_hypotheses_new(model_MaxRE)
 
