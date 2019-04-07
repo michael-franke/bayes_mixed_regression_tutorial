@@ -272,6 +272,7 @@ extract_posterior_cell_means = function(model) {
 }
 
 get_cell_comparison = function(model, cell_low, cell_high) {
+  ### TODO: currently relying on correct order of factors in 'cell_low' and 'cell_high'
   cell_high = paste(names(cell_high), unlist(cell_high), sep = ":", collapse = "__")
   cell_low = paste(names(cell_low), unlist(cell_low), sep = ":", collapse = "__")
   all_cells_compared = extract_posterior_cell_means(model)$all_cells_compared
