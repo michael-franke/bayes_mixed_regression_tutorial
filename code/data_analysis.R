@@ -33,26 +33,26 @@ head(politedata)
 
 politedata.agg <- 
   politedata %>% 
-    group_by(gender, attitude, scenario) %>% 
-    summarize(mean_frequency = mean(freq))
+    group_by(gender, context, sentence) %>% 
+    summarize(mean_frequency = mean(pitch))
 
 politedata.agg2 <- 
   politedata %>%
-  group_by(gender, attitude) %>% 
-  summarize(mean_frequency = round(mean(freq), 0))
+  group_by(gender, context) %>% 
+  summarize(mean_frequency = round(mean(pitch), 0))
 
 ggplot(data = politedata.agg, 
        aes(x = gender, 
            y = mean_frequency, 
-           colour = attitude)) + 
+           colour = context)) + 
   geom_point(position = position_dodge(0.5), 
              alpha = 0.3, 
              size = 3) +
   geom_point(data = politedata.agg2, 
              aes(x = gender, 
                  y = mean_frequency, 
-                 #colour = attitude,
-                 fill = attitude),
+                 #colour = context,
+                 fill = context),
              position = position_dodge(0.5), 
              pch = 21, 
              colour = "black",
@@ -90,26 +90,28 @@ ggsave(filename = "../text/pics/basic_data_plot.pdf",
        plot = last_plot(),
        width = 6, height = 4)
 
+stop()
+
 #####################################################
 ## run model with different random-effects structures
 #####################################################
 
 # model with only fixed effects (non-hierarchical)
-model_FE = brm(formula = freq ~ gender * attitude, data = politedata)
+model_FE = brm(formula = pitch ~ gender * context, data = politedata)
 
 # model with only a fixed effect for gender (non-hierarchical)
-model_gender = brm(formula = freq ~ gender, data = politedata)
+model_gender = brm(formula = pitch ~ gender, data = politedata)
 
 # hierarchical model with random intercepts
-model_interceptOnly = brm(formula = freq ~ gender * attitude +
-                            (1 | scenario + subject),
+model_interceptOnly = brm(formula = pitch ~ gender * context +
+                            (1 | sentence + subject),
                           data = politedata)
 
 # hierarchical model with the maximial RE structure licensed by the design
 # (notice that factor 'gender' does not vary for a given value of variable 'subject')
-model_MaxRE = brm(formula = freq ~ gender * attitude +
-                    (1 + gender * attitude | scenario) +
-                    (1 + attitude | subject),
+model_MaxRE = brm(formula = pitch ~ gender * context +
+                    (1 + gender * context | sentence) +
+                    (1 + context | subject),
                   data = politedata)
 
 #####################################################
@@ -295,9 +297,9 @@ get_posterior_beliefs_about_hypotheses = function(model) {
                         "Male-informal < Female-polite"),
          probability = c(
            # insert the comparisons you are interested in referring to the extracted samples
-           mean(posterior_cell_means$`gender:F__attitude:pol` < posterior_cell_means$`gender:F__attitude:inf`),
-           mean(posterior_cell_means$`gender:M__attitude:pol` < posterior_cell_means$`gender:M__attitude:inf`),
-           mean(posterior_cell_means$`gender:M__attitude:inf` < posterior_cell_means$`gender:F__attitude:pol`)
+           mean(posterior_cell_means$`gender:F__context:pol` < posterior_cell_means$`gender:F__context:inf`),
+           mean(posterior_cell_means$`gender:M__context:pol` < posterior_cell_means$`gender:M__context:inf`),
+           mean(posterior_cell_means$`gender:M__context:inf` < posterior_cell_means$`gender:F__context:pol`)
          ))
 }
 
@@ -315,9 +317,9 @@ get_posterior_beliefs_about_hypotheses_new = function(model) {
                         "Male-informal < Female-polite"),
          probability = c(
            # insert the comparisons you are interested in referring to the extracted samples
-           get_cell_comparison(model, list(gender = "F", attitude = "pol"), list(gender = "F", attitude = "inf")),
-           get_cell_comparison(model, list(gender = "M", attitude = "pol"), list(gender = "M", attitude = "inf")),
-           get_cell_comparison(model, list(gender = "M", attitude = "inf"), list(gender = "F", attitude = "pol")) 
+           get_cell_comparison(model, list(gender = "F", context = "pol"), list(gender = "F", context = "inf")),
+           get_cell_comparison(model, list(gender = "M", context = "pol"), list(gender = "M", context = "inf")),
+           get_cell_comparison(model, list(gender = "M", context = "inf"), list(gender = "F", context = "pol")) 
          ))
 }
 
