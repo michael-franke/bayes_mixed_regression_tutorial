@@ -2,16 +2,23 @@
 ## package includes and options
 #####################################################
 
-# library for convenience functions (e.g. plotting)
+# package for convenience functions (e.g. plotting)
 library(tidyverse)
 
-# library for Bayesian regression modeling
+# package for Bayesian regression modeling
 library(brms)
 # option for Bayesian regression models: use all available cores for parallel computing
 options(mc.cores = parallel::detectCores())
 
 # package for function 'std.error' to obtain standard errors
 library(plotrix)
+
+# package to allow installation from github
+library(devtools)
+
+# package with convenience function for Bayesian regression models for factorial designs
+install_github('michael-franke/bayes_mixed_regression_tutorial/faintr') # install from GitHub
+library(faintr)
 
 # package to navigate to your source folder
 library(rstudioapi)

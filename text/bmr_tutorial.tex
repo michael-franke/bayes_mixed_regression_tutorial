@@ -120,36 +120,40 @@ This tutorial provides a very basic introduction to Bayesian regression modeling
 
 If you don’t have any experience with regression modeling, you will probably still be able to follow but you might also want to consider doing a crash course. To bring you up to speed, we recommend the excellent two-part tutorial by Bodo \citet{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~classical or frequentist--- paradigm. In a sense, this tutorial could be considered part three of Bodo's nice and lofty introduction. We will, for example use the same data set.
 
-This tutorial contains text boxes (with a gray background) which contain additional background
-information on some topics. The information is sometimes a bit technical but never absolutely
-necessary for understanding the main ideas. So, feel free to read or not read any of the text
-boxes to suit your needs.
+This tutorial contains text boxes (with a gray background) which contain additional background information on some topics.
+The information is sometimes a bit technical but never absolutely necessary for understanding the main ideas.
+So, feel free to read or not read any of the text boxes to suit your needs.
 
-To follow this tutorial, you should have R installed on your computer
-(\url{https://www.r-project.org}). Unless you already have a favorite editor for tinkering with
-R scripts, we recommend you try out RStudio (https://www.rstudio.com). You will also need some
-packages,\marginnote{Remember that you can install a package called \texttt{XYZ} with the
-  command \texttt{install.packages(XYZ).}} which you can import with the following
-code:\marginnote{If you do not want to copy-paste, all code and data for this tutorial is also
-  available for download here: \url{https://github.com/michael-franke/bayes_mixed_regression_tutorial}}
+To follow this tutorial, you should have R installed on your computer (\url{https://www.r-project.org}).
+Unless you already have a favorite editor for tinkering with R scripts, we recommend you try out RStudio (https://www.rstudio.com).
+You will also need some packages,
+\marginnote{Remember that you can install a package called \texttt{XYZ} with the command \texttt{install.packages(XYZ)}.}
+which you can import with the following code:
+\marginnote{If you do not want to copy-paste, all code and data for this tutorial is also available for download here: \url{https://github.com/michael-franke/bayes_mixed_regression_tutorial}}
 
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
 #####################################################
 ## package includes and options
-### install packages XYZ with 'install.packages(XYZ)'
 #####################################################
 
-# library for convenience functions (e.g. plotting)
+# package for convenience functions (e.g. plotting)
 library(tidyverse)
 
-# library for Bayesian regression modeling
+# package for Bayesian regression modeling
 library(brms)
 # option for Bayesian regression models: use all available cores for parallel computing
 options(mc.cores = parallel::detectCores())
 
 # package for function 'std.error' to obtain standard errors
 library(plotrix)
+
+# package to allow installation from github
+library(devtools)
+
+# package with convenience function for Bayesian regression models for factorial designs
+install_github('michael-franke/bayes_mixed_regression_tutorial/faintr') # install from GitHub
+library(faintr)
 
 # package to navigate to your source folder
 library(rstudioapi)
@@ -159,10 +163,6 @@ current_path = rstudioapi::getActiveDocumentContext()$path
 setwd(dirname(current_path))
 \end{lstlisting}
 \end{minipage}
-
-
-
-
 
 \section{Data, research questions \& hypotheses}
 \label{sec:data}
@@ -356,8 +356,9 @@ Individual responses from one subject are thus dependent. Also, we took multiple
     \end{align*}
     Jones' posterior belief that the coin is twice as likely to land heads is therefore:
     \begin{align*}
-      P(\theta = \nicefrac{2}{3} \mid D = \text{heads}) & = \frac{P(\theta = \nicefrac{2}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{2}{3})}{P(\theta = \nicefrac{2}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{2}{3}) + P(\theta = \nicefrac{1}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{1}{3})} \\
-            & = \frac{\nicefrac{1}{2} \ \nicefrac{2}{3}}{\nicefrac{1}{2} \ \nicefrac{2}{3} + \nicefrac{1}{2} \ \nicefrac{1}{3}} = \nicefrac{1}{2}
+      & P(\theta = \nicefrac{2}{3} \mid D = \text{heads}) =  \\
+      & \frac{P(\theta = \nicefrac{2}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{2}{3})}{P(\theta = \nicefrac{2}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{2}{3}) + P(\theta = \nicefrac{1}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{1}{3})} = \\
+      & \frac{\nicefrac{1}{2} \ \nicefrac{2}{3}}{\nicefrac{1}{2} \ \nicefrac{2}{3} + \nicefrac{1}{2} \ \nicefrac{1}{3}} = \nicefrac{1}{2}
     \end{align*}
     After making her observation, rational Jones believes that the bias towards heads is twice
     more likely than the bias towards tails.
