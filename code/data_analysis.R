@@ -24,7 +24,7 @@ setwd(dirname(current_path))
 ## read and massage the data
 #####################################################
 
-politedata = read.csv('politeness_data.csv') 
+politedata = read_csv('https://raw.githubusercontent.com/michael-franke/bayes_mixed_regression_tutorial/master/code/politeness_data.csv') 
 head(politedata)
 
 #####################################################
