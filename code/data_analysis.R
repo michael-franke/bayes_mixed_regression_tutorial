@@ -100,7 +100,7 @@ ggsave(filename = "../text/pics/basic_data_plot.pdf",
 stop()
 
 #####################################################
-## run model with different random-effects structures
+## run & inspect model with only fixed effects
 #####################################################
 
 formulaFE = pitch ~ gender * context
@@ -111,6 +111,32 @@ modelFE = brm(formula = formulaFE, data = politedata)
 # extract posterior samples 
 post_samples_FE = posterior_samples(modelFE)
 head(post_samples_FE)
+
+# plotting the posterior distributions
+plot_posterior_density_FE = modelFE %>% as.tibble() %>% 
+  select(- lp__, - sigma) %>% 
+  gather(key = "parameter", value = "posterior") %>% 
+  ggplot(aes(x = posterior)) + geom_density() +
+  facet_wrap(~ parameter, scales = "free")
+
+# save the plotted figure
+ggsave(plot = plot_posterior_density_FE, filename = "../text/pics/posterior_density_FE.pdf",
+       width = 6, height = 4)
+
+# proportion of negative samples for parameter p_contextpol
+# this number approximates P(beta_pol < 0 | model, data)
+mean(post_samples_FE$b_contextpol < 0)
+
+# proportion of samples where the mean for cell 2 was bigger 
+# than that of cell 3 
+# this number approximates P(beta_pol > beta_male | model, data)
+mean(post_samples_FE$b_contextpol - post_samples_FE$b_genderM > 0)
+
+###########################################
+## showcasing the faintr package
+## (still hoping for the best)
+###########################################
+
 
 
 

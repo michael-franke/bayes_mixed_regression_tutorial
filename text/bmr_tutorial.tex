@@ -84,6 +84,7 @@
   morekeywords={*, ...}            % if you want to add more keywords to the set
 }
 
+
 % this is for showing the R output
 \lstnewenvironment{rc}[1][]{\lstset{language=R}}{}
 
@@ -437,6 +438,7 @@ Now, here comes a nice gadget. Based on the samples obtained for \texttt{context
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
 # proportion of negative samples for parameter p_contextpol
+# this number approximates P(beta_pol < 0 | model, data)
 mean(post_samples_FE$b_contextpol < 0)
 \end{lstlisting}
 \end{minipage}
@@ -445,19 +447,49 @@ In sum, we have seen how to run a Bayesian regression analysis with the \texttt{
 
 Unfortunately, what we have not seen yet is what our model and data say about hypotheses 2 or 3. This is because there is no single parameter in the (dummy-coded) regression model that corresponds to the differences between cells 3 and 4 (for hypothesis 2) and cells 2 and 3 (for hypothesis 3). Notice that this problem is not specific to Bayesian analyses, but it is inherent in the way the regression coefficients were set up.
 %
-\marginnote{A potential way of testing different hypotheses of the kind we have set our here, is to run different regression analyses, each with a different reference cell. But that is tedious.}
+\marginnote{A potential way of testing different hypotheses of the kind we have set our here, is to run different regression analyses, each with a different reference cell. But that is tedious. Moreover, it does not help with hypothesis 3, which compares ``diagonally'': there is no way of changing the reference level of either factor such that dummy coding gives us a single coefficient as the difference between cells 2 and 3.}
 %
 However, unlike in more frequentist/classical analysis, the Bayesian approach allows to recover information about any derived measure from the obtained samples. Here's how.
 
-Take hypothesis 3 which requires us to 
+Take hypothesis 3 which requires us to compare cells 2 and 3. The hypothesis states that $\beta_0 + \beta_{\text{pol}} > \beta_0 + \beta_{\text{male}}$, which reduces to $\beta_{\text{pol}} > \beta_{\text{male}}$. We can approximate the posterior probability that this is true based on the samples that we obtained for our model in the same general way as before, namely:
 
+\begin{minipage}[]{1.1\textwidth}
+\begin{lstlisting}[language=R]
+# proportion of samples where the mean for cell 2 was bigger 
+# than that of cell 3 
+# this number approximates P(beta_pol > beta_male | model, data)
+mean(post_samples_FE$b_contextpol - post_samples_FE$b_genderM > 0)
+\end{lstlisting}
+\end{minipage}
 
+Based on the samples we returned, this estimate is 1. That's a strong result. If the model were true, then, given the data, our certainty that hypothesis 3 is true should be pretty much almost at ceiling.
 
+In sum, the Bayesian approach to regression model allows us to retrieve, from just one run of a model, all direct comparisons between cells in a factorial design. It also returns numeric information which is accessible and easy to communicate, namely the assignment of (estimated)
+posterior probability that a particular hypothesis holds (formalized here as an ordering relation of design cell means).
 
+\subsection{The \texttt{faintr} package}
 
+To facilitate the comparison of pairs of cells also in bigger factorial designs, this tutorial comes with a little R package, the \texttt{faintr} package.
+%
+\marginnote{The name \texttt{faintr} is indicative of the possibility that the package might break down unexpectedly (we might consider renaming after more extensive testing), but also alludes to ``\emph{fa}ctorial design'' and ``\emph{int}erpretation'' somehow.}
+%
+You can install the package from GitHub with the \texttt{devtools} package, as shown in the first code block of this tutorial. The \texttt{faintr} package provides two (hopefully) useful functions. The function \texttt{extract\_posterior\_cell\_means} takes as input the output of a factorial-design regression model fitted with \textrm{brm}. It outputs samples for all design cell means, and a comparison of all design cells against each other. The function \texttt{get\_cell\_comparison} takes the same kind of model fit as input, together with a specification of which two cells to compare against each other. Using the latter function, the source code provides a convenient function to produce the posterior probability of the three hypothesis relevant for this tutorial:
+%
+% \marginnote{We will reuse this function, when we inspect the conclusions supported by different models in the following.}
 
+\medskip
 
-\bigskip
+\begin{minipage}[]{\textwidth}
+\begin{rc}
+> get_posterior_beliefs_about_hypotheses_new(modelFE)
+# A tibble: 3 x 2
+  hypothesis                      probability
+  <chr>                                 <dbl>
+1 Female-polite < Female-informal       0.993
+2 Male-polite < Male-informal           0.842
+3 Male-informal < Female-polite         1  
+\end{rc}
+\end{minipage}
 
 % \subsection{Priors}
 
