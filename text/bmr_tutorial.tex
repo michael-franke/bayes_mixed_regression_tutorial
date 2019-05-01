@@ -312,10 +312,12 @@ $\beta_{\text{pol\&male}}$.
     \label{fig:coefficients_table}
 \end{figure}
 
-Next, based on this model of how the data was generated, we can ask: what should we believe
-about the values of the coefficients $\beta_0$, $\beta_{\text{pol}}$, $\beta_{\text{male}}$ and
-$\beta_{\text{pol\&male}}$?; what values for these parameters are likely, given the data, the
-assumed model and our initial beliefs about the parameters likely values?
+\section{A Bayesian analysis of a (fixed effects) regression model}
+
+Based on our model of how the data was generated, a Bayesian analysis asks: what should we
+believe about the values of the coefficients $\beta_0$, $\beta_{\text{pol}}$,
+$\beta_{\text{male}}$ and $\beta_{\text{pol\&male}}$?; what values for these parameters are
+likely, given the data, the assumed model and our initial beliefs about the parameters?
 %
 \marginnote{These initial beliefs, also called \textbf{prior beliefs}, are important to get a
   Bayesian analysis off the ground; a circumstance which is discussed controversially. For many
@@ -326,51 +328,132 @@ assumed model and our initial beliefs about the parameters likely values?
 \marginnote{Info Box~1 provides some background on prior beliefs, likelihood function and posterior beliefs.}
 %
 
-
-\bigskip
-
-
-Within the bayesian framework, we can estimate the values for each cell and, in turn, the differences between cells directly. Our aim is to get some values about voice pitch for males and females and polite and informal contexts. 
-
-We can express the relationship between pitch on the one hand and gender and attitude on the other as a regression formula like this one here: pitch ~ gender * attitude.
-
-Translated into the syntax of brms we end up with following function:
-
-\medskip
+The R package \texttt{brms} \citep{buerkner2016brms} makes it easy to run Bayesian regression models. It uses much the same formula syntax as related packages for regression analysis. In the case at hand we want to regress the dependent variable \texttt{pitch} against the independent variables \texttt{gender} and \texttt{context} and include their interaction. This model is expressed by the formula:
 
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
-  # formulate regression model in brms
-  xmdl = brm(freq ~ gender * attitude, data = politedata)
+# formula for (fixed effects) regression model
+formulaFE = pitch ~ gender * context
 \end{lstlisting}
 \end{minipage}
 
-\vspace*{-0.5cm}
+The Bayesian model can then be fitted with the function \texttt{brm} from the \texttt{brms} package. We only need to specify the formula and supply the data:\marginnote{The \texttt{brms} packages uses probabilistic programming language \texttt{Stan} in the background. Essentially, \texttt{brms} writes Stan code and executes it, which is then translated to C++ (hence the message when you run this code) and used to obtain samples from the posterior distribution, based on an instance of an algorithm called \emph{Hamiltonian Monte Carlo}.}
 
-\noindent 
+\begin{minipage}[]{\textwidth}
+\begin{lstlisting}[language=R]
+# run regression model in brms
+modelFE = brm(
+  formula = formulaFE,
+  data = politedata
+)
+\end{lstlisting}
+\end{minipage}
 
-The syntax of this function should look very familiar to anyone who has worked with (generalized) linear models in R. Now one important difference between traditional frequentist' inferences and a Bayesian framework is that we can take specific prior beliefs about the relationships between dependent and independent variables into account. 
+If you just type in \texttt{modelFE}, you will see a summary of the obtained model fit. It should look (modulo stochastic variation) looks much like the following:
+
+\medskip
+
+\begin{minipage}[]{1.2\textwidth}
+\begin{rc}
+> modelFE
+ Family: gaussian 
+  Links: mu = identity; sigma = identity 
+Formula: pitch ~ gender * context 
+   Data: politedata (Number of observations: 83) 
+Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+         total post-warmup samples = 4000
+
+Population-Level Effects: 
+                   Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+Intercept            260.68      8.07   244.99   276.78       2409 1.00
+genderM             -116.09     11.44  -138.37   -93.80       2094 1.00
+contextpol           -27.38     11.33   -50.01    -5.98       2092 1.00
+genderM:contextpol    15.74     16.38   -17.03    49.13       1831 1.00
+
+Family Specific Parameters: 
+      Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sigma    36.15      2.87    30.93    42.40       3652 1.00
+
+Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
+is a crude measure of effective sample size, and Rhat is the potential 
+scale reduction factor on split chains (at convergence, Rhat = 1).
+\end{rc}
+\end{minipage}
+
+\medskip
+
+This summary tells us a lot. First, we get information about the model and the data used (lines 2--5 above). Lines 6 and 7 tell us about the sampling procedure, e.g., we here have a total of 4000 samples from the posterior distribution, obtained from 4 chains all of which had 2000 iterations but discarded the first 1000 as warmup (more on this below). Lines 9--14 are what is most interesting for evaluating our hypotheses, so we will dwell extensively on them in a moment. Lines 16--18 contain information in a format that is similar to that of lines 9--14, but for a different type of model parameter, namely the standard deviation \texttt{sigma} of the assumed normal distributions (which describe the distribution of measures in each design cell). Finally, lines 20--22 contain general information about the model fit and the information presented in this summary.\marginnote{If the model failed to converge or other problems occurred, you would see an informative message in the last part of this summary.}
+
+Let us now zoom in on the information from lines 9--14 which is theoretically most interesting because this is where we find (partial) answers to the question what we should believe about our research hypotheses. What these lines give us is a table with four rows, each of which corresponds to a parameter in the model, namely the coefficients shown in Figure~\ref{fig:coefficients_table}. The variable \texttt{Intercept} refers to our $\beta_0$, which represents the mean of cell 1 (female speakers in polite contexts; the ``reference cell''). The variable \texttt{genderM} corresponds to our $\beta_{\text{male}}$, \texttt{contextpol} corresponds to our $\beta_{\text{pol}}$, and \texttt{genderM:contextpol} is the interaction term $\beta_{\text{pol\&male}}$. For each of these parameters, the table contains very useful summary statistics based on the samples returned from the model fit. The first column \emph{Estimate} gives the mean of the obtained samples, thereby approximating the mean of the posterior distribution (beliefs we should hold) about each parameter. For example, the parameter \texttt{Intercept} is estimated to have a mean of about $261$, which is (of course) exactly what we calculated as a mean of the data points in cell 1, as shown in Figure~\ref{fig:BasicPlotData_table}. The other columns give further useful information. \emph{Est.Error} is the estimation error, an indication of the certainty we should have about the whole inference procedure. The columns \texttt{l-95\% CI} and \texttt{u-95\% CI} give the lower and upper bound of the \textbf{95\% credible interval} for each parameter, estimated from the posterior samples.
+%
+\marginnote{Intuitively, the 95\% credible interval is the range of values that we can deem credible enough to care about; the rest is sufficiently unlikely to (perhaps) be ignored, or at least be treated as a different category. Formally, the 95\% credible interval is the set of convex intervals of parameter values such that the probability density over all intervals sums to 0.95 while no parameter value not included in any interval has higher probability density than any point within.}
+%
+The column \texttt{Eff.Sample}, for efficient samples, gives a rough measure of how many of all the samples we took (4000 in our case) are contributing non-redundant information to our estimation. The higher this number, the better. Finally, \texttt{Rhat} is a measure of whether the samples obtained are likely representative of the true distribution. Concretely, it indicates whether the four chains we ran in parallel all ended up with the same results, so to speak. If this column contains values bigger than 1.1 this is an indication that your model fit has not converged.\marginnote{If your model output indicates non-convergence, you may want to increase the number of samples, but you should also consider the possibility that you are trying to fit a model which cannot be ``trained'' based on the (perhaps insufficient) data and the particular method of posterior sampling. For common regression analyses, this will usually entail considering a simpler model (e.g., with fewer explanatory factors, less (correlated) random effects, etc.)}
+
+For our purposes, the information about 95\% credible intervals is most interesting. Take the parameter \texttt{contextpol}, corresponding to our coefficient $\beta_{\text{pol}}$. The 95\% CI is roughly [-50;-6]. This means that we would take values outside of this interval to be sufficiently unlikely to treat them as ``ignorable''. But that means that we would ignore a very special parameter value for this parameter (including a substantial region around it), namely 0. In intuitive terms, this analysis says that we should not believe that 0 is a credible value for the coefficient $\beta_{\text{pol}}$; rather we should believe that $\beta_{\text{pol}}$ is negative (based on the priors, the regression model and the data; all of which may be critically re-assessed if there are good reasons for it). --- Hurray! This directly addresses our first research hypothesis. In a research paper we could now write: ``Based the regression model, the data suggests that H1 is likely true.''
+
+How likely is it that $\beta_{\text{pol}}$ is smaller than 0? --- It would be even cooler, if we could put a number to it. In fact, we can. To see how this works, let us have a more intimate look at the samples that the \textrm{brm} function returns. We can access the samples of a model fitted with \textrm{brm} with the function \texttt{posterior\_samples}:
+
+\begin{minipage}[]{\textwidth}
+\begin{lstlisting}[language=R]
+# extract posterior samples 
+post_samples_FE = posterior_samples(modelFE)
+head(post_samples_FE)
+\end{lstlisting}
+\end{minipage}
+
+The output of this could look like this:
+
+\medskip
+
+\begin{minipage}[]{1.2\textwidth}
+\begin{rc}
+> head(post_samples_FE)
+  b_Intercept b_genderM b_contextpol b_genderM:contextpol    sigma      lp__
+1    255.2955 -106.4147    -24.73881             15.91545 34.24995 -420.0674
+2    252.4705 -118.6785    -15.69895             22.73200 35.38918 -421.2423
+3    254.0602 -119.7602    -15.87901             15.45185 35.68362 -420.5696
+4    270.1344 -114.0217    -33.74421             26.91341 36.25080 -423.0939
+5    275.4422 -122.9397    -37.11601             23.48895 37.45709 -422.0191
+6    281.3819 -135.4289    -43.38679             25.46482 38.93948 -423.2867
+\end{rc}
+\end{minipage}
+
+What you see here is the top 6 rows of a data frame with columns for each parameter and 4000 rows, corresponding to each sample of that parameter.
+%
+\marginnote{The column \texttt{lp\_\_} contains the log-probability of the data for the parameterization in each row. This is useful for model comparison and model criticism but not important for our current adventures.}
+%
+We can use these samples to produce a density plot. The plot in Figure~\ref{fig:Posteriors_FE} shows, for each of the four main model parameters an estimate of the posterior density. This is, intuitively put, a plot of how much (relative) credence we, as rational agents, should assign to any particular value of each parameter, given the regression model, the specified prior beliefs, and the data. We see that our beliefs concerning plausible values for the mean of cell 1 (female speakers in polite contexts, the reference cell) should hover around 261. We also see that all values that receive substantial probability density for \texttt{contextpol} (our $\beta_{\text{pol}}$) are negative (as captured in the 95\% CI discussed above). 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{pics/posterior_density_FE.pdf}
+  \caption[Posteriors fixed-effects model]{Posterior density of parameter values in the fixed-effects regression model}
+  \label{fig:Posteriors_FE}
+\end{figure}
+
+Now, here comes a nice gadget. Based on the samples obtained for \texttt{contextpol} ($\beta_{\text{pol}}$), it is very easy to estimate our belief that $\beta_{\text{pol}}$ is indeed negative. We simply have to calculate the proportion of samples that were negative, that's all. For instance, with the code below, which reveals that the posterior probability, given the data, that $\beta_{\text{pol}} < 0$ is about 0.99275, so very close to certain!  
+
+\begin{minipage}[]{\textwidth}
+\begin{lstlisting}[language=R]
+# proportion of negative samples for parameter p_contextpol
+mean(post_samples_FE$b_contextpol < 0)
+\end{lstlisting}
+\end{minipage}
+
+In sum, we have seen how to run a Bayesian regression analysis with the \texttt{brms} package and deal with its output. We have also seen that we get output that is interpretable in very terms that also non-statisticians can understand (e.g., ``The probability of H1, given our model, priors, and data, is more than .99''). Unfortunately, what we have not seen yet is what our model and data say about hypotheses 2 or 3.
 
 
 
 
-Priors are subjective pieces of information about your data that you have before analyzing the data. These priors might constrain values that your data can have. For example, mathematically, pitch values  cannot be lower than 0. Practically, human pitch values are within a certain range that is limited by bio mechanical constraints on our laryngeal system. In adults, values beyond, let's say 1000 Hz are very unlikely even when they use falsetto.
-Priors can also express our subjective beliefs about a relationship. For example, knowing what we know about gender differences in pitch, we might be already very certain that female speakers have higher pitch values than male speakers.
-
-But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. Although, they are cases in which we might want to specify very concrete priors about our data, practically we will restrict ourselves here to what we call weakly informative priors. Weakly informative priors are priors that constrain possible values of a variable (e.g. possible pitch values). These priors are also called regularizing priors, as they help the statistical model to converge on reasonable estimates. But these priors are also agnostic about possible relationships between variables. 
 
 
 
-\tr{Below is stuff to mention when we transition to hierarchical models}. 
+\bigskip
 
-These mean values, however, are a very poor and abstract representation of all the pitch values that we have recorded. Different speakers have very different voice pitch ranges. Likewise, speakers are not machines. There is a substantial variability in how a single speaker pronounces an utterance. So we expect some variability here. Likewise,
-different scenarios might elicit very different pitch values due idiosyncratic aspects of the scenario that are not captured by our independent variables. 
+% \subsection{Priors}
 
-In our study, we took multiple measures per speaker. That is, each subject gave multiple polite responses and multiple informal responses. 
-Individual responses from one subject are thus dependent. Also, we took multiple measures per scenario, as each scenario was produced by all speakers. This introduces, again, dependencies between data points. These dependencies need to be taken into account when we try to estimate differences between groups.
-
-
-\newpage
+% The syntax of this function should look very familiar to anyone who has worked with (generalized) linear models in R. Now one important difference between traditional frequentist' inferences and a Bayesian framework is that we can take specific prior beliefs about the relationships between dependent and independent variables into account. 
 
 \begin{InfoBox}[t]
 \centering
@@ -427,6 +510,26 @@ Individual responses from one subject are thus dependent. Also, we took multiple
   \end{center}
   % \caption{\label{InfoBox:asymptotic_CIs} Here is my caption}  
 \end{InfoBox}
+
+
+
+% Priors are subjective pieces of information about your data that you have before analyzing the data. These priors might constrain values that your data can have. For example, mathematically, pitch values  cannot be lower than 0. Practically, human pitch values are within a certain range that is limited by bio mechanical constraints on our laryngeal system. In adults, values beyond, let's say 1000 Hz are very unlikely even when they use falsetto.
+% Priors can also express our subjective beliefs about a relationship. For example, knowing what we know about gender differences in pitch, we might be already very certain that female speakers have higher pitch values than male speakers.
+
+% But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. Although, they are cases in which we might want to specify very concrete priors about our data, practically we will restrict ourselves here to what we call weakly informative priors. Weakly informative priors are priors that constrain possible values of a variable (e.g. possible pitch values). These priors are also called regularizing priors, as they help the statistical model to converge on reasonable estimates. But these priors are also agnostic about possible relationships between variables. 
+
+
+
+% \tr{Below is stuff to mention when we transition to hierarchical models}. 
+
+% These mean values, however, are a very poor and abstract representation of all the pitch values that we have recorded. Different speakers have very different voice pitch ranges. Likewise, speakers are not machines. There is a substantial variability in how a single speaker pronounces an utterance. So we expect some variability here. Likewise,
+% different scenarios might elicit very different pitch values due idiosyncratic aspects of the scenario that are not captured by our independent variables. 
+
+% In our study, we took multiple measures per speaker. That is, each subject gave multiple polite responses and multiple informal responses. 
+% Individual responses from one subject are thus dependent. Also, we took multiple measures per scenario, as each scenario was produced by all speakers. This introduces, again, dependencies between data points. These dependencies need to be taken into account when we try to estimate differences between groups.
+
+
+
 
 
 
