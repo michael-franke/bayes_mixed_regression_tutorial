@@ -10,23 +10,6 @@ library(brms)
 # option for Bayesian regression models: use all available cores for parallel computing
 options(mc.cores = parallel::detectCores())
 
-# package for function 'std.error' to obtain standard errors
-library(plotrix)
-
-# package to allow installation from github
-library(devtools)
-
-# package with convenience function for Bayesian regression models for factorial designs
-# install_github('michael-franke/bayes_mixed_regression_tutorial/faintr') # install from GitHub
-library(faintr)
-
-# package to navigate to your source folder
-library(rstudioapi)
-
-## Getting the path of your current open file
-current_path = rstudioapi::getActiveDocumentContext()$path 
-setwd(dirname(current_path))
-
 #####################################################
 ## read and massage the data
 #####################################################
@@ -97,8 +80,6 @@ ggsave(filename = "../text/pics/basic_data_plot.pdf",
        plot = last_plot(),
        width = 6, height = 4)
 
-stop()
-
 #####################################################
 ## run & inspect model with only fixed effects
 #####################################################
@@ -137,42 +118,65 @@ mean(post_samples_FE$b_contextpol - post_samples_FE$b_genderM > 0)
 ## (still hoping for the best)
 ###########################################
 
+# package to allow installation from github
+library(devtools)
 
+# package with convenience function for Bayesian regression models for factorial designs
+install_github('michael-franke/bayes_mixed_regression_tutorial/faintr') # install from GitHub
+library(faintr)
 
+extract_posterior_cell_means(modelFE)
 
-stop()
+get_posterior_beliefs_about_hypotheses_new = function(model) {
+  # insert the comparisons you are interested in as strings 
+  tibble(
+    hypothesis = c("Female-polite < Female-informal", 
+                   "Male-polite < Male-informal",
+                   "Male-informal < Female-polite"),
+    probability = c(
+      # insert the comparisons you are interested in referring to the extracted samples
+      get_cell_comparison(
+        model = model, 
+        cell_low = list(gender = "F", context = "pol"), 
+        cell_high = list(gender = "F", context = "inf")
+      ),
+      get_cell_comparison(
+        model = model, 
+        cell_low = list(gender = "M", context = "pol"), 
+        cell_high = list(gender = "M", context = "inf")
+      ),
+      get_cell_comparison(
+        model = model, 
+        cell_low = list(gender = "M", context = "inf"),
+        cell_high = list(gender = "F", context = "pol")
+      ) 
+    )
+  )
+}
 
-# model with only a fixed effect for gender (non-hierarchical)
-model_gender = brm(formula = pitch ~ gender, data = politedata)
+get_posterior_beliefs_about_hypotheses_new(model_FE)
+
+###############################################
+## models with additional random effects
+###############################################
 
 # hierarchical model with random intercepts
 model_interceptOnly = brm(formula = pitch ~ gender * context +
                             (1 | sentence + subject),
-                          data = politedata)
+                          data = politedata,
+                          control = list(adapt_delta = 0.99))
 
 # hierarchical model with the maximial RE structure licensed by the design
 # (notice that factor 'gender' does not vary for a given value of variable 'subject')
 model_MaxRE = brm(formula = pitch ~ gender * context +
                     (1 + gender * context | sentence) +
                     (1 + context | subject),
-                  data = politedata)
+                  data = politedata,
+                  control = list(adapt_delta = 0.9))
 
 ##################################
-## testing selected hypotheses
+## comparing selected hypotheses
 ##################################
-
-get_posterior_beliefs_about_hypotheses_new = function(model) {
-  # insert the comparisons you are interested in as strings 
-  tibble(hypothesis = c("Female-polite < Female-informal", 
-                        "Male-polite < Male-informal",
-                        "Male-informal < Female-polite"),
-         probability = c(
-           # insert the comparisons you are interested in referring to the extracted samples
-           get_cell_comparison(model, list(gender = "F", context = "pol"), list(gender = "F", context = "inf")),
-           get_cell_comparison(model, list(gender = "M", context = "pol"), list(gender = "M", context = "inf")),
-           get_cell_comparison(model, list(gender = "M", context = "inf"), list(gender = "F", context = "pol")) 
-         ))
-}
 
 get_posterior_beliefs_about_hypotheses_new(model_FE)
 get_posterior_beliefs_about_hypotheses_new(model_interceptOnly)

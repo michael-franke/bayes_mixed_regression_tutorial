@@ -313,6 +313,63 @@ $\beta_{\text{pol\&male}}$.
     \label{fig:coefficients_table}
 \end{figure}
 
+\begin{InfoBox}[t]
+\centering
+\colorbox{mygray}{\centering
+  \begin{minipage}{1.0\textwidth}
+
+    \emph{Bayesian inference: priors, likelihoods and posteriors}
+    \medskip
+
+    Jones is a rational scientist. She has recently inherited her grandma's lucky coin. Grandma
+    used this coin many times during Jones' childhood to determine whether Jones was allowed a
+    sweet or not. Jones suspects that grandma's coin might be a trick coin, but she is not
+    sure. She is determined to find out. How? Well, naturally, by rationally updating her
+    \emph{prior beliefs} about the coin's bias to obtain a new \emph{posterior belief} based on
+    empirical observation (outcomes of coin flips). Central to this updating is Jones'
+    \emph{likelihood function}, which encodes how likely each relevant coin bias may have
+    generated the observed data. --- Sounds fancifully abstract? It's actially fairly intuitive.
+    Consider this example.
+    
+    \paragraph{Prior beliefs.} Jones initially believes that the coin is either biased towards
+    heads or biased towards tails, and that both of these possibilities are equally likely. She
+    also believes that, if biased towards heads, the coin is three times more likely to come up
+    heads; and that, if biased towards tails, the coin is three times more likely to come up
+    tails. Numerically, Jones' \emph{prior beliefs} can be written as, where $\theta \in [0;1]$
+    is the coin's bias: $P(\theta = \nicefrac{1}{3}) = \nicefrac{1}{2}$, and $P(\theta =
+    \nicefrac{2}{3}) = \nicefrac{1}{2}$.
+
+    \paragraph{Likelihood.} The bias $\theta$ is, by definition, the probability of the coin
+    landing heads on the next trial. Let's assume that Jones tosses the coin only once (hm,
+    maybe not so rational a scientist after all? or just too busy?). Let $D$ be the set of
+    potential outcomes of this experiment, namely $D = \set{\text{heads}, \text{tails}}$. The
+    \emph{likelihood function} determines the likelihood of observing each datum $d \in D$ for
+    each $\theta$, which in our case is just rather trivial: $P(D = \text{heads} \mid \theta) =
+    \theta$ and $P(D = \text{tails} \mid \theta) = 1 - \theta$.
+
+    \paragraph{Posterior beliefs.} Jones observes that the coin landed heads. What should she
+    believe now. By \emph{Bayes rule} her posterior beliefs are defined like so:
+    \begin{align*}
+      P(\theta \mid D = \text{heads}) = \frac{P(\theta) P(D = \text{heads} \mid \theta)}{\sum_{\theta'}P(\theta') P(D = \text{heads} \mid \theta')}
+    \end{align*}
+    Jones' posterior belief that the coin is twice as likely to land heads is therefore:
+    \begin{align*}
+      & P(\theta = \nicefrac{2}{3} \mid D = \text{heads}) =  \\
+      & \frac{P(\theta = \nicefrac{2}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{2}{3})}{P(\theta = \nicefrac{2}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{2}{3}) + P(\theta = \nicefrac{1}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{1}{3})} = \\
+      & \frac{\nicefrac{1}{2} \ \nicefrac{2}{3}}{\nicefrac{1}{2} \ \nicefrac{2}{3} + \nicefrac{1}{2} \ \nicefrac{1}{3}} = \nicefrac{1}{2}
+    \end{align*}
+    After making her observation, rational Jones believes that the bias towards heads is twice
+    more likely than the bias towards tails.
+    
+  \end{minipage} \par
+  } \par
+  \begin{center}
+    Info Box 1: Priors, likelihood and posteriors in Bayesian inference.
+  \end{center}
+  % \caption{\label{InfoBox:asymptotic_CIs} Here is my caption}  
+\end{InfoBox}
+
+
 \section{A Bayesian analysis of a (fixed effects) regression model}
 
 Based on our model of how the data was generated, a Bayesian analysis asks: what should we
@@ -473,7 +530,19 @@ To facilitate the comparison of pairs of cells also in bigger factorial designs,
 %
 \marginnote{The name \texttt{faintr} is indicative of the possibility that the package might break down unexpectedly (we might consider renaming after more extensive testing), but also alludes to ``\emph{fa}ctorial design'' and ``\emph{int}erpretation'' somehow.}
 %
-You can install the package from GitHub with the \texttt{devtools} package, as shown in the first code block of this tutorial. The \texttt{faintr} package provides two (hopefully) useful functions. The function \texttt{extract\_posterior\_cell\_means} takes as input the output of a factorial-design regression model fitted with \textrm{brm}. It outputs samples for all design cell means, and a comparison of all design cells against each other. The function \texttt{get\_cell\_comparison} takes the same kind of model fit as input, together with a specification of which two cells to compare against each other. Using the latter function, the source code provides a convenient function to produce the posterior probability of the three hypothesis relevant for this tutorial:
+You can install the package from GitHub with the \texttt{devtools} package, as follows:
+
+\begin{minipage}[]{1\textwidth}
+\begin{lstlisting}[language=R]
+# package to allow installation from github
+library(devtools)
+# package with convenience function for Bayesian regression models for factorial designs
+install_github('michael-franke/bayes_mixed_regression_tutorial/faintr') # install from GitHub
+library(faintr)
+\end{lstlisting}
+\end{minipage}
+
+The \texttt{faintr} package provides two (hopefully) useful functions. The function \texttt{extract\_posterior\_cell\_means} takes as input the output of a factorial-design regression model fitted with \textrm{brm}. It outputs samples for all design cell means, and a comparison of all design cells against each other. The function \texttt{get\_cell\_comparison} takes the same kind of model fit as input, together with a specification of which two cells to compare against each other. Using the latter function, the source code provides a convenient function to produce the posterior probability of the three hypothesis relevant for this tutorial:
 %
 % \marginnote{We will reuse this function, when we inspect the conclusions supported by different models in the following.}
 
@@ -491,65 +560,96 @@ You can install the package from GitHub with the \texttt{devtools} package, as s
 \end{rc}
 \end{minipage}
 
-% \subsection{Priors}
+\section{Adding random effects structures}
+
+Although the results look quite different, running hierarchical models with random effects with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is a function call to a model with the maximal random effect structure licensed by the design:
+
+\begin{minipage}[]{1\textwidth}
+\begin{lstlisting}[language=R]
+# hierarchical model with the maximial RE structure licensed by the design
+# (notice that factor 'gender' does not vary for a given value of variable 'subject')
+model_MaxRE = brm(formula = pitch ~ gender * context +
+                    (1 + gender * context | sentence) +
+                    (1 + context | subject),
+                  data = politedata,
+                  control = list(adapt_delta = 0.9))
+\end{lstlisting}
+\end{minipage}
+
+The outcome of this is model fit is shown here:
+
+\medskip
+
+\begin{minipage}[]{1.5\textwidth}
+\begin{rc}
+> model_MaxRE
+ Family: gaussian 
+  Links: mu = identity; sigma = identity 
+Formula: pitch ~ gender * context + (1 + gender * context | sentence) + (1 + context | subject) 
+   Data: politedata (Number of observations: 83) 
+Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+         total post-warmup samples = 4000
+
+Group-Level Effects: 
+~sentence (Number of levels: 7) 
+                                   Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sd(Intercept)                         21.84      9.72     7.40    44.90       2116 1.00
+sd(genderM)                           11.13      9.07     0.49    33.29       2435 1.00
+sd(contextpol)                        15.04     11.24     0.55    42.49       1637 1.00
+sd(genderM:contextpol)                16.55     13.43     0.76    47.63       2173 1.00
+cor(Intercept,genderM)                -0.23      0.44    -0.90     0.71       4808 1.00
+cor(Intercept,contextpol)              0.01      0.41    -0.74     0.79       4658 1.00
+cor(genderM,contextpol)               -0.06      0.44    -0.83     0.77       2940 1.00
+cor(Intercept,genderM:contextpol)     -0.10      0.43    -0.84     0.73       5216 1.00
+cor(genderM,genderM:contextpol)       -0.03      0.44    -0.82     0.80       3335 1.00
+cor(contextpol,genderM:contextpol)    -0.15      0.44    -0.87     0.74       3057 1.00
+
+~subject (Number of levels: 6) 
+                          Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sd(Intercept)                36.11     18.30    14.60    84.84       1210 1.00
+sd(contextpol)                9.17      8.73     0.32    32.53       2290 1.00
+cor(Intercept,contextpol)     0.03      0.58    -0.93     0.95       4608 1.00
+
+Population-Level Effects: 
+                   Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+Intercept            261.92     25.73   213.11   312.17       1088 1.00
+genderM             -116.78     35.19  -188.21   -50.38       1011 1.00
+contextpol           -27.16     12.44   -51.30    -2.22       2782 1.00
+genderM:contextpol    15.13     16.84   -17.62    47.40       2863 1.00
+
+Family Specific Parameters: 
+      Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sigma    24.96      2.38    20.73    30.07       3676 1.00
+
+Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
+is a crude measure of effective sample size, and Rhat is the potential 
+scale reduction factor on split chains (at convergence, Rhat = 1).
+\end{rc}
+\end{minipage}
+
+The lines 29--34 again give the estimates of the fixed-effects coefficients, but we now also obtain information about the parameters implied by the specified random effect structure. Lines 9--21 cover the by-sentence random effects, lines 23--27 cover the by-subject random effects. We see from the 95\% credible intervals that the only parameters implied by the random effects structure that does seem to receive sufficient a posteriori credence on non-trivial values are the by-sentence and by-subject random intercepts.
+
+As for the probability of the hypotheses of interest, we can use the \texttt{faintr} package and the convenience function defined above to inspect:
+
+\medskip
+
+\begin{minipage}[]{\textwidth}
+\begin{rc}
+> get_posterior_beliefs_about_hypotheses_new(model_MaxRE)
+# A tibble: 3 x 2
+  hypothesis                      probability
+  <chr>                                 <dbl>
+1 Female-polite < Female-informal       0.981
+2 Male-polite < Male-informal           0.830
+3 Male-informal < Female-polite         0.988
+\end{rc}
+\end{minipage}
+\section{Priors}
+
+\dots in progress \dots
 
 % The syntax of this function should look very familiar to anyone who has worked with (generalized) linear models in R. Now one important difference between traditional frequentist' inferences and a Bayesian framework is that we can take specific prior beliefs about the relationships between dependent and independent variables into account. 
 
-\begin{InfoBox}[t]
-\centering
-\colorbox{mygray}{\centering
-  \begin{minipage}{1.0\textwidth}
-
-    \emph{Bayesian inference: priors, likelihoods and posteriors}
-    \medskip
-
-    Jones is a rational scientist. She has recently inherited her grandma's lucky coin. Grandma
-    used this coin many times during Jones' childhood to determine whether Jones was allowed a
-    sweet or not. Jones suspects that grandma's coin might be a trick coin, but she is not
-    sure. She is determined to find out. How? Well, naturally, by rationally updating her
-    \emph{prior beliefs} about the coin's bias to obtain a new \emph{posterior belief} based on
-    empirical observation (outcomes of coin flips). Central to this updating is Jones'
-    \emph{likelihood function}, which encodes how likely each relevant coin bias may have
-    generated the observed data. --- Sounds fancifully abstract? It's actially fairly intuitive.
-    Consider this example.
-    
-    \paragraph{Prior beliefs.} Jones initially believes that the coin is either biased towards
-    heads or biased towards tails, and that both of these possibilities are equally likely. She
-    also believes that, if biased towards heads, the coin is three times more likely to come up
-    heads; and that, if biased towards tails, the coin is three times more likely to come up
-    tails. Numerically, Jones' \emph{prior beliefs} can be written as, where $\theta \in [0;1]$
-    is the coin's bias: $P(\theta = \nicefrac{1}{3}) = \nicefrac{1}{2}$, and $P(\theta =
-    \nicefrac{2}{3}) = \nicefrac{1}{2}$.
-
-    \paragraph{Likelihood.} The bias $\theta$ is, by definition, the probability of the coin
-    landing heads on the next trial. Let's assume that Jones tosses the coin only once (hm,
-    maybe not so rational a scientist after all? or just too busy?). Let $D$ be the set of
-    potential outcomes of this experiment, namely $D = \set{\text{heads}, \text{tails}}$. The
-    \emph{likelihood function} determines the likelihood of observing each datum $d \in D$ for
-    each $\theta$, which in our case is just rather trivial: $P(D = \text{heads} \mid \theta) =
-    \theta$ and $P(D = \text{tails} \mid \theta) = 1 - \theta$.
-
-    \paragraph{Posterior beliefs.} Jones observes that the coin landed heads. What should she
-    believe now. By \emph{Bayes rule} her posterior beliefs are defined like so:
-    \begin{align*}
-      P(\theta \mid D = \text{heads}) = \frac{P(\theta) P(D = \text{heads} \mid \theta)}{\sum_{\theta'}P(\theta') P(D = \text{heads} \mid \theta')}
-    \end{align*}
-    Jones' posterior belief that the coin is twice as likely to land heads is therefore:
-    \begin{align*}
-      & P(\theta = \nicefrac{2}{3} \mid D = \text{heads}) =  \\
-      & \frac{P(\theta = \nicefrac{2}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{2}{3})}{P(\theta = \nicefrac{2}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{2}{3}) + P(\theta = \nicefrac{1}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{1}{3})} = \\
-      & \frac{\nicefrac{1}{2} \ \nicefrac{2}{3}}{\nicefrac{1}{2} \ \nicefrac{2}{3} + \nicefrac{1}{2} \ \nicefrac{1}{3}} = \nicefrac{1}{2}
-    \end{align*}
-    After making her observation, rational Jones believes that the bias towards heads is twice
-    more likely than the bias towards tails.
-    
-  \end{minipage} \par
-  } \par
-  \begin{center}
-    Info Box 1: Priors, likelihood and posteriors in Bayesian inference.
-  \end{center}
-  % \caption{\label{InfoBox:asymptotic_CIs} Here is my caption}  
-\end{InfoBox}
 
 
 
