@@ -90,6 +90,7 @@
 % this is for inline R code
 \newcommand{\ri}[1]{\lstinline{#1}}  %% Short for 'R inline'
 
+
 %========================================
 % Article Header 
 %========================================
@@ -122,14 +123,18 @@ If you don’t have any experience with regression modeling, you will probably s
 
 This tutorial contains text boxes (with a gray background) which contain additional background information on some topics.
 The information is sometimes a bit technical but never absolutely necessary for understanding the main ideas.
-So, feel free to read or not read any of the text boxes to suit your needs.
+So, feel free to read or skip any of the text boxes to suit your needs.
 
 To follow this tutorial, you should have R installed on your computer (\url{https://www.r-project.org}).
-Unless you already have a favorite editor for tinkering with R scripts, we recommend you try out RStudio (https://www.rstudio.com).
+Unless you already have a favorite editor for tinkering with R scripts, we recommend to try out RStudio (\url{https://www.rstudio.com}).
 You will also need some packages,
-\marginnote{Remember that you can install a package called \texttt{XYZ} with the command \texttt{install.packages(XYZ)}.}
+\marginnote{Remember that you can install a package called \texttt{XYZ} with the command \texttt{install.packages('XYZ')}.}
 which you can import with the following code:
-\marginnote{If you do not want to copy-paste, all code and data for this tutorial is also available for download here: \url{https://github.com/michael-franke/bayes_mixed_regression_tutorial}}
+\marginnote{If you do not want to copy-paste, all code and data for this tutorial is also
+  available for download here:
+  \url{https://github.com/michael-franke/bayes_mixed_regression_tutorial}}
+\marginnote{We wrote a small R package with convenience functions for this tutorials, the
+  \texttt{faintr} package, which the code in this code box attempts to download and install (like 20).}
 
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
@@ -173,25 +178,28 @@ interest about how nature works. For example, we might want to know whether voic
 In this tutorial, we are looking at data just like this
 \citep[following][]{Winter2013:Linear-models-a}\marginnote{The data is originally from research
 presented by \citet{WinterGrawunder2012:The-Phonetic-Pr}}. To load the data into your session,
-run the following code:\marginnote{If you are familiar with the previous tutorials by
-  \citet{Winter2013:Linear-models-a}, is might help to say that massage the data a bit, e.g.,
-  renaming of variables or removing a line with missing data.}
+run the following code:
+\marginnote{If you are familiar with the previous tutorials by \citet{Winter2013:Linear-models-a}, it might help to know that we massaged the data a bit, e.g., renaming of variables or removing a line with missing data, so it differs slightly from the data set used in earlier tutorials by Winter.}
 
 \medskip
 
+
+\begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
   # load the data into variable 'politedata'
  politedata = read_csv('https://raw.githubusercontent.com/michael-franke/bayes_mixed_regression_tutorial/master/code/politeness_data.csv') 
 \end{lstlisting}
+\end{minipage}
 
 \vspace*{-0.5cm}
 
 \noindent Type \ri{head(politedata)} and you should see the first lines of the imported
-data:\marginnote{We show here only part of the output that you might see when executing this command.}
+data:\marginnote{Here, we show only part of the output that you might see when executing this
+  command.}
 
 \medskip
 
-
+\begin{minipage}[]{\textwidth}
 \begin{rc}
 > head(politedata)
    subject gender sentence context pitch
@@ -202,25 +210,23 @@ data:\marginnote{We show here only part of the output that you might see when ex
  4 F1      F      S2       inf      260.
  5 F1      F      S3       pol      204.
 \end{rc}
+\end{minipage}
+
 
 \medskip
 
-\noindent Looking at the data, we have different subjects, with an anonymous identifier stored
-in variable \texttt{subject}. Because voice pitch is highly dependent on gender, we stored
-whether our subjects are F(emale) or M(ale) in variable \texttt{gender}. Subjects produced
-different sentences (stored in variable \texttt{sentence}), and the experiment manipulated
-whether the sentence was produced in a polite or an informal context. This is indicated by the
-variable \texttt{context}. Crucially, each row contains a measurement of pitch in Hz stored in
-variable \texttt{pitch}.
+\noindent This data set contains information about different subjects, with an anonymous identifier stored in variable \texttt{subject}.
+Because voice pitch is highly dependent on gender, we stored whether our subjects are F(emale) or M(ale) in variable \texttt{gender}.
+Subjects produced different sentences (stored in variable \texttt{sentence}), and the experiment manipulated whether the sentence was produced in a polite or an informal context.
+This is indicated by the variable \texttt{context}. Crucially, each row contains a measurement of pitch in Hz stored in variable \texttt{pitch}.
 
-Often, we are interested in comparing a dependent variable (here pitch) across different
-conditions or groups, i.e. independent variables. Before our data collection, we might have
-formulated concrete predictions about the relationship between the dependent variable and
-independent variables. For example, we might have formulated the following three
+Often, we are interested in comparing a \textbf{dependent variable} (here \texttt{pitch})
+across different conditions or groups, i.e. \textbf{independent variables} (here \texttt{gender} and \texttt{context}). Before our data collection,
+we might have formulated concrete predictions about the relationship between the dependent
+variable and independent variables. For example, we might have formulated the following three
 hypotheses:\marginnote{Notice that our hypotheses are formulated explicitly as comparisons of
   means / averages. The statistical model we will use indeed compares means, and this is common
-  practice, albeit a particular assumption worth flagging. Very commonly in psychological texts
-  this assumption is implicit and so you could encounter H1 formulated flatly as, e.g.,
+  practice, albeit a particular assumption worth flagging. Very commonly this assumption is implicit and so you could encounter H1 formulated flatly as, e.g.,
   ``Female speakers' pitch is lower in polite than informal contexts.'' }
 
 \begin{enumerate}[{H}1:]
@@ -259,15 +265,8 @@ hypotheses? Or are the observable differences to meager? -- Also, notice that th
 lot of variability between different sentences (the semi-transparent dots). For example, some
 values from the informal condition for female speakers (blue points in left column), are lower
 than their corresponding polite counterparts. Similarly, there could be quite some differences
-between individual speakers. Consequently, what we want is a precise estimates of potential
+between individual speakers. Consequently, what we want is precise estimates of potential
 differences between conditions, alongside a measure of certainty around these estimates.
-
-
-\section{A regression model for our data}
-
-Another way of looking at the data in connection with our research hypotheses is in Figure~\ref{fig:BasicPlotData_table}. Each cell represent one unique combination of the gender and the attitude factor.\marginpar{In technical terms, this table is the \textbf{design matrix} of our experiment. We have two factors of interest \texttt{context} and \texttt{gender}, each with two levels. The table shows each combination of levels of all relevant factors. The cells in this table are therefore also called \textbf{design cells}.}
-Our hypotheses can be related to the comparison between some of these cells.
-H1 makes a statement about the comparison between quadrant 1 and 2 (the context effect for female speakers); H2 makes a statement about quadrant 3 and 4 (the context effect for male speakers); and H3 makes a statement about quadrant 2 and 3 (the difference between informal male speakers and polite female speakers).
 
 \begin{figure}[h]
   \centering
@@ -276,7 +275,60 @@ H1 makes a statement about the comparison between quadrant 1 and 2 (the context 
     \label{fig:BasicPlotData_table}
 \end{figure}
 
-\mf{Next steps: give the table of means; say how above comparisons translate into a comparison of cells in that table}
+\section{A regression model for our data}
+
+Another way of looking at the data in connection with our research hypotheses is in Figure~\ref{fig:BasicPlotData_table}. Each cell represent one unique combination of the gender and the context factor, and the table shows the mean pitch value for each cell.\marginpar{In technical terms, this table is the \textbf{design matrix} of our experiment. We have two factors of interest \texttt{context} and \texttt{gender}, each with two levels. The table shows each combination of levels of all relevant factors. The cells in this table are therefore also called \textbf{design cells}.}
+Our hypotheses can be related to the comparison between some of these cell-based means.
+H1 makes a statement about the comparison between cells 1 and 2 (the context effect for female speakers); H2 makes a statement about cells 3 and 4 (the context effect for male speakers); and H3 makes a statement about cells 2 and 3 (the difference between informal male speakers and polite female speakers).
+
+One way of testing our hypotheses using a Bayesian approach to data analysis, is to ask whether, given the data, the relevant differences between cell means are credibly different from zero. This is, as we will see below, jargon for asking whether, given the data, we should believe that the relevant cell means are different. The important bit about the Bayesian approach is in the ``credibly different'' and the ``should believe''. The Bayesian approach is about updating beliefs (expressed as probability distributions). This may appear scary or technically involved. But at the end of the day the intuitions captured by this approach are arguably very natural, and perhaps easier to understand that the motivations underlying other approaches to data analysis. Let's try to tackle this step by step.
+
+First, let us look at the \textbf{regression model} we want to use.\marginnote{While other
+  approaches to data analysis might stress the application of statistical tests, a Bayesian
+  approach puts more emphasis on the fact that all statistical inference resolves around a
+  statistical model; which is usually an assumption about how the data was generated. This
+  model is, almost certainly, always false. But even a false model can be useful; conclusions
+  based on a false model can be meaningful and insightful.} As usual in regression models for
+factorial designs, like the present one, we assume that pitch values observed in each cell are
+samples from some normal distribution, where each cell $c_i$ has its own mean $\mu_i$. We are
+ultimately interested in the probability of the proposition that one cell's mean is bigger than
+another's, i.e., whether $\mu_i > \mu_j$. Since the latter is equivalent to $\mu_i - m_j > 0$,
+and since, let's say, it is easier to test whether a value is bigger than zero, we can encode
+the cell means like in Figure~\ref{fig:coefficients_table}. This encoding scheme assumes that
+there is a \textbf{reference level} for each factor. Here it is the level \texttt{female} for
+the factor \texttt{gender} and the level \texttt{informal} for the factor
+\texttt{context}.\marginnote{This is so-called \textbf{dummy coding} of the regression
+  coefficients. Other coding schemes exist.} All cell means can then be expressed in terms of
+differences between the \textbf{intercept} $\beta_0$ which is the cell mean of the cell where
+all factors have their reference levels (here, the cell mean for pitch of female speakers in
+informal contexts) and deviations from this \textbf{reference cell} for each individual factor
+($\beta_{\text{male}}$, and $\beta_{\text{polite}}$), and a so-called \textbf{interaction term}
+$\beta_{\text{pol\&male}}$.
+
+\begin{figure}[h]
+  \centering
+    \includegraphics[width = \textwidth]{pics/table_coefficients.png}
+    \caption{Coefficients of a dummy-coded regression model for the factorial $2 \times 2$ design.}
+    \label{fig:coefficients_table}
+\end{figure}
+
+Next, based on this model of how the data was generated, we can ask: what should we believe
+about the values of the coefficients $\beta_0$, $\beta_{\text{pol}}$, $\beta_{\text{male}}$ and
+$\beta_{\text{pol\&male}}$?; what values for these parameters are likely, given the data, the
+assumed model and our initial beliefs about the parameters likely values?
+%
+\marginnote{These initial beliefs, also called \textbf{prior beliefs}, are important to get a
+  Bayesian analysis off the ground; a circumstance which is discussed controversially. For many
+  practical purposes, however, the precise choice of prior is not decisive and tools like the
+  \texttt{brms} package which we will use here will default to generically reasonable choices
+  of priors for your model (more on this below).}
+%
+\marginnote{Info Box~1 provides some background on prior beliefs, likelihood function and posterior beliefs.}
+%
+
+
+\bigskip
+
 
 Within the bayesian framework, we can estimate the values for each cell and, in turn, the differences between cells directly. Our aim is to get some values about voice pitch for males and females and polite and informal contexts. 
 
@@ -286,16 +338,21 @@ Translated into the syntax of brms we end up with following function:
 
 \medskip
 
+\begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
   # formulate regression model in brms
   xmdl = brm(freq ~ gender * attitude, data = politedata)
 \end{lstlisting}
+\end{minipage}
 
 \vspace*{-0.5cm}
 
 \noindent 
 
 The syntax of this function should look very familiar to anyone who has worked with (generalized) linear models in R. Now one important difference between traditional frequentist' inferences and a Bayesian framework is that we can take specific prior beliefs about the relationships between dependent and independent variables into account. 
+
+
+
 
 Priors are subjective pieces of information about your data that you have before analyzing the data. These priors might constrain values that your data can have. For example, mathematically, pitch values  cannot be lower than 0. Practically, human pitch values are within a certain range that is limited by bio mechanical constraints on our laryngeal system. In adults, values beyond, let's say 1000 Hz are very unlikely even when they use falsetto.
 Priors can also express our subjective beliefs about a relationship. For example, knowing what we know about gender differences in pitch, we might be already very certain that female speakers have higher pitch values than male speakers.
