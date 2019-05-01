@@ -441,7 +441,15 @@ mean(post_samples_FE$b_contextpol < 0)
 \end{lstlisting}
 \end{minipage}
 
-In sum, we have seen how to run a Bayesian regression analysis with the \texttt{brms} package and deal with its output. We have also seen that we get output that is interpretable in very terms that also non-statisticians can understand (e.g., ``The probability of H1, given our model, priors, and data, is more than .99''). Unfortunately, what we have not seen yet is what our model and data say about hypotheses 2 or 3.
+In sum, we have seen how to run a Bayesian regression analysis with the \texttt{brms} package and deal with its output. We have also seen that we get output that is interpretable in very terms that also non-statisticians can understand (e.g., ``The probability of H1, given our model, priors, and data, is more than .99'').
+
+Unfortunately, what we have not seen yet is what our model and data say about hypotheses 2 or 3. This is because there is no single parameter in the (dummy-coded) regression model that corresponds to the differences between cells 3 and 4 (for hypothesis 2) and cells 2 and 3 (for hypothesis 3). Notice that this problem is not specific to Bayesian analyses, but it is inherent in the way the regression coefficients were set up.
+%
+\marginnote{A potential way of testing different hypotheses of the kind we have set our here, is to run different regression analyses, each with a different reference cell. But that is tedious.}
+%
+However, unlike in more frequentist/classical analysis, the Bayesian approach allows to recover information about any derived measure from the obtained samples. Here's how.
+
+Take hypothesis 3 which requires us to 
 
 
 
