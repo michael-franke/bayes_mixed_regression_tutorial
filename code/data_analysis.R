@@ -189,7 +189,7 @@ get_posterior_beliefs_about_hypotheses_new = function(model) {
   )
 }
 
-get_posterior_beliefs_about_hypotheses_new(model_FE)
+get_posterior_beliefs_about_hypotheses_new(modelFE)
 
 ###############################################
 ## models with additional random effects
@@ -207,13 +207,13 @@ model_MaxRE = brm(formula = pitch ~ gender * context +
                     (1 + gender * context | sentence) +
                     (1 + context | subject),
                   data = politedata,
-                  control = list(adapt_delta = 0.9))
+                  control = list(adapt_delta = 0.99))
 
 ##################################
 ## comparing selected hypotheses
 ##################################
 
-get_posterior_beliefs_about_hypotheses_new(model_FE)
+get_posterior_beliefs_about_hypotheses_new(modelFE)
 get_posterior_beliefs_about_hypotheses_new(model_interceptOnly)
 get_posterior_beliefs_about_hypotheses_new(model_MaxRE)
 
