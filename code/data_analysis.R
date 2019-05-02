@@ -10,6 +10,9 @@ library(brms)
 # option for Bayesian regression models: use all available cores for parallel computing
 options(mc.cores = parallel::detectCores())
 
+# package to define relative paths
+library(rstudioapi)
+
 #####################################################
 ## read and massage the data
 #####################################################
@@ -75,7 +78,9 @@ ggplot(data = politedata.agg,
         plot.title = element_text(size = 18, face = "bold"),
         plot.margin = unit(c(0.2,0.1,0.2,0.1),"cm"))
   
-  
+current_path = rstudioapi::getActiveDocumentContext()$path 
+setwd(dirname(current_path))
+
 ggsave(filename = "../text/pics/basic_data_plot.pdf",
        plot = last_plot(),
        width = 6, height = 4)
@@ -100,9 +105,39 @@ plot_posterior_density_FE = modelFE %>% as.tibble() %>%
   ggplot(aes(x = posterior)) + geom_density() +
   facet_wrap(~ parameter, scales = "free")
 
+
+# IN PRETTY: plotting the posterior distributions
+plot_posterior_density_FE = 
+  modelFE %>% as.tibble() %>% 
+  select(- lp__, - sigma) %>% 
+  gather(key = "parameter", value = "posterior") %>% 
+  mutate(parameter = as.factor(parameter)) %>% 
+  mutate(parameter = factor(parameter, levels = c("b_Intercept", "b_contextpol", "b_genderM", "b_genderM.contextpol"))) %>% 
+  ggplot(aes(x = posterior)) + 
+    geom_density(fill = "grey") +
+    facet_wrap(~ parameter, scales = "free") +
+  ylab("density\n") +
+  xlab("\nposterior values") +
+  theme_classic() +
+  theme(legend.position = "right",
+        legend.key.height = unit(2,"line"),
+        legend.title = element_text(size = 18, face = "bold"),
+        legend.text = element_text(size = 16),
+        legend.background = element_rect(fill = "transparent"),
+        strip.background = element_blank(),
+        strip.text = element_text(size = 18, face = "bold"),
+        axis.line = element_blank(),
+        panel.spacing = unit(2, "lines"),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        panel.background = element_rect(fill = "transparent"),
+        axis.text = element_text(size = 16),
+        axis.title = element_text(size = 18, face = "bold"),
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.margin = unit(c(0.2,0.1,0.2,0.1),"cm"))
+
 # save the plotted figure
 ggsave(plot = plot_posterior_density_FE, filename = "../text/pics/posterior_density_FE.pdf",
-       width = 6, height = 4)
+       width = 9, height = 6)
 
 # proportion of negative samples for parameter p_contextpol
 # this number approximates P(beta_pol < 0 | model, data)
