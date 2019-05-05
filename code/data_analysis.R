@@ -10,9 +10,6 @@ library(brms)
 # option for Bayesian regression models: use all available cores for parallel computing
 options(mc.cores = parallel::detectCores())
 
-# package to define relative paths
-library(rstudioapi)
-
 #####################################################
 ## read and massage the data
 #####################################################

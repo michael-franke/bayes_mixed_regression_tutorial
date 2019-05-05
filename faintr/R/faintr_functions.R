@@ -1,12 +1,4 @@
-#' Extracting cell means
-#'
-#' This function takes a brms model fit for a factorial design and outputs a comparison of all factor levels. 
-#' @param model Model fit from brms package.
-#' @keywords regression, factorial design, brms
-#' @export
-#' @examples
-#' extract_posterior_cell_means()
-extract_posterior_cell_means = function(model) {
+get_factor_information = function(model) {
   
   # extract information about dependent and independent variables from formula
   ## TODO :: check extensively, especially for mixed effects models whether this stuff here works
@@ -15,7 +7,6 @@ extract_posterior_cell_means = function(model) {
                                    split =  "(\\*|\\+)",
                                    fixed = FALSE)[[1]] %>% trimws()
   independent_variables = independent_variables[which(independent_variables != "")]
-  
   
   # stop this if there are not at least two factors
   if (length(independent_variables) <= 1) {
@@ -45,6 +36,34 @@ extract_posterior_cell_means = function(model) {
   for (iv in independent_variables) {
     ref_levels = c(ref_levels, paste0(iv, ref_levels_list[[iv]][1]))
   }
+  
+  return(list(
+    dependent_variable = dependent_variable,
+    independent_variables = independent_variables,
+    factors = factors,
+    ref_levels_list = ref_levels_list,
+    ref_levels = ref_levels
+  ))
+}
+
+
+#' Extracting cell means
+#'
+#' This function takes a brms model fit for a factorial design and outputs a comparison of all factor levels. 
+#' @param model Model fit from brms package.
+#' @keywords regression, factorial design, brms
+#' @export
+#' @examples
+#' extract_posterior_cell_means()
+extract_posterior_cell_means = function(model) {
+  
+  # get information about factors
+  factor_info = get_factor_information(model)
+  dependent_variable = factor_info[["dependent_variable"]]
+  independent_variables = factor_info[["independent_variables"]]
+  factors = factor_info[["factors"]]
+  ref_levels_list = factor_info[["ref_levels_list"]]
+  ref_levels = factor_info[["ref_levels"]]
   
   # get the posterior samples for all regression coefficients
   post_samples = posterior_samples(model) %>% select(starts_with("b_"))
@@ -120,7 +139,7 @@ extract_posterior_cell_means = function(model) {
   
   predictor_values = predictor_values %>% spread(key = cell, value = predictor_value)
   
-  ## towards an alternative (more versatile) output which compares all cells
+  ## an alternative (more versatile) output which compares all cells
   
   cells = expand.grid(factors)
   for (j in 1:ncol(cells_readable)) {cells_readable[,j] = as.character(cells_readable[,j])}  
@@ -135,7 +154,7 @@ extract_posterior_cell_means = function(model) {
   names(cells_high) = map_chr(names(cells), function(c) {paste0(c, "_high")})
   names(cells_low)  = map_chr(names(cells), function(c) {paste0(c, "_low")})
   
-  # from here: https://stackoverflow.com/questions/11693599/alternative-to-expand-grid-for-data-frames
+  # borrowed from here: https://stackoverflow.com/questions/11693599/alternative-to-expand-grid-for-data-frames
   expand.grid.df <- function(...) Reduce(function(...) merge(..., by=NULL), list(...))
   
   all_cells_compared = expand.grid.df(cells_high, cells_low)
@@ -167,10 +186,107 @@ extract_posterior_cell_means = function(model) {
 #' @export
 #' @examples
 #' get_cell_comparison()
-get_cell_comparison = function(model, cell_low, cell_high) {
+get_cell_comparison_old = function(model, cell_low, cell_high) {
   ### TODO: currently relying on correct order of factors in 'cell_low' and 'cell_high'
   cell_high = paste(names(cell_high), unlist(cell_high), sep = ":", collapse = "__")
   cell_low = paste(names(cell_low), unlist(cell_low), sep = ":", collapse = "__")
   all_cells_compared = extract_posterior_cell_means(model)$all_cells_compared
   all_cells_compared %>% filter(cell_name_high == cell_high, cell_name_low == cell_low) %>% pull(posterior)
 }
+
+get_cell_comparison = function(model, higher, lower) {
+  
+  # get information about factors
+  factor_info = get_factor_information(model)
+  dependent_variable = factor_info[["dependent_variable"]]
+  independent_variables = factor_info[["independent_variables"]]
+  factors = factor_info[["factors"]]
+  ref_levels_list = factor_info[["ref_levels_list"]]
+  ref_levels = factor_info[["ref_levels"]]
+  
+  # check the input groups
+  input_combined = c(higher, lower)
+  ## check if all factor names specified are actually in the model
+  input_factor_names = unique(names(input_combined))
+  known_factor_names = map_lgl(input_factor_names, function(f) {f %in% independent_variables})
+  if (sum(known_factor_names) < length(known_factor_names)) {
+    stop("The following factor names specified in the groups to be compared do not match any independent variable in the specified model: 
+  ", paste(input_factor_names[known_factor_names == F], collapse = ", "))
+  }
+  ## check if all factor levels specified are actually in the model
+  for (i in length(input_combined)) {
+    if (! input_combined[[i]] %in% factors[[names(input_combined)[i]]]) {
+      stop("The level '", input_combined[[i]], "' is not part of the factor '", names(input_combined)[i], "' in the given model.")
+    }
+  }
+  
+  # get posterior samples for all cell means
+  post_cell_samples = extract_posterior_cell_means(model)$predictor_values
+  
+  ## helper function :: recursive extraction of cell names
+  collect_cell_names = function(remaining_names, remaining_factors) {
+    if (length(remaining_factors) == 1) {
+      return ( str_subset(remaining_names, remaining_factors) )
+    } else {
+      remaining_names = str_subset(remaining_names, remaining_factors[1]) 
+      remaining_factors = remaining_factors[2:length(remaining_factors)]
+      return(collect_cell_names(remaining_names, remaining_factors))
+    }
+  }
+  
+  ## helper function :: get names for cells
+  get_group_names = function(group){
+    if (length(group) == 0) {
+      return("grand mean")
+    }
+    map_chr(1:length(group), 
+            function(c) {paste(names(group[c]), unlist(group[c]), sep = ":")})  
+  }
+  
+  ## helper function :: get means for each cell
+  extract_group_samples = function(group) {
+    if (length(group) == 0) {
+      return(apply(as.matrix(post_cell_samples), 1, mean))
+    }
+    factors_group = get_group_names(group)
+    cells_group = collect_cell_names(names(post_cell_samples), factors_group)
+    apply(as.matrix(post_cell_samples %>% select(cells_group)), 1, mean)
+  }
+  
+  post_samples_higher = extract_group_samples(higher)
+  post_samples_lower  = extract_group_samples(lower)
+  
+  return(list(
+    post_samples_higher = post_samples_higher,
+    post_samples_lower = post_samples_lower,
+    higher = get_group_names(higher),
+    lower = get_group_names(lower),
+    probability = mean(post_samples_higher > post_samples_lower)
+    )
+  )
+}
+
+get_cell_comparison(
+  model = model, 
+  higher = list(gender = "F", context = "inf"), 
+  lower = list(gender = "F", context = "pol")
+)
+
+get_cell_comparison(
+  model = model, 
+  higher = list(context = "inf", gender = "M"), 
+  lower = list(gender = "M", context = "pol")
+)
+
+
+get_cell_comparison(
+  model = model, 
+  higher = list(), 
+  lower = list(gender = "M")
+)
+
+get_cell_comparison(
+  model = model, 
+  higher = list(context = "pol"), 
+  lower = list()
+)
