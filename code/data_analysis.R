@@ -10,6 +10,10 @@ library(brms)
 # option for Bayesian regression models: use all available cores for parallel computing
 options(mc.cores = parallel::detectCores())
 
+# set seed
+set.seed(1702)
+
+
 #####################################################
 ## read and massage the data
 #####################################################
@@ -96,20 +100,16 @@ post_samples_FE = posterior_samples(modelFE)
 head(post_samples_FE)
 
 # plotting the posterior distributions
-plot_posterior_density_FE = modelFE %>% as.tibble() %>% 
-  select(- lp__, - sigma) %>% 
-  gather(key = "parameter", value = "posterior") %>% 
-  ggplot(aes(x = posterior)) + geom_density() +
-  facet_wrap(~ parameter, scales = "free")
-
-
-# IN PRETTY: plotting the posterior distributions
 plot_posterior_density_FE = 
   modelFE %>% as.tibble() %>% 
   select(- lp__, - sigma) %>% 
   gather(key = "parameter", value = "posterior") %>% 
+  mutate(parameter = case_when(parameter == "b_Intercept" ~ "Intercept",
+                               parameter == "b_contextpol" ~ "context:pol",
+                               parameter == "b_genderM" ~ "gender:M",
+                               parameter == "b_genderM.contextpol" ~ "gender:M__context:pol")) %>% 
   mutate(parameter = as.factor(parameter)) %>% 
-  mutate(parameter = factor(parameter, levels = c("b_Intercept", "b_contextpol", "b_genderM", "b_genderM.contextpol"))) %>% 
+  mutate(parameter = factor(parameter, levels = c("Intercept", "context:pol", "gender:M", "gender:M__context:pol"))) %>% 
   ggplot(aes(x = posterior)) + 
     geom_density(fill = "grey") +
     facet_wrap(~ parameter, scales = "free") +
@@ -130,7 +130,16 @@ plot_posterior_density_FE =
         axis.text = element_text(size = 16),
         axis.title = element_text(size = 18, face = "bold"),
         plot.title = element_text(size = 18, face = "bold"),
-        plot.margin = unit(c(0.2,0.1,0.2,0.1),"cm"))
+        plot.margin = unit(c(0.2,0.1,0.2,0.1),"cm")) +
+  geom_segment(
+    mapping = aes(y = 0, yend = 0, x = low, xend = high),
+    color = "firebrick",
+    size = 3,
+    alpha = 0.7,
+    data = fixef(modelFE) %>% as.tibble() %>%
+      mutate(parameter = c("Intercept", "gender:M", "context:pol", "gender:M__context:pol")) %>%
+      rename( low = Q2.5, high = Q97.5)
+      )
 
 # save the plotted figure
 ggsave(plot = plot_posterior_density_FE, filename = "../text/pics/posterior_density_FE.pdf",
@@ -143,7 +152,7 @@ mean(post_samples_FE$b_contextpol < 0)
 # proportion of samples where the mean for cell 2 was bigger 
 # than that of cell 3 
 # this number approximates P(beta_pol > beta_male | model, data)
-mean(post_samples_FE$b_contextpol - post_samples_FE$b_genderM > 0)
+mean(post_samples_FE$b_contextpol > post_samples_FE$b_genderM)
 
 ###########################################
 ## showcasing the faintr package
@@ -154,7 +163,7 @@ mean(post_samples_FE$b_contextpol - post_samples_FE$b_genderM > 0)
 library(devtools)
 
 # package with convenience function for Bayesian regression models for factorial designs
-install_github('michael-franke/bayes_mixed_regression_tutorial/faintr') # install from GitHub
+# install_github('michael-franke/bayes_mixed_regression_tutorial/faintr') # install from GitHub
 library(faintr)
 
 extract_posterior_cell_means(modelFE)
@@ -169,24 +178,24 @@ get_posterior_beliefs_about_hypotheses_new = function(model) {
       # insert the comparisons you are interested in referring to the extracted samples
       get_cell_comparison(
         model = model, 
-        cell_low = list(gender = "F", context = "pol"), 
-        cell_high = list(gender = "F", context = "inf")
-      ),
+        lower = list(gender = "F", context = "pol"), 
+        higher = list(gender = "F", context = "inf")
+      )$probability,
       get_cell_comparison(
         model = model, 
-        cell_low = list(gender = "M", context = "pol"), 
-        cell_high = list(gender = "M", context = "inf")
-      ),
+        lower = list(gender = "M", context = "pol"), 
+        higher = list(gender = "M", context = "inf")
+      )$probability,
       get_cell_comparison(
         model = model, 
-        cell_low = list(gender = "M", context = "inf"),
-        cell_high = list(gender = "F", context = "pol")
-      ) 
+        lower = list(gender = "M", context = "inf"),
+        higher = list(gender = "F", context = "pol")
+      )$probability 
     )
   )
 }
 
-get_posterior_beliefs_about_hypotheses_new(modelFE)
+get_posterior_beliefs_about_hypotheses_new(modelFE
 
 ###############################################
 ## models with additional random effects

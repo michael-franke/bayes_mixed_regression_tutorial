@@ -129,7 +129,7 @@ So, feel free to read or skip any of the text boxes to suit your needs.
 To follow this tutorial, you should have R installed on your computer (\url{https://www.r-project.org}).
 Unless you already have a favorite editor for tinkering with R scripts, we recommend to try out RStudio (\url{https://www.rstudio.com}).
 You will also need some packages,
-\marginnote{Remember that you can install a package called \texttt{XYZ} with the command \texttt{install.packages('XYZ')}.}
+\marginnote{Remember that you can install a package called \texttt{XYZ} with the command \texttt{install.packages("XYZ")}.}
 which you can import with the following code:
 \marginnote{If you do not want to copy-paste, all code and data for this tutorial is also
   available for download here:
@@ -148,6 +148,9 @@ library(tidyverse)
 library(brms)
 # option for Bayesian regression models: use all available cores for parallel computing
 options(mc.cores = parallel::detectCores())
+
+# set seed
+set.seed(1702)
 \end{lstlisting}
 \end{minipage}
 
@@ -210,7 +213,6 @@ hypotheses:\marginnote{Notice that our hypotheses are formulated explicitly as c
   means / averages. The statistical model we will use indeed compares means, and this is common
   practice, albeit a particular assumption worth highlighting. Commonly, this assumption is implicit, with e.g. H1 being simply formulated as something like
   ``Female speakers' pitch is lower in polite than informal contexts.'' }
-\tr{up till here, this reads really lofty and flows nicely}
 
 \begin{enumerate}[{H}1:]
 \item Female speakers have a lower average pitch in polite than in informal contexts.
@@ -240,6 +242,9 @@ slightly higher than orange points).\marginnote{The code needed to generated the
      \label{fig:BasicPlotData_data}
 \end{figure}
 
+\mf{About Figure~\ref{fig:BasicPlotData_data}, could we make sure the plot is readable in
+  gray-scale printing as well?}
+
 Based on keen eye-balling, we might want to shout: ``Eureka! The data confirm all of our
 hypotheses!'' But, of course, we need to be more careful. As Bayesians, we would like to
 translate the data into an expression of \textbf{evidence}: does the data provide evidence for
@@ -259,19 +264,15 @@ estimates of potential differences between conditions, alongside a measure of ho
 
 \section{A regression model for our data}
 
-Another way of looking at the data in connection with our research hypotheses is displayed in Figure~\ref{fig:BasicPlotData_table}. Each cell represents one unique combination of the gender and the context factor, and the table shows the mean pitch value for each cell.\marginpar{In technical terms, this table is the \textbf{design matrix} of our experiment. We have two factors of interest \texttt{context} and \texttt{gender}, each with two levels. The table shows each combination of levels of all relevant factors. The cells in this table are therefore also called \textbf{design cells}.} \tr{font in the side note is larger than the other notes and it might be positioned wrongly.}
+Another way of looking at the data in connection with our research hypotheses is displayed in Figure~\ref{fig:BasicPlotData_table}. Each cell represents one unique combination of the gender and the context factor, and the table shows the mean pitch value for each cell.\marginnote{In technical terms, this table is the \textbf{design matrix} of our experiment. We have two factors of interest \texttt{context} and \texttt{gender}, each with two levels. The table shows each combination of levels of all relevant factors. The cells in this table are therefore also called \textbf{design cells}.} 
 Our hypotheses can be related to the comparison between some of these cell-based means.
 H1 makes a statement about the comparison between cells 1 and 2 (the context effect for female speakers); H2 makes a statement about cells 3 and 4 (the context effect for male speakers); and H3 makes a statement about cells 2 and 3 (the difference between informal male speakers and polite female speakers).
 
 One way of testing our hypotheses using a Bayesian approach to data analysis, is to ask whether the relevant differences between cell means are \textit{credibly different from zero}. This is  jargon for asking whether, given the observed data, we should believe that the relevant cell means are different from each other. The fact that we are now in Bayesian land should hit us when we hear the phrases ``credibly different'' and the ``should believe''. The Bayesian approach is about  updating beliefs based on observations. And we express our beliefs as as probability distributions. 
 At first, this may appear scary or technically involved. But at the end of the day, the intuitions captured by this approach are arguably very natural, and perhaps easier to understand than the reasoning underlying other approaches to statistical inference. Let's walk through our Bayesian approach step by step.
 
-First, let us look at the \textbf{regression model} we want to use.\marginnote{While other
-  approaches to data analysis might stress the application of statistical tests, a Bayesian
-  approach puts more emphasis on the fact that all statistical inference resolves around a
-  statistical model; which is usually an assumption about how the data was generated. This
-  model is, almost certainly, always false. But even a false model can be useful; conclusions
-  based on a false model can be meaningful and insightful.\tr{I find this remark confusing and maybe a little too much on the "selling Bayes" side of things? consider deleting}} Our regression models assumes that pitch values observed in each cell are
+First, let us look at the \textbf{regression model} we want to use.
+Our regression models assumes that pitch values observed in each cell are
 sampled from a population that is normally distribution, where each cell $c_i$ has its own mean $\mu_i$. We are interested in the probability of one cell mean being larger than
 another cell mean, i.e., the probability that $\mu_i > \mu_j$. Put differently, we are interested in the probability that the difference between $\mu_i$ and $\mu_j$ is larger than zero: $\mu_i - \mu_j > 0$.
 %and since, let's say, it is easier to test whether a value is bigger than zero, we can encode the cell means like in Figure~\ref{fig:coefficients_table}. \tr{I cannot see this in the figure. The figure merely displays how we calculate the individual cell mean in a regression}
@@ -309,16 +310,14 @@ $\beta_{\text{pol\&male}}$. In other words, our regression estimates the mean of
     \emph{prior beliefs} about the coin's bias to obtain a new \emph{posterior belief} based on
     empirical observation (outcomes of coin flips). Central to this updating is Jones'
     \emph{likelihood function}, which encodes how likely each relevant coin bias may have
-    generated the observed data. --- Sounds fancifully abstract? It's actially fairly intuitive.
+    generated the observed data. --- Sounds fancifully abstract? It's actually fairly intuitive.
     Consider this example.
     
-    \paragraph{Prior beliefs.} Jones initially believes that the coin is either biased towards
-    heads or biased towards tails, and that both of these possibilities are equally likely. She
-    also believes that, if biased towards heads, the coin is two times more likely to come up
-    heads; and that, if biased towards tails, the coin is two times more likely to come up
-    tails. Numerically, Jones' \emph{prior beliefs} can be written as, where $\theta \in [0;1]$
-    is the coin's bias: $P(\theta = \nicefrac{1}{3}) = \nicefrac{1}{2}$, and $P(\theta =
-    \nicefrac{2}{3}) = \nicefrac{1}{2}$.
+    \paragraph{Prior beliefs.} Jones knows that there are two factories who produce coins. One
+    produces fair coins, the other produces coins which give heads three times more often than
+    tails. She believes that it's equally likely that the coin is from either factory. Numerically, Jones' \emph{prior beliefs} can be written as, where $\theta \in [0;1]$
+    is the coin's bias: $P(\theta = \nicefrac{1}{2}) = \nicefrac{1}{2}$, and $P(\theta =
+    \nicefrac{3}{4}) = \nicefrac{1}{2}$.
 
     \paragraph{Likelihood.} The bias $\theta$ is, by definition, the probability of the coin
     landing heads on the next trial. Let's assume that Jones tosses the coin only once (hm,
@@ -335,12 +334,12 @@ $\beta_{\text{pol\&male}}$. In other words, our regression estimates the mean of
     \end{align*}
     Jones' posterior belief that the coin is twice as likely to land heads is therefore:
     \begin{align*}
-      & P(\theta = \nicefrac{2}{3} \mid D = \text{heads}) =  \\
-      & \frac{P(\theta = \nicefrac{2}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{2}{3})}{P(\theta = \nicefrac{2}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{2}{3}) + P(\theta = \nicefrac{1}{3}) \ P(D = \text{heads} \mid \theta = \nicefrac{1}{3})} = \\
-      & \frac{\nicefrac{1}{2} \ \nicefrac{2}{3}}{\nicefrac{1}{2} \ \nicefrac{2}{3} + \nicefrac{1}{2} \ \nicefrac{1}{3}} = \nicefrac{1}{2}
+      & P(\theta = \nicefrac{3}{4} \mid D = \text{heads}) =  \\
+      & \frac{P(\theta = \nicefrac{3}{4}) \ P(D = \text{heads} \mid \theta = \nicefrac{3}{4})}{P(\theta = \nicefrac{3}{4}) \ P(D = \text{heads} \mid \theta = \nicefrac{3}{4}) + P(\theta = \nicefrac{1}{2}) \ P(D = \text{heads} \mid \theta = \nicefrac{1}{2})} = \\
+      & \frac{\nicefrac{1}{2} \ \nicefrac{3}{4}}{\nicefrac{1}{2} \ \nicefrac{3}{4} + \nicefrac{1}{2} \ \nicefrac{1}{2}} = \frac{\nicefrac{3}{8}}{\nicefrac{7}{8}} = \frac{3}{5} 
     \end{align*}
-    After making her observation, rational Jones believes that the bias towards heads is twice
-    more likely than the bias towards tails. \tr{I think what can be confusing it that her prior is a bias of observing heads TWICE as likely as tails (or vice versa) and her posterior is to believe that the one bias is TWICE as likely as the other. If the numbers would be different, we would avoid a possible confusion of prior and posterior. My first reading was: so the posterior didnt change the prior...oh nuh, now I gottit.}
+    After making her observation, rational Jones believes that the bias towards heads has a
+    probability of about $0.6$, unlike her prior belief of $0.5$.
     
   \end{minipage} \par
   } \par
@@ -353,16 +352,17 @@ $\beta_{\text{pol\&male}}$. In other words, our regression estimates the mean of
 
 \section{A Bayesian analysis of a (fixed effects) regression model}
 
-Based on our model of how the data was generated \tr{I dont think this is clear to the reader}, a Bayesian analysis asks: what should we
+Having spelled out a model like the above, a Bayesian analysis asks: what should we
 believe about the values of the coefficients $\beta_0$, $\beta_{\text{pol}}$,
 $\beta_{\text{male}}$ and $\beta_{\text{pol\&male}}$?; what values for these parameters are
-likely, given the data, the assumed model, and our initial beliefs about the parameters?
+likely, given the data, the assumed model, and our initial beliefs about the parameters, the
+so-called \textbf{prior beliefs}?
 %
-\marginnote{These initial beliefs, also called \textbf{prior beliefs}, are important to get a
-  Bayesian analysis off the ground; a circumstance which is discussed controversially. For many
-  practical purposes, however, the precise choice of prior is not decisive and tools like the
-  \texttt{brms} package which we will use here will default to generically reasonable choices
-  of priors for your model (more on this below).\tr{should we maybe use a consistent typography such that the margin notes always pick up on a bold word in the text?}}
+\marginnote{\textbf{Prior beliefs} are important to get a Bayesian analysis off the ground; a
+  circumstance which is discussed controversially. For many practical purposes, however, the
+  precise choice of prior is not decisive and tools like the \texttt{brms} package which we
+  will use here will default to generically reasonable choices of priors for your model (more
+  on this below).}
 %
 \marginnote{Info Box~1 provides some background on prior beliefs, likelihood function and posterior beliefs.}
 %
@@ -423,11 +423,11 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 
 \medskip
 
-This summary looks very much like regression model summaries of non-Bayesian model. Lines 2--5 give us information about the model and the data used. Lines 6 and 7 tell us about the sampling procedure. We have a total of 4000 samples from the posterior distribution, obtained from 4 chains all of which had 2000 iterations but discarded the first 1000 as warmup (more on this below) \tr{chains, iterations, warm-up need to be elaborated}. Lines 9--14 contain information about our parameters of interest, i.e. what we are most interested in for evaluating our hypotheses, We will discuss them in detail below. Lines 16--18 contain information that look similar to those in lines 9--14. This is the estimation of the standard deviation \texttt{sigma}, describing the variance of the assumed normal distributions (which describe the distribution of measures in each design cell) \tr{maybe wanna call this the residual error instead?}. Finally, lines 20--22 contain general information about the model fit and the information presented in this summary.\marginnote{If the model failed to converge or other problems occurred, you would see an informative message in the last part of this summary.}
+This summary looks very much like regression model summaries of non-Bayesian model. Lines 2--5 give us information about the model and the data used. Lines 6 and 7 tell us about the sampling procedure. We have a total of 4000 samples from the posterior distribution, obtained from 4 chains all of which had 2000 iterations but discarded the first 1000 as warmup (more on this below) \tr{chains, iterations, warm-up need to be elaborated}. Lines 9--14 contain information about our parameters of interest, i.e. what we are most interested in for evaluating our hypotheses, We will discuss them in detail below. Lines 16--18 contain information that look similar to those in lines 9--14. This is the estimation of the standard deviation \texttt{sigma}, describing the variance of the assumed normal distributions (which describe the distribution of measures in each design cell). Finally, lines 20--22 contain general information about the model fit and the information presented in this summary.\marginnote{If the model failed to converge or other problems occurred, you would see an informative message in the last part of this summary.}
 
 Let us look at lines 9--14 in detail now. What these lines give us is a table with four rows, each of which corresponds to a parameter in the model, namely the coefficients shown in Figure~\ref{fig:coefficients_table}. The variable \texttt{Intercept} refers to our $\beta_0$, which represents the mean of our reference level in cell 1 (female speakers in polite contexts). The variable \texttt{genderM} corresponds to our $\beta_{\text{male}}$, \texttt{contextpol} corresponds to our $\beta_{\text{pol}}$, and \texttt{genderM:contextpol} is the interaction term $\beta_{\text{pol\&male}}$. For each of these parameters, the table contains very useful summary statistics based on the samples returned from the model fit. Here we are interested in the information in columns \texttt{Estimate}, that is the estimate of each parameter's mean. We are also interested in \texttt{l-95\% CI} and \texttt{u-95\% CI}, which give us the lower and upper bound of the \textbf{95\% credible interval} for each parameter.
 %
-\marginnote[-2.5cm]{Intuitively, the 95\% credible interval is the range of values that we can often practically consider credible enough to care about. Formally, the 95\% credible interval is the set of convex intervals of parameter values such that the probability density over all intervals sums to 0.95 while no parameter value not included in any interval has higher probability density than any point within.\tr{consider deleting the last sentence. Not relevant for this tutorial, Let's stick to practical aspects}}
+\marginnote[-2.5cm]{Intuitively, the 95\% credible interval is the range of values that we can often practically consider credible enough to care about.}
 %
 More details about the information given in the other columns can be found in Info Box~2.
 
@@ -436,12 +436,33 @@ More details about the information given in the other columns can be found in In
 \colorbox{mygray}{\centering
   \begin{minipage}{1.0\textwidth}
 
-    \emph{More about the information displayed in the summary output of a \texttt{brm} model fit}
+    \emph{Information displayed in the summary of a \texttt{brm} model fit}
     \medskip
 
-The first column \emph{Estimate} gives the mean of the obtained samples, thereby approximating the mean of the posterior distribution (beliefs we should hold) about each parameter. For example, the parameter \texttt{Intercept} is estimated to have a mean of about $261$, which is (of course) exactly what we calculated as a mean of the data points in cell 1, as shown in Figure~\ref{fig:BasicPlotData_table} \tr{I dont think it is good to give the impression that the mean and the estimate should be identical. Depending on the sampling, the mean might be off the estimate}. The other columns give further useful information. \emph{Est.Error} is the estimation error, an indication of the certainty we should have about the whole inference procedure. The columns \texttt{l-95\% CI} and \texttt{u-95\% CI} give the lower and upper bound of the \textbf{95\% credible interval} for each parameter, estimated from the posterior samples. 
+    The first column \emph{Estimate} gives the mean of the obtained samples, thereby
+    approximating the mean of the posterior distribution (beliefs we should hold) about each
+    parameter. For example, the parameter \texttt{Intercept} is estimated to have a mean of
+    about $261$, which (here) coincides with the mean of the data points in cell 1, as shown in
+    Figure~\ref{fig:BasicPlotData_table}. The other columns give further useful information.
+    \emph{Est.Error} is the estimation error, an indication of the certainty we should have
+    about the whole inference procedure. The columns \texttt{l-95\% CI} and \texttt{u-95\% CI}
+    give the lower and upper bound of the \textbf{95\% credible interval} for each parameter,
+    estimated from the posterior samples.
 
-The column \texttt{Eff.Sample}, for efficient samples, gives a rough measure of how many of all the samples we took (4000 in our case) are contributing non-redundant information to our estimation. \tr{what does non-redundant mean concretely. Remember I am a noob reading this} The higher this number, the better. Finally, \texttt{Rhat} is a measure of whether the samples obtained are likely representative of the true distribution. Concretely, it indicates whether the four chains we ran in parallel all ended up with the same results, so to speak. If this column contains values bigger than 1.1 this is an indication that your model fit has not converged. (If your model output indicates non-convergence, you may want to increase the number of samples, but you should also consider the possibility that you are trying to fit a model which cannot be ``trained'' based on the (perhaps too little) data and the particular method of posterior sampling. For common regression analyses, this will usually entail considering a simpler model (e.g., with fewer explanatory factors, less (correlated) random effects, etc.))
+    The column \texttt{Eff.Sample}, for efficient samples, gives a rough measure of how many of
+    all the samples we took (4000 in our case) are contributing non-redundant information to
+    our estimation. \tr{what does non-redundant mean concretely. Remember I am a noob reading
+      this} \mf{I'll leave this comment unaddressed here and pick it up later in an Info Box on
+      sampling etc.} The higher this number, the better. Finally, \texttt{Rhat} is a measure of
+    whether the samples obtained are likely representative of the true distribution.
+    Concretely, it indicates whether the four chains we ran in parallel all ended up with the
+    same results, so to speak. If this column contains values bigger than 1.1 this is an
+    indication that your model fit has not converged. (If your model output indicates
+    non-convergence, you may want to increase the number of samples, but you should also
+    consider the possibility that you are trying to fit a model which cannot be ``trained''
+    based on the (perhaps too little) data and the particular method of posterior sampling. For
+    common regression analyses, this will usually entail considering a simpler model (e.g.,
+    with fewer explanatory factors, less (correlated) random effects, etc.))
     
   \end{minipage} \par
   } \par
@@ -452,7 +473,7 @@ The column \texttt{Eff.Sample}, for efficient samples, gives a rough measure of 
 \end{InfoBox}
 
 
-For our purposes, the information about 95\% credible intervals is most interesting. Take the parameter \texttt{contextpol}, corresponding to our coefficient $\beta_{\text{pol}}$. This parameter corresponds to the estimated adjustment of the mean of the reference level when we change the context level to polite. The 95\% CI is roughly [-50;-6]. This means that we would take values outside of this interval to be sufficiently unlikely to consider plausible values. This means that a very special parameter value for this parameter is implausible, namely 0. In other words, this analysis suggests that we should no believe that 0 is a very likely value for the coefficient $\beta_{\text{pol}}$; rather we should believe that $\beta_{\text{pol}}$ is most likely negative (based on the priors, the regression model, and the data; all of which may be critically re-assessed if there are good reasons for it\tr{again, this nuance might be too much for the basic tutorial or am I too fluffy?}). --- Hurray! This directly addresses our first research hypothesis. In a research paper we could now write: ``Based on the regression model, the data suggests that H1 is likely true.''
+For our purposes, the information about 95\% credible intervals is most interesting. Take the parameter \texttt{contextpol}, corresponding to our coefficient $\beta_{\text{pol}}$. This parameter corresponds to the estimated adjustment of the mean of the reference level when we change the context level to polite. The 95\% CI is roughly [-50;-6]. This means that we would take values outside of this interval to be sufficiently unlikely to consider plausible values. This means that a very special parameter value for this parameter is implausible, namely 0. In other words, this analysis suggests that we should not believe that 0 is a very likely value for the coefficient $\beta_{\text{pol}}$; rather we should believe that $\beta_{\text{pol}}$ is most likely negative. --- Hurray! This directly addresses our first research hypothesis. In a research paper we could now write: ``Based on the regression model, the data suggests that H1 is likely true.''
 
 How likely is it that $\beta_{\text{pol}}$ is smaller than 0? ---Instead of simply making a binary thumbs-up / thumbs-down decision, it would be even cooler, if we could put a number to it. As Bayesians, we fortunately can. To see how this works, let us have a more intimate look at the samples that the \texttt{brm} function returns. We can access the samples of a model fitted with \texttt{brm} with the function \texttt{posterior\_samples}:
 
@@ -485,12 +506,18 @@ What you see here is the top 6 rows of a data frame with columns for each parame
 %
 \marginnote{The column \texttt{lp\_\_} contains the log-probability of the data for the parameterization in each row. This is useful for model comparison and model criticism but not important for our current adventures.}
 %
-We can use these samples to produce a density plot. The plot in Figure~\ref{fig:Posteriors_FE} shows, for each of the four main model parameters an estimate of the posterior density. This is, intuitively put, a plot of how much (relative) credence we, as rational agents, should assign to any particular value of each parameter, given the regression model, the specified prior beliefs, and the data \tr{and now in a way that your daughter understands it ;)}. We see that our beliefs concerning plausible values for the mean of cell 1 (female speakers in polite contexts, the reference cell) should hover around 261. We also see that all values that receive substantial probability density for \texttt{contextpol} (our $\beta_{\text{pol}}$) are negative (as captured in the 95\% CI discussed above). Zero is estimated to be a rather unlikely value for this parameter.
+We can use these samples to produce a density plot. The plot in Figure~\ref{fig:Posteriors_FE}
+shows, for each of the four main model parameters an estimate of the posterior density. Each
+curve shows how much credence we should put on particular parameter values. For example, we see
+that our beliefs concerning plausible values for the mean of cell 1 (female speakers in polite
+contexts, the reference cell) should hover around 261, spreading from about 240 to 280. We also see that all values that receive substantial probability density for \texttt{contextpol} (our $\beta_{\text{pol}}$) are negative (as captured in the 95\% CI discussed above). Zero is estimated to be a rather unlikely value for this parameter.
 
 \begin{figure}
   \centering
   \includegraphics[width=\textwidth]{pics/posterior_density_FE.pdf}
-  \caption[Posteriors fixed-effects model]{Posterior density of parameter values in the fixed-effects regression model}
+  \caption[Posteriors fixed-effects model]{Posterior density of parameter values in the
+    fixed-effects regression model. The thick red lines indicate the 95\% credible intervals,
+    i.e., the range of parameter values that it is reasonable to believe in.}
   \label{fig:Posteriors_FE}
 \end{figure}
 
@@ -512,14 +539,20 @@ Unfortunately, what we have not seen yet is what our model and data say about hy
 %
 However, unlike in more frequentist/classical analysis, the Bayesian approach allows to recover information about any derived measure from the obtained samples. Here's how:
 
-Take hypothesis 3 which requires us to compare cells 2 and 3. The hypothesis states that $\beta_0 + \beta_{\text{pol}} > \beta_0 + \beta_{\text{male}}$, which reduces to $\beta_{\text{pol}} > \beta_{\text{male}}$. We can approximate the posterior probability that this is true based on the samples that we obtained for our model in the same general way as before, namely \tr{I think this would be easier to follow if we'd keep the reference level in the equation}:
+Take hypothesis 3 which requires us to compare cells 2 and 3. The hypothesis states that
+$\beta_0 + \beta_{\text{pol}} > \beta_0 + \beta_{\text{male}}$, which reduces to
+$\beta_{\text{pol}} > \beta_{\text{male}}$. We can approximate the posterior probability that
+this is true based on the samples that we obtained for our model in the same general way as
+before, namely \tr{I think this would be easier to follow if we'd keep the reference level in
+  the equation} \mf{aaargh, I cannot do it; that's rock-bottom for me; ;-) it's explained in
+  the paragraph above why we \emph{can} leave it out; please \dots}:
 
 \begin{minipage}[]{1.1\textwidth}
 \begin{lstlisting}[language=R]
 # proportion of samples where the mean for cell 2 was bigger 
 # than that of cell 3 
 # this number approximates P(beta_pol > beta_male | model, data)
-mean(post_samples_FE$b_contextpol - post_samples_FE$b_genderM > 0)
+mean(post_samples_FE$b_contextpol > post_samples_FE$b_genderM)
 \end{lstlisting}
 \end{minipage}
 
@@ -633,7 +666,16 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 \end{minipage}
 
 The lines 29--34 again give the estimates of the fixed-effects coefficients. The mean estimates look very similar to the ones that we obtained in the fixed-effect only model above. However, not surprisingly, our uncertainty surrounding these estimates is larger.  
-We now also get information about the parameters implied by the specified random effect structure. Lines 9--21 cover the by-sentence random effects, lines 23--27 cover the by-subject random effects. We see from the 95\% credible intervals that the only parameters implied by the random effects structure that does seem to receive sufficient a posteriori credence on non-trivial values are the by-sentence and by-subject random intercepts.\tr{wait? I don't understand. Where do you get this from? The random intercepts and slopes are SDs, meaning they are bound to zero, so from the CIs, you cannot infer that they are relevant or not. You can for the correlation terms, however, they are rarely systematic}
+We now also get information about the parameters implied by the specified random effect
+structure. Lines 9--21 cover the by-sentence random effects, lines 23--27 cover the by-subject
+random effects. We see from the 95\% credible intervals that the only parameters implied by the
+random effects structure that does seem to receive sufficient a posteriori credence on
+non-trivial values are the by-sentence and by-subject random intercepts.\tr{wait? I don't
+  understand. Where do you get this from? The random intercepts and slopes are SDs, meaning
+  they are bound to zero, so from the CIs, you cannot infer that they are relevant or not. You
+  can for the correlation terms, however, they are rarely systematic} \mf{I think you can infer
+that they are not noticably different from zero; but I agree this is a subtle point and maybe
+not to be touched here}
 
 To check the probability of our hypotheses of interest, we can use the \texttt{faintr} package again:
 
