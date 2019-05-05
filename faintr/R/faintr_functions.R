@@ -1,3 +1,14 @@
+#' Obtaining information about factors in regression model
+#'
+#' For a model for a factorial design, fitted with brms, this function returns information about the factors used, their levels, and the reference levels.
+#' @param model Model fit from brms package.
+#' @keywords regression, factorial design, brms
+#' @export
+#' @return list with names of factors and their levels, including the reference levels (in dummy coding)
+#' @examples
+#' library(brms)
+#' m = brm(yield ~ N * P * K, npk)
+#' get_factor_information(m)
 get_factor_information = function(model) {
   
   # extract information about dependent and independent variables from formula
@@ -49,12 +60,15 @@ get_factor_information = function(model) {
 
 #' Extracting cell means
 #'
-#' This function takes a brms model fit for a factorial design and outputs a comparison of all factor levels. 
+#' This function takes a brms model fit for a factorial design and outputs a comparison of all factor levels against each other, and posterior samples of all cell means. 
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
 #' @export
+#' @return list with (i) samples of estimated means of all cells and (ii) pairwise comparison of each cell (whether one has credibly a higher inferred mean than the other)
 #' @examples
-#' extract_posterior_cell_means()
+#' #' library(brms)
+#' m = brm(yield ~ N * P * K, npk)
+#' extract_posterior_cell_means(m)
 extract_posterior_cell_means = function(model) {
   
   # get information about factors

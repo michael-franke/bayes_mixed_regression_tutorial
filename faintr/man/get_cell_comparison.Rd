@@ -4,16 +4,25 @@
 \alias{get_cell_comparison}
 \title{Comparing cell means}
 \usage{
-get_cell_comparison(model, cell_low, cell_high)
+get_cell_comparison(model, higher, lower)
 }
 \arguments{
 \item{model}{Model fit from brms package.}
 }
+\value{
+list with posterior samples for each group, and the posterior probability that group 'higher' has a higher estimated coefficient in the posterior samples than the group 'lower'
+}
 \description{
-This function takes a brms model fit and design cells to compare and it outputs posterior probabilities over differences between cell means.
+This function takes a brms model fit and design cells to compare and it outputs the posterior probability that the 'higher' cell has a higher coefficient than the 'lower' group.
 }
 \examples{
-get_cell_comparison()
+library(brms)
+m = brm(yield ~ N * P * K, npk)
+get_cell_comparison(
+ model = m, 
+ higher = list("N" = "1", "P" = "1",  "K" = "1"), 
+ lower  = list("N" = "0", "P" = "0",  "K" = "1")
+)
 }
 \keyword{brms}
 \keyword{design,}
