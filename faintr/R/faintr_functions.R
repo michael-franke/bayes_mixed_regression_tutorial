@@ -180,20 +180,19 @@ extract_posterior_cell_means = function(model) {
 
 #' Comparing cell means
 #'
-#' This function takes a brms model fit and design cells to compare and it outputs posterior probabilities over differences between cell means.
+#' This function takes a brms model fit and design cells to compare and it outputs the posterior probability that the 'higher' cell has a higher coefficient than the 'lower' group.
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
 #' @export
+#' @return list with posterior samples for each group, and the posterior probability that group 'higher' has a higher estimated coefficient in the posterior samples than the group 'lower'
 #' @examples
-#' get_cell_comparison()
-get_cell_comparison_old = function(model, cell_low, cell_high) {
-  ### TODO: currently relying on correct order of factors in 'cell_low' and 'cell_high'
-  cell_high = paste(names(cell_high), unlist(cell_high), sep = ":", collapse = "__")
-  cell_low = paste(names(cell_low), unlist(cell_low), sep = ":", collapse = "__")
-  all_cells_compared = extract_posterior_cell_means(model)$all_cells_compared
-  all_cells_compared %>% filter(cell_name_high == cell_high, cell_name_low == cell_low) %>% pull(posterior)
-}
-
+#' library(brms)
+#' m = brm(yield ~ N * P * K, npk)
+#' get_cell_comparison(
+#'  model = m, 
+#'  higher = list("N" = "1", "P" = "1",  "K" = "1"), 
+#'  lower  = list("N" = "0", "P" = "0",  "K" = "1")
+#' )
 get_cell_comparison = function(model, higher, lower) {
   
   # get information about factors
@@ -265,28 +264,3 @@ get_cell_comparison = function(model, higher, lower) {
     )
   )
 }
-
-get_cell_comparison(
-  model = model, 
-  higher = list(gender = "F", context = "inf"), 
-  lower = list(gender = "F", context = "pol")
-)
-
-get_cell_comparison(
-  model = model, 
-  higher = list(context = "inf", gender = "M"), 
-  lower = list(gender = "M", context = "pol")
-)
-
-
-get_cell_comparison(
-  model = model, 
-  higher = list(), 
-  lower = list(gender = "M")
-)
-
-get_cell_comparison(
-  model = model, 
-  higher = list(context = "pol"), 
-  lower = list()
-)
