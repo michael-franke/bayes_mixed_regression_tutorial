@@ -14,6 +14,7 @@ list with names of factors and their levels, including the reference levels (in 
 }
 \description{
 For a model for a factorial design, fitted with brms, this function returns information about the factors used, their levels, and the reference levels.
+For more information see \code{vignette('faintr_basics')}.
 }
 \examples{
 library(brms)

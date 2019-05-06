@@ -16,6 +16,7 @@ list with posterior samples for each group, and the posterior probability that g
 This function takes a brms model fit for a factorial design and a specification of two groups (subsets of design cells) to compare. 
 A group is specified as a named list, specifiying the factors and their levels which to include in the group.
 It outputs the posterior mean of the 'higher' minus the 'lower' subset of cells, its 95 percent credible interval and the posterior probability that the 'higher' group has a higher mean than the the 'lower' group.
+For more information see \code{vignette('faintr_basics')}.
 }
 \examples{
 library(brms)

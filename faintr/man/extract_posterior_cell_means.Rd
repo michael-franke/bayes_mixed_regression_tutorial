@@ -13,7 +13,8 @@ extract_posterior_cell_means(model)
 list with (i) samples of estimated means of all cells and (ii) pairwise comparison of each cell (whether one has credibly a higher inferred mean than the other)
 }
 \description{
-This function takes a brms model fit for a factorial design and outputs a comparison of all factor levels against each other, and posterior samples of all cell means.
+This function takes a brms model fit for a factorial design and outputs a comparison of all factor levels against each other, and posterior samples of all cell means. 
+For more information see \code{vignette('faintr_basics')}.
 }
 \examples{
 #' library(brms)

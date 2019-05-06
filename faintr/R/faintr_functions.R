@@ -1,6 +1,7 @@
 #' Obtaining information about factors in regression model
 #'
 #' For a model for a factorial design, fitted with brms, this function returns information about the factors used, their levels, and the reference levels.
+#' For more information see \code{vignette('faintr_basics')}.
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
 #' @import tidyverse brms
@@ -86,6 +87,7 @@ The factor level(s) '", paste0(factor_levels[check_permitted_characters(factor_l
 #' Extracting cell means
 #'
 #' This function takes a brms model fit for a factorial design and outputs a comparison of all factor levels against each other, and posterior samples of all cell means. 
+#' For more information see \code{vignette('faintr_basics')}.
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
 #' @import tidyverse brms
@@ -224,6 +226,7 @@ extract_posterior_cell_means = function(model) {
 #' This function takes a brms model fit for a factorial design and a specification of two groups (subsets of design cells) to compare. 
 #' A group is specified as a named list, specifiying the factors and their levels which to include in the group.
 #' It outputs the posterior mean of the 'higher' minus the 'lower' subset of cells, its 95 percent credible interval and the posterior probability that the 'higher' group has a higher mean than the the 'lower' group.
+#' For more information see \code{vignette('faintr_basics')}.
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
 #' @import tidyverse brms
@@ -310,8 +313,6 @@ compare_groups = function(model, higher, lower) {
   post_samples_higher = extract_group_samples(higher)
   post_samples_lower  = extract_group_samples(lower)
   
-
-  
   outlist = list(
     post_samples_higher = post_samples_higher,
     post_samples_lower = post_samples_lower,
@@ -340,12 +341,3 @@ print.faintCompare = function(obj) {
   cat("95% CI: [", signif(obj$l95_ci, 4), ";", signif(obj$u95_ci,4), "]\n")
   cat("P('higher - lower' > 0): ", signif(obj$probability,4), "\n")
 }
-
-# knit_print.faintCompare = function(obj) {
-#   cat("Outcome of comparing groups:\n")
-#   cat(" * higher: ", obj$higher, "\n")
-#   cat(" * lower:  ", obj$lower, "\n")
-#   cat("Mean 'higher - lower': ", signif(obj$mean_diff, 4), "\n")
-#   cat("95% CI: [", signif(obj$l95_ci, 4), ";", signif(obj$u95_ci,4), "]\n")
-#   cat("P('higher - lower' > 0): ", signif(obj$probability,4), "\n")
-# }
