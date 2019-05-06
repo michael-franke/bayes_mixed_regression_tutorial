@@ -146,7 +146,9 @@ library(tidyverse)
 
 # package for Bayesian regression modeling
 library(brms)
-# option for Bayesian regression models: use all available cores for parallel computing
+
+# option for Bayesian regression models: 
+# use all available cores for parallel computing
 options(mc.cores = parallel::detectCores())
 
 # set seed
@@ -232,8 +234,7 @@ from female speakers are generally higher than those from male speakers (points 
 are higher than in the right column). We also see that pitch values in the informal context are slightly higher than those in the polite context  (blue points are
 slightly higher than orange points).\marginnote{The code needed to generated the picture in
   Figure~\ref{fig:BasicPlotData_data} is not reproduced here, but included in the script in the
-  resources for this tutorial: \url{https://github.com/ michael- franke/bayes_mixed_
-    regression_tutorial}}
+  resources for this tutorial: \url{https://github.com/michael-franke/bayes_mixed_regression_tutorial}}
 
 \begin{figure}[t]
   \centering
@@ -288,14 +289,14 @@ informal contexts) and deviations from this \textbf{reference cell} for each ind
 ($\beta_{\text{male}}$, and $\beta_{\text{polite}}$), and a so-called \textbf{interaction term}
 $\beta_{\text{pol\&male}}$. In other words, our regression estimates the mean of the reference level and estimates how much we need to adjust this mean when we change either the context level (C2), the gender level (C3), or both (C4). Every value that the model estimates is called a parameter.
 
-\begin{figure}[h]
+\begin{figure}[]
   \centering
     \includegraphics[width = \textwidth]{pics/table_coefficients.pdf}
     \caption{Coefficients of a dummy-coded regression model for the factorial $2 \times 2$ design.}
     \label{fig:coefficients_table}
 \end{figure}
 
-\begin{InfoBox}[t]
+\begin{InfoBox}[]
 \centering
 \colorbox{mygray}{\centering
   \begin{minipage}{1.0\textwidth}
@@ -388,7 +389,49 @@ modelFE = brm(
 \end{lstlisting}
 \end{minipage}
 
-\noindent The \texttt{brms} packages uses the probabilistic programming language \texttt{Stan} in the background. What \texttt{brms} does is translating your syntax into Stan code and executes it. The Stan code  is then translated to C++ (hence the message about ``compiling C++'' when you run this code). Conceptually, Stan obtains samples from the posterior distribution, based on an algorithm called \emph{Hamiltonian Monte Carlo}. This is an instance of a more general class of algorithms, called \emph{Markov Chain Monte Carlo} methods. The purpose of these methods is to return representative samples from the posterior distribution (without actually having to compute the exact distribution, which might be intractable) \tr{I suggest deleting the brackets. Difficult to understand and not relevant}.
+\noindent The \texttt{brms} packages uses the probabilistic programming language \texttt{Stan}
+in the background. What \texttt{brms} does is translating your syntax into Stan code and
+executes it. The Stan code  is then translated to C++ (hence the message about ``compiling
+C++'' when you run this code). Conceptually, Stan obtains samples from the posterior
+distribution, based on an algorithm called \emph{Hamiltonian Monte Carlo}. This is an instance
+of a more general class of algorithms, called \emph{Markov Chain Monte Carlo} methods. The
+purpose of these methods is to return representative samples from the posterior distribution.
+If you are interested in finding out more about this 'sampling stuff', why not pay a visit to Info Box~2?
+
+\begin{InfoBox}[]
+\centering
+\colorbox{mygray}{\centering
+  \begin{minipage}{1.0\textwidth}
+
+    \emph{Sampling, MCMC \& diagnostics}
+    \medskip
+
+    Bayesian ideas are old. Why have they come to such popularity only recently? -- Part of the
+    answer is certainly to be found in recent developments in computation. To understand this,
+    consider Bayes rule for data analysis. We have a prior $P{\theta}$ over parameter vector
+    $\theta$, a likelihood function $P(D \mid \theta)$ and we want to compute the posterior
+    distribution, using Bayes rule like so:
+    \begin{eqnarray*}
+      P(\theta \mid D) = \frac{P(\theta) \ P(D \mid \theta)}{ \int P(\theta') \ P(D \mid
+      \theta') \textrm{d}\theta'}
+    \end{eqnarray*}
+    The problem is the integral in the denominator. If $\theta$ is a large vector of parameters
+    (e.g., in a hierarchical regression model), it might not be all that easy (euphemistic for
+    ``quite impossible'') to crack that integral. Hh, what to do? -- The solution is not to
+    crack it at all! Yes, you read that correctly: clever algorithms like \emph{Markov Chain
+      Monte Carlo} allow us to approximate the posterior distribution without having to
+    calculate the integral-of-doom. They do that by giving us samples.
+
+    For this tutorial, it is not important to understand how MCMC algorithms work precisely.
+    Let's just accept that they give us samples from the posterior distribution, which we can
+    use to plot or reason with, e.g., like in Figure~\ref{fig:Posteriors_FE}.  
+  \end{minipage} \par
+  } \par
+  \begin{center}
+    Info Box 3: Information in summaries of \texttt{brm} model fits.
+  \end{center}
+\end{InfoBox}
+
 
 You can type in \texttt{modelFE} in order to get a summary of the model fit. It should look much like the following output (note that your  values might be slightly different due to stochastic variation in the sampling procedure).
 
@@ -429,7 +472,7 @@ Let us look at lines 9--14 in detail now. What these lines give us is a table wi
 %
 \marginnote[-2.5cm]{Intuitively, the 95\% credible interval is the range of values that we can often practically consider credible enough to care about.}
 %
-More details about the information given in the other columns can be found in Info Box~2.
+More details about the information given in the other columns can be found in Info Box~3.
 
 \begin{InfoBox}[t]
 \centering
@@ -467,9 +510,8 @@ More details about the information given in the other columns can be found in In
   \end{minipage} \par
   } \par
   \begin{center}
-    Info Box 2: Information in summaries of \texttt{brm} model fits.
+    Info Box 3: Information in summaries of \texttt{brm} model fits.
   \end{center}
-  % \caption{\label{InfoBox:asymptotic_CIs} Here is my caption}  
 \end{InfoBox}
 
 
