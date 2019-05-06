@@ -13,7 +13,6 @@ options(mc.cores = parallel::detectCores())
 # set seed
 set.seed(1702)
 
-
 #####################################################
 ## read and massage the data
 #####################################################
@@ -176,17 +175,17 @@ get_posterior_beliefs_about_hypotheses_new = function(model) {
                    "Male-informal < Female-polite"),
     probability = c(
       # insert the comparisons you are interested in referring to the extracted samples
-      get_cell_comparison(
+      compare_groups(
         model = model, 
         lower = list(gender = "F", context = "pol"), 
         higher = list(gender = "F", context = "inf")
       )$probability,
-      get_cell_comparison(
+      compare_groups(
         model = model, 
         lower = list(gender = "M", context = "pol"), 
         higher = list(gender = "M", context = "inf")
       )$probability,
-      get_cell_comparison(
+      compare_groups(
         model = model, 
         lower = list(gender = "M", context = "inf"),
         higher = list(gender = "F", context = "pol")
@@ -195,7 +194,7 @@ get_posterior_beliefs_about_hypotheses_new = function(model) {
   )
 }
 
-get_posterior_beliefs_about_hypotheses_new(modelFE
+get_posterior_beliefs_about_hypotheses_new(modelFE)
 
 ###############################################
 ## models with additional random effects
