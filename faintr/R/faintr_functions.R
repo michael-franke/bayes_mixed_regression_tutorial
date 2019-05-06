@@ -217,9 +217,11 @@ extract_posterior_cell_means = function(model) {
 }
 
 
-#' Comparing cell means
+#' Compare means of two subsets of factorial design cells
 #'
-#' This function takes a brms model fit and design cells to compare and it outputs the posterior probability that the 'higher' cell has a higher coefficient than the 'lower' group.
+#' This function takes a brms model fit and a specification of two groups (subsets of design cells) to compare. 
+#' A group (subset of cells) is specified as a named list, specifiying the factors and their levels which to include in the group.
+#' It outputs the posterior mean of the 'higher' minus the 'lower' subset of cells, its 95% credible interval and the posterior probability that the 'higher' group has a higher mean than the the 'lower' group.
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
 #' @export
@@ -227,12 +229,21 @@ extract_posterior_cell_means = function(model) {
 #' @examples
 #' library(brms)
 #' m = brm(yield ~ N * P * K, npk)
-#' get_cell_comparison(
+#' # this compares two single cells in the factorial design
+#' compare_groups(
 #'  model = m, 
 #'  higher = list("N" = "1", "P" = "1",  "K" = "1"), 
 #'  lower  = list("N" = "0", "P" = "0",  "K" = "1")
 #' )
-get_cell_comparison = function(model, higher, lower) {
+#' # this compares the average of N=1 cells to the grand mean
+#' # like in deviance conding
+#' compare_groups(
+#'  model = m, 
+#'  higher = list("N" = "1"), 
+#'  lower  = list()
+#' )
+#' 
+compare_groups = function(model, higher, lower) {
   
   # get information about factors
   factor_info = get_factor_information(model)
