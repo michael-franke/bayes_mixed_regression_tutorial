@@ -1,0 +1,30 @@
+#' Factorial-design interpreter for Bayesian regression models
+#'
+#' @docType package
+#' @name faintr-package
+#' @aliases faintr
+#'
+#' @description
+#' 
+#' he \pkg{faintr} package provides convenience functions for testing different hypotheses 
+#' about factor level combinations for a Bayesian regression analysis of data from a 
+#' factorial-design experiment. It builds on a regression model fitted with the help of 
+#' the \pkg{brms} package. For more information type \code{vignette("faintr_basics")}. 
+#' 
+#' @details 
+#' 
+#' The package provides the following functions.
+#' \code{\link{get_factor_information}} extracts information about the factors
+#' and their (reference) levels used in the regression analysis.
+#' \code{\link{extract_posterior_cell_means}} gives the estimated means for all 
+#' design cells, and a complete pairwise comparison between cells.
+#' \code{\link{compare_groups}} allows the comparison of any pair of 
+#' (subsets) of cells.
+#' 
+#' For more information type \code{vignette("faintr_basics")}
+#' #' 
+#' @seealso 
+#' \code{\link{brm}}, 
+#' \code{\link{brmsfit}}
+#'
+NULL
