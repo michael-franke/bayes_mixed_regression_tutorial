@@ -401,15 +401,15 @@ If you are interested in finding out more about this 'sampling stuff', why not p
 \begin{InfoBox}[]
 \centering
 \colorbox{mygray}{\centering
-  \begin{minipage}{1.0\textwidth}
+  \begin{minipage}{1.5\textwidth}
 
-    \emph{Sampling, MCMC \& diagnostics}
+    \emph{Sampling, MCMC, chains, \& diagnostics (\dots, oh, and frogs \& lilies)}
     \medskip
 
     Bayesian ideas are old. Why have they come to such popularity only recently? -- Part of the
     answer is certainly to be found in recent developments in computation. To understand this,
     consider Bayes rule for data analysis. We have a prior $P{\theta}$ over parameter vector
-    $\theta$, a likelihood function $P(D \mid \theta)$ and we want to compute the posterior
+    $\theta$, a likelihood function $P(D\mid\theta)$ and we want to compute the posterior
     distribution, using Bayes rule like so:
     \begin{eqnarray*}
       P(\theta \mid D) = \frac{P(\theta) \ P(D \mid \theta)}{ \int P(\theta') \ P(D \mid
@@ -420,15 +420,57 @@ If you are interested in finding out more about this 'sampling stuff', why not p
     ``quite impossible'') to crack that integral. Hh, what to do? -- The solution is not to
     crack it at all! Yes, you read that correctly: clever algorithms like \emph{Markov Chain
       Monte Carlo} allow us to approximate the posterior distribution without having to
-    calculate the integral-of-doom. They do that by giving us samples.
+    calculate the integral-of-doom. They do that by giving us \textbf{samples}.
 
     For this tutorial, it is not important to understand how MCMC algorithms work precisely.
     Let's just accept that they give us samples from the posterior distribution, which we can
-    use to plot or reason with, e.g., like in Figure~\ref{fig:Posteriors_FE}.  
+    use to plot or reason with, e.g., like in Figure~\ref{fig:Posteriors_FE}. That's nice, but
+    it would be foolish to just trust whatever samples some piece of software gives us without
+    some sanity checking. That's why it is common to inspect your samples, visually by
+    plotting, and by certain numeric measure indicating how ``good'' your samples really are.
+    
+    To understand the most basic diagnostics (which is really all you need for common and
+    simple applications), we need to understand one thing about how MCMC methods generate
+    samples. They do that just like a rather dumb frog would hop from one lily pad to another
+    in the pursuit of flies. Call the frog ``Franz'' (alliteration, folks!). Franz sits on a
+    lily pad and observes the number of flies here. He then considers exactly one other lily
+    pad and wonders: ``Should I jump there?'' If there are more flies over there, he jumps; if
+    not, he sometimes stays, sometimes jumps (with a probability proportional to the ratio of
+    flies here and there). If he does that over an over again, the probability of visiting a
+    lily pad is proportional to its number of flies (relative to that of all other lily pads
+    Franz might visit). Enough of frogs? Okay, the lily pads are really parameter values for
+    $\theta$ and the number of flies is the quantity $P(\theta) \ P(D \mid \theta)$. So,
+    Franz's visits to a lily pad are visits to a vector of parameter values, and
+    the history of these visits gives us information about the relative posterior probability
+    of parameter values $\theta$. --- Roughly, modulo frogs and lilies, that's how basic MCMC
+    works.
+
+    The problem is that we can be sure that the visits are ``good'' samples from the posterior
+    distribution only if we take infinitely many. Usually, Franz is too lazy to jump that much
+    (and we are too busy). If we only have a small-ish number of samples, it might be that
+    Franz was sitting (with his fat \dots) on the same lily pad for a looooong time. While he
+    sat there, we did not learn much about the posterior's shape. Variants of basic MCMC, like
+    Hamiltonian Monte Carlo which \texttt{brms} uses, cleverly circumnavigate this problem to a
+    wide extent. Still, we should not trust Franz alone. So we routinely run several
+    \textbf{chains} (per defaul \texttt{brm} uses 4 chains). Think of this as letting go Franz,
+    Fritz, Frieda and Frederieke, all starting on random lily pads, doing their myopic jumping
+    all on their own. Usually, we let them jump for a while before we even start recording
+    where they sat, because they might have started at some far-off place with hardly any flies
+    at all, so that the first jumps are really not interesting. This is the so-called
+    \emph{warm-up} period. Finally, we gather the histories of all four froggies and compare
+    whether the outcome was (roughly) the same. That's what the \textbf{$\hat{R}$-value} in the
+    \texttt{brm} output gives us. If this value is below 1.1, we commonly assume that the
+    history of froggy jumps are similar enough; techinically: the \textbf{chains have
+      converged}. of the froggies commonly to check if the samples are good enough, we can
+    investigate. The number of \textbf{efficient samples} is an estimate of, roughly put, the
+    number of informative jumps that out froggies made, when we subtract periods where they
+    were just sitting around in a spot that was, for example, a local maximum of flies. The
+    higher the proportion of efficient samples, the better.
+    
   \end{minipage} \par
   } \par
   \begin{center}
-    Info Box 3: Information in summaries of \texttt{brm} model fits.
+    Info Box 2: Background on sampling methods \& diagnostics.
   \end{center}
 \end{InfoBox}
 
@@ -466,7 +508,10 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 
 \medskip
 
-This summary looks very much like regression model summaries of non-Bayesian model. Lines 2--5 give us information about the model and the data used. Lines 6 and 7 tell us about the sampling procedure. We have a total of 4000 samples from the posterior distribution, obtained from 4 chains all of which had 2000 iterations but discarded the first 1000 as warmup (more on this below) \tr{chains, iterations, warm-up need to be elaborated}. Lines 9--14 contain information about our parameters of interest, i.e. what we are most interested in for evaluating our hypotheses, We will discuss them in detail below. Lines 16--18 contain information that look similar to those in lines 9--14. This is the estimation of the standard deviation \texttt{sigma}, describing the variance of the assumed normal distributions (which describe the distribution of measures in each design cell). Finally, lines 20--22 contain general information about the model fit and the information presented in this summary.\marginnote{If the model failed to converge or other problems occurred, you would see an informative message in the last part of this summary.}
+This summary looks very much like regression model summaries of non-Bayesian model. Lines 2--5
+give us information about the model and the data used. Lines 6 and 7 tell us about the sampling
+procedure. We have a total of 4000 samples from the posterior distribution, obtained from 4
+chains all of which had 2000 iterations but discarded the first 1000 as warmup (see Info Box~3). Lines 9--14 contain information about our parameters of interest, i.e. what we are most interested in for evaluating our hypotheses, We will discuss them in detail below. Lines 16--18 contain information that look similar to those in lines 9--14. This is the estimation of the standard deviation \texttt{sigma}, describing the variance of the assumed normal distributions (which describe the distribution of measures in each design cell). Finally, lines 20--22 contain general information about the model fit and the information presented in this summary.\marginnote{If the model failed to converge or other problems occurred, you would see an informative message in the last part of this summary.}
 
 Let us look at lines 9--14 in detail now. What these lines give us is a table with four rows, each of which corresponds to a parameter in the model, namely the coefficients shown in Figure~\ref{fig:coefficients_table}. The variable \texttt{Intercept} refers to our $\beta_0$, which represents the mean of our reference level in cell 1 (female speakers in polite contexts). The variable \texttt{genderM} corresponds to our $\beta_{\text{male}}$, \texttt{contextpol} corresponds to our $\beta_{\text{pol}}$, and \texttt{genderM:contextpol} is the interaction term $\beta_{\text{pol\&male}}$. For each of these parameters, the table contains very useful summary statistics based on the samples returned from the model fit. Here we are interested in the information in columns \texttt{Estimate}, that is the estimate of each parameter's mean. We are also interested in \texttt{l-95\% CI} and \texttt{u-95\% CI}, which give us the lower and upper bound of the \textbf{95\% credible interval} for each parameter.
 %
@@ -494,18 +539,17 @@ More details about the information given in the other columns can be found in In
 
     The column \texttt{Eff.Sample}, for efficient samples, gives a rough measure of how many of
     all the samples we took (4000 in our case) are contributing non-redundant information to
-    our estimation. \tr{what does non-redundant mean concretely. Remember I am a noob reading
-      this} \mf{I'll leave this comment unaddressed here and pick it up later in an Info Box on
-      sampling etc.} The higher this number, the better. Finally, \texttt{Rhat} is a measure of
-    whether the samples obtained are likely representative of the true distribution.
-    Concretely, it indicates whether the four chains we ran in parallel all ended up with the
-    same results, so to speak. If this column contains values bigger than 1.1 this is an
-    indication that your model fit has not converged. (If your model output indicates
-    non-convergence, you may want to increase the number of samples, but you should also
-    consider the possibility that you are trying to fit a model which cannot be ``trained''
-    based on the (perhaps too little) data and the particular method of posterior sampling. For
-    common regression analyses, this will usually entail considering a simpler model (e.g.,
-    with fewer explanatory factors, less (correlated) random effects, etc.))
+    our estimation (see Info Box~2). The higher this number, the better. Finally, \texttt{Rhat}
+    is a measure of whether the samples obtained are likely representative of the true
+    distribution (again, see Info Box~2). Concretely, it indicates whether the four chains we
+    ran in parallel all ended up with the same results, so to speak. If this column contains
+    values bigger than 1.1 this is an indication that your model fit has not converged. (If
+    your model output indicates non-convergence, you may want to increase the number of
+    samples, but you should also consider the possibility that you are trying to fit a model
+    which cannot be ``trained'' based on the (perhaps too little) data and the particular
+    method of posterior sampling. For common regression analyses, this will usually entail
+    considering a simpler model (e.g., with fewer explanatory factors, less (correlated) random
+    effects, etc.))
     
   \end{minipage} \par
   } \par
@@ -606,23 +650,57 @@ To conclude this section, the Bayesian approach to regression modeling allows us
 
 To make the comparison of pairs of cells even easier and applicable for even bigger factorial designs, this tutorial comes with a little R package, the \texttt{faintr} package.
 %
-\marginnote{The name \texttt{faintr} is indicative of the possibility that the package might break down unexpectedly (we might consider renaming after more extensive testing), but also alludes to ``\emph{fa}ctorial design'' and ``\emph{int}erpretation'' somehow.}
+\marginnote[-1.5cm]{The name \texttt{faintr} is indicative of the possibility that the package might break down unexpectedly (we might consider renaming after more extensive testing), but also alludes to ``\emph{fa}ctorial design'' and ``\emph{int}erpretation'' somehow.}
 %
 You can install the package from GitHub with the \texttt{devtools} package, as follows:
 
-\begin{minipage}[]{1\textwidth}
+\begin{minipage}[]{1.3\textwidth}
 \begin{lstlisting}[language=R]
 # package to allow installation from github
 library(devtools)
-# package with convenience function for Bayesian regression models for factorial designs
-install_github("michael-franke/bayes_mixed_regression_tutorial/faintr") # install from GitHub
+# package with convenience function for Bayesian regression 
+# models for factorial designs
+install_github("michael-franke/bayes_mixed_regression_tutorial/faintr", 
+               build_vignettes = TRUE) # install from GitHub
 library(faintr)
 \end{lstlisting}
 \end{minipage}
 
-The \texttt{faintr} package provides two (hopefully) useful functions. The function \texttt{extract\_posterior\_cell\_means} takes as input the output of a factorial-design regression model fitted with \textrm{brm}. It outputs samples for all design cell means, and a comparison of all design cells against each other. The function \texttt{get\_cell\_comparison} takes the same kind of model fit as input, together with a specification of which two cells to compare against each other. Using the latter function, the source code provides a convenient function to produce the posterior probability of the three hypothesis relevant for this tutorial:
-%
-% \marginnote{We will reuse this function, when we inspect the conclusions supported by different models in the following.}
+The \texttt{faintr} package provides the function \texttt{extract\_posterior\_cell\_means}
+which takes as input the output of a factorial-design regression model fitted with
+\textrm{brm}. It outputs samples for all design cell means, and a comparison of all design
+cells against each other. The function \texttt{compare\_groups} takes the same kind of model
+fit as input, together with a specification of which two (subsets of) cells to compare against
+each other. For example, we can compare (diagonally) the cells for female speakers in polite
+contexts with male speakers in informal contexts with this call:
+
+\begin{minipage}[]{1.3\textwidth}
+\begin{lstlisting}[language=R]
+compare_groups(
+  model = modelFE, 
+  lower = list(gender = "M", context = "inf"),
+  higher = list(gender = "F", context = "pol")
+)
+\end{lstlisting}
+\end{minipage}
+
+The out put is this:
+
+\medskip
+
+\begin{minipage}[]{\textwidth}
+\begin{rc}
+Outcome of comparing groups:
+ * higher:  gender:F context:pol 
+ * lower:   gender:M context:inf 
+Mean 'higher - lower':  88.97 
+95% CI: [ 67.33 ; 110.2 ]
+P('higher - lower' > 0):  1 
+\end{rc}
+\end{minipage}
+
+Using the \texttt{compare\_groups} function, the source code provides a convenient function to
+produce the posterior probability of the three hypothesis relevant for this tutorial:
 
 \medskip
 
@@ -734,6 +812,11 @@ To check the probability of our hypotheses of interest, we can use the \texttt{f
 3 Male-informal < Female-polite         0.988
 \end{rc}
 \end{minipage}
+
+\section{Model criticism}
+
+\dots in progress \dots
+
 \section{Priors}
 
 \dots in progress \dots
