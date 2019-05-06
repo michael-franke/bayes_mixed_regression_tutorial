@@ -20,10 +20,25 @@ get_factor_information = function(model) {
   independent_variables = independent_variables[which(independent_variables != "")]
   
   # stop this if there are not at least two factors
-  if (length(independent_variables) <= 1) {
-    stop("Oeps! There do not seem to be at least two factors. If you have no more than one factor, computing cell means is not necessary. Use the estimated coffeficients instead.")
+  if (length(independent_variables) < 1) {
+    stop("Oeps! There do not seem to be any factors!")
   }
   
+  # stop if any factor name or factor level contains a character that brms might not handle correctly
+  check_permitted_characters = function(chr_vec) {
+    str_which(chr_vec, "[^([:alnum:]|\\.|_)]")
+  }
+  # dependent variable
+  if (length(check_permitted_characters(dependent_variable))>0) {
+    stop("All variables, factor names, and factor levels must not contain any character except alpha-numeric characters (letters and numbers), dots '.', or underscores '_'.
+The dependent variable '", dependent_variable, "' does not satisfy this constraint.")
+  }
+  # independent variables
+  if (length(check_permitted_characters(independent_variables))>0) {
+    stop("All variables, factor names, and factor levels must not contain any character except alpha-numeric characters (letters and numbers), dots '.', or underscores '_'.
+The dependent variable(s) '", paste0(independent_variables[check_permitted_characters(independent_variables)], collapse = ", ") , "' does (do) not satisfy this constraint.")
+  }
+
   # construct three helpful representations of factors and their levels for the following
   ## factors :: a list with all factors and their levels
   factors = list()
@@ -37,6 +52,15 @@ get_factor_information = function(model) {
   if (min(n_levels) <= 1){
     stop("Oeps! There seems to be a factor with less than 2 levels. Please check and possibly exclude that factor.")
   }
+  
+  # check naming conventions in factor levels
+  factor_levels = unlist(factors)
+  if (length(check_permitted_characters(factor_levels))>0) {
+    stop("All variables, factor names, and factor levels must not contain any character except alpha-numeric characters (letters and numbers), dots '.', or underscores '_'.
+The factor level(s) '", paste0(factor_levels[check_permitted_characters(factor_levels)], collapse = ", ") , "' does (do) not satisfy this constraint.")
+  }
+  
+  
   ## ref_levels_list :: a list with all factors and their refernce levels
   ref_levels_list = factors
   for (iv in independent_variables) {
@@ -144,7 +168,8 @@ extract_posterior_cell_means = function(model) {
                                }
       )
       tibble(
-        cell = paste(map_chr(1:ncol(cell), function(j) as.character(cells_readable[i,j])), collapse = "__"),
+        cell = paste(map_chr(1:ifelse(is.null(ncol(cell)), 1, ncol(cell)), 
+                             function(j) as.character(cells_readable[i,j])), collapse = "__"),
         predictor_value = rowSums(post_samples[column_indices]),
         n_sample = 1:length(predictor_value)
       )
