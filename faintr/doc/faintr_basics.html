@@ -209,7 +209,8 @@ hr {
 
 <p>Install the <code>faintr</code> package with <code>devtools</code> from GitHub:</p>
 
-<pre><code class="r">devtools::install_github(&#39;michael-franke/bayes_mixed_regression_tutorial/faintr&#39;)
+<pre><code class="r">devtools::install_github(&#39;michael-franke/bayes_mixed_regression_tutorial/faintr&#39;, 
+                         build_vignettes = TRUE)
 library(faintr)
 </code></pre>
 
@@ -254,10 +255,10 @@ m_dummy = brm(pitch ~ gender * context + (1 | subject + sentence), politedata)
 
 <pre><code class="r">fixef(m_dummy)
 ##                      Estimate Est.Error        Q2.5     Q97.5
-## Intercept           261.96353 26.210121  210.634410 321.25811
-## genderM            -118.84640 37.805871 -196.814199 -54.35276
-## contextpol          -27.43324  7.997798  -43.145377 -11.94414
-## genderM:contextpol   15.57078 11.416124   -5.762044  37.68132
+## Intercept           260.55672 22.894586  212.747198 306.55812
+## genderM            -116.65491 29.789504 -177.970877 -55.97815
+## contextpol          -27.44564  7.865963  -42.595914 -12.26362
+## genderM:contextpol   15.80439 11.350807   -5.893805  38.33587
 </code></pre>
 
 <p>The reference cell is where <code>gender:F</code> and <code>context:inf</code>, so female speakers in informal contexts. The estimated mean for the cell with data from male speakers in informal contexts is retrievable by adding the estimated coefficient <code>genderM</code> in the output above from the estimated Intercept.</p>
@@ -272,9 +273,9 @@ m_dummy = brm(pitch ~ gender * context + (1 | subject + sentence), politedata)
 ## Outcome of comparing groups:
 ##  * higher:  gender:F context:pol 
 ##  * lower:   gender:M context:inf 
-## Mean &#39;higher - lower&#39;:  91.41 
-## 95% CI: [ 24.51 ; 162 ]
-## P(&#39;higher - lower&#39; &gt; 0):  0.9918
+## Mean &#39;higher - lower&#39;:  89.21 
+## 95% CI: [ 25.13 ; 148.5 ]
+## P(&#39;higher - lower&#39; &gt; 0):  0.9952
 </code></pre>
 
 <p>We can also compare the effect of gender female against the grand mean, to retrieve the information normally obtained by deviance coding:</p>
@@ -287,9 +288,9 @@ m_dummy = brm(pitch ~ gender * context + (1 | subject + sentence), politedata)
 ## Outcome of comparing groups:
 ##  * higher:  gender:F 
 ##  * lower:   grand mean 
-## Mean &#39;higher - lower&#39;:  55.53 
-## 95% CI: [ 23.28 ; 90.3 ]
-## P(&#39;higher - lower&#39; &gt; 0):  0.9958
+## Mean &#39;higher - lower&#39;:  54.38 
+## 95% CI: [ 25.1 ; 85.1 ]
+## P(&#39;higher - lower&#39; &gt; 0):  0.9995
 </code></pre>
 
 </body>

@@ -12,7 +12,8 @@ library(tidyverse)
 theme_set(theme_bw() + theme(plot.background=element_blank()) )
 
 ## ---- eval = F-----------------------------------------------------------
-#  devtools::install_github('michael-franke/bayes_mixed_regression_tutorial/faintr')
+#  devtools::install_github('michael-franke/bayes_mixed_regression_tutorial/faintr',
+#                           build_vignettes = TRUE)
 #  library(faintr)
 
 ## ---- echo = F-----------------------------------------------------------
