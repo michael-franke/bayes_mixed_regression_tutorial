@@ -323,6 +323,12 @@ compare_groups = function(model, higher, lower) {
   return(outlist)
 }
 
+#' Print comparison object between factor groups
+#' @param model Model fit from brms package.
+#' @keywords regression, factorial design, brms
+#' @export
+#' @return 
+#' @examples
 print.faintCompare = function(obj) {
   cat("Outcome of comparing groups:\n")
   cat(" * higher: ", obj$higher, "\n")
@@ -332,3 +338,11 @@ print.faintCompare = function(obj) {
   cat("P('higher - lower' > 0): ", signif(obj$probability,4), "\n")
 }
 
+# knit_print.faintCompare = function(obj) {
+#   cat("Outcome of comparing groups:\n")
+#   cat(" * higher: ", obj$higher, "\n")
+#   cat(" * lower:  ", obj$lower, "\n")
+#   cat("Mean 'higher - lower': ", signif(obj$mean_diff, 4), "\n")
+#   cat("95% CI: [", signif(obj$l95_ci, 4), ";", signif(obj$u95_ci,4), "]\n")
+#   cat("P('higher - lower' > 0): ", signif(obj$probability,4), "\n")
+# }
