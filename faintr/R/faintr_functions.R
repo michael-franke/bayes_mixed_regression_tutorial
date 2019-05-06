@@ -219,9 +219,9 @@ extract_posterior_cell_means = function(model) {
 
 #' Compare means of two subsets of factorial design cells
 #'
-#' This function takes a brms model fit and a specification of two groups (subsets of design cells) to compare. 
-#' A group (subset of cells) is specified as a named list, specifiying the factors and their levels which to include in the group.
-#' It outputs the posterior mean of the 'higher' minus the 'lower' subset of cells, its 95% credible interval and the posterior probability that the 'higher' group has a higher mean than the the 'lower' group.
+#' This function takes a brms model fit for a factorial design and a specification of two groups (subsets of design cells) to compare. 
+#' A group is specified as a named list, specifiying the factors and their levels which to include in the group.
+#' It outputs the posterior mean of the 'higher' minus the 'lower' subset of cells, its 95 percent credible interval and the posterior probability that the 'higher' group has a higher mean than the the 'lower' group.
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
 #' @importFrom HDInterval hdi
