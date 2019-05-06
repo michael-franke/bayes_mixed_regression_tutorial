@@ -3,6 +3,7 @@
 #' For a model for a factorial design, fitted with brms, this function returns information about the factors used, their levels, and the reference levels.
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
+#' @import tidyverse brms
 #' @export
 #' @return list with names of factors and their levels, including the reference levels (in dummy coding)
 #' @examples
@@ -87,6 +88,7 @@ The factor level(s) '", paste0(factor_levels[check_permitted_characters(factor_l
 #' This function takes a brms model fit for a factorial design and outputs a comparison of all factor levels against each other, and posterior samples of all cell means. 
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
+#' @import tidyverse brms
 #' @export
 #' @return list with (i) samples of estimated means of all cells and (ii) pairwise comparison of each cell (whether one has credibly a higher inferred mean than the other)
 #' @examples
@@ -224,6 +226,7 @@ extract_posterior_cell_means = function(model) {
 #' It outputs the posterior mean of the 'higher' minus the 'lower' subset of cells, its 95 percent credible interval and the posterior probability that the 'higher' group has a higher mean than the the 'lower' group.
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
+#' @import tidyverse brms
 #' @importFrom HDInterval hdi
 #' @export
 #' @return list with posterior samples for each group, and the posterior probability that group 'higher' has a higher estimated coefficient in the posterior samples than the group 'lower'
