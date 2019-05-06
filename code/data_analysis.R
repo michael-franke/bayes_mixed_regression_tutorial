@@ -167,6 +167,12 @@ library(faintr)
 
 extract_posterior_cell_means(modelFE)
 
+compare_groups(
+  model = modelFE, 
+  lower = list(gender = "M", context = "inf"),
+  higher = list(gender = "F", context = "pol")
+)
+
 get_posterior_beliefs_about_hypotheses_new = function(model) {
   # insert the comparisons you are interested in as strings 
   tibble(
