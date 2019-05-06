@@ -259,7 +259,8 @@ get_cell_comparison = function(model, higher, lower) {
   }
   
   # get posterior samples for all cell means
-  post_cell_samples = extract_posterior_cell_means(model)$predictor_values
+  post_cell_samples = extract_posterior_cell_means(model)$predictor_values %>% 
+    select(- n_sample)
   
   ## helper function :: recursive extraction of cell names
   collect_cell_names = function(remaining_names, remaining_factors) {
@@ -294,12 +295,28 @@ get_cell_comparison = function(model, higher, lower) {
   post_samples_higher = extract_group_samples(higher)
   post_samples_lower  = extract_group_samples(lower)
   
-  return(list(
+
+  
+  outlist = list(
     post_samples_higher = post_samples_higher,
     post_samples_lower = post_samples_lower,
     higher = get_group_names(higher),
     lower = get_group_names(lower),
+    mean_diff = mean(post_samples_higher - post_samples_lower),
+    l95_ci = as.vector(HDInterval::hdi(post_samples_higher - post_samples_lower)[1]),
+    u95_ci = as.vector(HDInterval::hdi(post_samples_higher - post_samples_lower)[2]),
     probability = mean(post_samples_higher > post_samples_lower)
-    )
   )
+  class(outlist) = "faintCompare"
+  return(outlist)
 }
+
+print.faintCompare = function(obj) {
+  cat("Outcome of comparing groups:\n")
+  cat(" * higher: ", obj$higher, "\n")
+  cat(" * lower:  ", obj$lower, "\n")
+  cat("Mean 'higher - lower': ", signif(obj$mean_diff, 4), "\n")
+  cat("95% CI: [", signif(obj$l95_ci, 4), ";", signif(obj$u95_ci,4), "]\n")
+  cat("P('higher - lower' > 0): ", signif(obj$probability,4), "\n")
+}
+
