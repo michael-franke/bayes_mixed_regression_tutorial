@@ -224,6 +224,7 @@ extract_posterior_cell_means = function(model) {
 #' It outputs the posterior mean of the 'higher' minus the 'lower' subset of cells, its 95% credible interval and the posterior probability that the 'higher' group has a higher mean than the the 'lower' group.
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
+#' @importFrom HDInterval hdi
 #' @export
 #' @return list with posterior samples for each group, and the posterior probability that group 'higher' has a higher estimated coefficient in the posterior samples than the group 'lower'
 #' @examples
@@ -314,8 +315,8 @@ compare_groups = function(model, higher, lower) {
     higher = get_group_names(higher),
     lower = get_group_names(lower),
     mean_diff = mean(post_samples_higher - post_samples_lower),
-    l95_ci = as.vector(HDInterval::hdi(post_samples_higher - post_samples_lower)[1]),
-    u95_ci = as.vector(HDInterval::hdi(post_samples_higher - post_samples_lower)[2]),
+    l95_ci = as.vector(hdi(post_samples_higher - post_samples_lower)[1]),
+    u95_ci = as.vector(hdi(post_samples_higher - post_samples_lower)[2]),
     probability = mean(post_samples_higher > post_samples_lower)
   )
   class(outlist) = "faintCompare"
