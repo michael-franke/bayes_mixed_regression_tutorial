@@ -231,8 +231,8 @@ them.\marginnote{Extensive plotting is always recommended to start data analysis
 sentence (semi-transparent points) across gender and context. The solid points indicate the
 average pitch values across all subjects. Looking at the plot, we can see that pitch values
 from female speakers are generally higher than those from male speakers (points in left column
-are higher than in the right column). We also see that pitch values in the informal context are slightly higher than those in the polite context  (blue points are
-slightly higher than orange points).\marginnote{The code needed to generated the picture in
+are higher than in the right column). We also see that pitch values in the informal context are slightly higher than those in the polite context  (orange points are
+slightly higher than purple points).\marginnote{The code needed to generated the picture in
   Figure~\ref{fig:BasicPlotData_data} is not reproduced here, but included in the script in the
   resources for this tutorial: \url{https://github.com/michael-franke/bayes_mixed_regression_tutorial}}
 
@@ -244,14 +244,14 @@ slightly higher than orange points).\marginnote{The code needed to generated the
 \end{figure}
 
 \mf{About Figure~\ref{fig:BasicPlotData_data}, could we make sure the plot is readable in
-  gray-scale printing as well?}
+  gray-scale printing as well?}\tr{color blind and print friendly now}
 
 Based on keen eye-balling, we might want to shout: ``Eureka! The data confirm all of our
 hypotheses!'' But, of course, we need to be more careful. As Bayesians, we would like to
 translate the data into an expression of \textbf{evidence}: does the data provide evidence for
 our research hypotheses? Or are the observable differences to meager? -- Also, notice that
 there is quite a lot of variability between different sentences (the semi-transparent dots in Figure 1).
-For example, some values from the informal condition for female speakers (blue points in left
+For example, some values from the informal condition for female speakers (orange points in left
 column), are lower than their corresponding polite counterparts. Similarly, there could be
 quite some differences between individual speakers. Consequently, what we want is precise
 estimates of potential differences between conditions, alongside a measure of how confident we can be in these estimates.
@@ -406,8 +406,8 @@ If you are interested in finding out more about this 'sampling stuff', why not p
     \emph{Sampling, MCMC, chains, \& diagnostics (\dots, oh, and frogs \& lilies)}
     \medskip
 
-    Bayesian ideas are old. Why have they come to such popularity only recently? -- Part of the
-    answer is certainly to be found in recent developments in computation. To understand this,
+    Bayesian ideas are old. Why have they come to such popularity only recently? -- 
+    Part of it is due to our ever growing computational resources. Bayesian inference is computationally very expensive. To understand this,
     consider Bayes rule for data analysis. We have a prior $P{\theta}$ over parameter vector
     $\theta$, a likelihood function $P(D\mid\theta)$ and we want to compute the posterior
     distribution, using Bayes rule like so:
@@ -415,9 +415,11 @@ If you are interested in finding out more about this 'sampling stuff', why not p
       P(\theta \mid D) = \frac{P(\theta) \ P(D \mid \theta)}{ \int P(\theta') \ P(D \mid
       \theta') \textrm{d}\theta'}
     \end{eqnarray*}
-    The problem is the integral in the denominator. If $\theta$ is a large vector of parameters
+    The problem is the integral in the denominator.
+    \tr{the reader will ask: where is the integral coming from?}
+    If $\theta$ is a large vector of parameters
     (e.g., in a hierarchical regression model), it might not be all that easy (euphemistic for
-    ``quite impossible'') to crack that integral. Hh, what to do? -- The solution is not to
+    ``quite impossible'') to crack that integral. Hmm, what to do? -- The solution is not to
     crack it at all! Yes, you read that correctly: clever algorithms like \emph{Markov Chain
       Monte Carlo} allow us to approximate the posterior distribution without having to
     calculate the integral-of-doom. They do that by giving us \textbf{samples}.
@@ -426,8 +428,7 @@ If you are interested in finding out more about this 'sampling stuff', why not p
     Let's just accept that they give us samples from the posterior distribution, which we can
     use to plot or reason with, e.g., like in Figure~\ref{fig:Posteriors_FE}. That's nice, but
     it would be foolish to just trust whatever samples some piece of software gives us without
-    some sanity checking. That's why it is common to inspect your samples, visually by
-    plotting, and by certain numeric measure indicating how ``good'' your samples really are.
+    some sanity checking. That's why it is common to inspect your samples either by visually inspection using plots, and/or by certain numeric indexes of  how ``good'' your samples really are.
     
     To understand the most basic diagnostics (which is really all you need for common and
     simple applications), we need to understand one thing about how MCMC methods generate
@@ -443,29 +444,25 @@ If you are interested in finding out more about this 'sampling stuff', why not p
     Franz's visits to a lily pad are visits to a vector of parameter values, and
     the history of these visits gives us information about the relative posterior probability
     of parameter values $\theta$. --- Roughly, modulo frogs and lilies, that's how basic MCMC
-    works.
+    works.\tr{didn't get it, sorry}
 
-    The problem is that we can be sure that the visits are ``good'' samples from the posterior
-    distribution only if we take infinitely many. Usually, Franz is too lazy to jump that much
-    (and we are too busy). If we only have a small-ish number of samples, it might be that
-    Franz was sitting (with his fat \dots) on the same lily pad for a looooong time. While he
-    sat there, we did not learn much about the posterior's shape. Variants of basic MCMC, like
-    Hamiltonian Monte Carlo which \texttt{brms} uses, cleverly circumnavigate this problem to a
-    wide extent. Still, we should not trust Franz alone. So we routinely run several
-    \textbf{chains} (per defaul \texttt{brm} uses 4 chains). Think of this as letting go Franz,
+    The problem is that we can only be sure that the visits are ``good'' samples from the posterior
+    distribution if we take infinitely many. Usually, Franz is too lazy to jump around the lily pads that much (and we are too busy). If we only have a small-ish number of samples, it might be that
+    Franz was sitting on the same lily pad for a looooong time. While he
+    sat there, we did not learn much about the posterior's shape. Luckily, some MCMC variants, like Hamiltonian Monte Carlo, which \texttt{brms} uses, mostly avoid this problem in a clever way. Still, we should not trust Franz alone. So we routinely run several
+    \textbf{chains} (per default \texttt{brm} uses 4 chains). Think of this as letting go Franz,
     Fritz, Frieda and Frederieke, all starting on random lily pads, doing their myopic jumping
     all on their own. Usually, we let them jump for a while before we even start recording
-    where they sat, because they might have started at some far-off place with hardly any flies
-    at all, so that the first jumps are really not interesting. This is the so-called
+    where they sat, because they might have started at some far-off place with hardly any flies so that the first jumps are really not that representative. This is the so-called
     \emph{warm-up} period. Finally, we gather the histories of all four froggies and compare
     whether the outcome was (roughly) the same. That's what the \textbf{$\hat{R}$-value} in the
     \texttt{brm} output gives us. If this value is below 1.1, we commonly assume that the
-    history of froggy jumps are similar enough; techinically: the \textbf{chains have
-      converged}. of the froggies commonly to check if the samples are good enough, we can
-    investigate. The number of \textbf{efficient samples} is an estimate of, roughly put, the
-    number of informative jumps that out froggies made, when we subtract periods where they
+    history of froggy jumps are similar enough. The fancy way to say that is that the \textbf{chains have
+      converged}. The number of \textbf{efficient samples} is an estimate of, roughly put, the
+    number of informative jumps that out froggies have made. This means we take all rounds of potential jumps and subtract periods where the frogs
     were just sitting around in a spot that was, for example, a local maximum of flies. The
     higher the proportion of efficient samples, the better.
+    \tr{the box has small font and is very wide, I found it difficult to read, can we reduce the width of the box?}
     
   \end{minipage} \par
   } \par
@@ -559,7 +556,7 @@ More details about the information given in the other columns can be found in In
 \end{InfoBox}
 
 
-For our purposes, the information about 95\% credible intervals is most interesting. Take the parameter \texttt{contextpol}, corresponding to our coefficient $\beta_{\text{pol}}$. This parameter corresponds to the estimated adjustment of the mean of the reference level when we change the context level to polite. The 95\% CI is roughly [-50;-6]. This means that we would take values outside of this interval to be sufficiently unlikely to consider plausible values. This means that a very special parameter value for this parameter is implausible, namely 0. In other words, this analysis suggests that we should not believe that 0 is a very likely value for the coefficient $\beta_{\text{pol}}$; rather we should believe that $\beta_{\text{pol}}$ is most likely negative. --- Hurray! This directly addresses our first research hypothesis. In a research paper we could now write: ``Based on the regression model, the data suggests that H1 is likely true.''
+For our purposes, the information about 95\% credible intervals is most interesting. Take the parameter \texttt{contextpol}, corresponding to our coefficient $\beta_{\text{pol}}$. This parameter corresponds to the estimated adjustment of the mean of the reference level when we change the context level to polite. The 95\% CI is roughly [-50;-6]. We would take values outside of this interval to be sufficiently unlikely to consider plausible values. Consequently, a very special value for this parameter is implausible, namely 0. In other words, this analysis suggests that we should not believe that 0 is a very likely value for the coefficient $\beta_{\text{pol}}$; rather we should believe that $\beta_{\text{pol}}$ is most likely negative. --- Hurray! This directly addresses our first research hypothesis. In a research paper we could now write: ``Based on the regression model, the data suggests that H1 is likely true.''
 
 How likely is it that $\beta_{\text{pol}}$ is smaller than 0? ---Instead of simply making a binary thumbs-up / thumbs-down decision, it would be even cooler, if we could put a number to it. As Bayesians, we fortunately can. To see how this works, let us have a more intimate look at the samples that the \texttt{brm} function returns. We can access the samples of a model fitted with \texttt{brm} with the function \texttt{posterior\_samples}:
 
@@ -631,7 +628,7 @@ $\beta_{\text{pol}} > \beta_{\text{male}}$. We can approximate the posterior pro
 this is true based on the samples that we obtained for our model in the same general way as
 before, namely \tr{I think this would be easier to follow if we'd keep the reference level in
   the equation} \mf{aaargh, I cannot do it; that's rock-bottom for me; ;-) it's explained in
-  the paragraph above why we \emph{can} leave it out; please \dots}:
+  the paragraph above why we \emph{can} leave it out; please \dots}\tr{lol, okay lass es drin haha, aber eine Sache die glaub ich ein wenig unintuitiv ist: Wenn wir die estimates berechnen für die absoluten Posterior Werte der Level,  dann brauchen wir das Intercept wieder...}:
 
 \begin{minipage}[]{1.1\textwidth}
 \begin{lstlisting}[language=R]
@@ -644,7 +641,7 @@ mean(post_samples_FE$b_contextpol > post_samples_FE$b_genderM)
 
 Based on the posterior samples we obtained, this estimate is 1. That's a strong result. If the model were true, then, given the data, our certainty that hypothesis 3 is true should be pretty much almost at ceiling.
 
-To conclude this section, the Bayesian approach to regression modeling allows us to retrieve all direct comparisons between cells in a factorial design (all possible comparisons). It also allows us to retrieve quantitative information about our hypotheses which is accessible, and easy to communicate and understand. We can calculate (estimated) posterior probability that a particular hypothesis holds. %(formalized here as an ordering relation of design cell means).
+To conclude this section, the Bayesian approach to regression modeling allows us to retrieve all direct comparisons between cells in a factorial design (all possible comparisons). It also allows us to retrieve quantitative information about our hypotheses which is accessible. It is easy to communicate and understand. We can calculate the (estimated) posterior probability that a particular hypothesis holds. %(formalized here as an ordering relation of design cell means).
 
 \subsection{The \texttt{faintr} package}
 
@@ -684,7 +681,7 @@ compare_groups(
 \end{lstlisting}
 \end{minipage}
 
-The out put is this:
+The output looks like this:
 
 \medskip
 
@@ -718,9 +715,9 @@ produce the posterior probability of the three hypothesis relevant for this tuto
 
 \section{Adding random effects}
 
-In our experiment, we measured pitch multiple times for each subject (since they produced multiple sentences). We also have multiple measures for each sentence (as each sentence was produced by multiple speakers). A crucial assumption of linear regression models is the independence assumptions. Many before us have covered this aspect of linear models before us \citep[e.g.][]{Winter2013:Linear-models-a, clark1973language} so we won't discuss this important issue here. In a nutshell, we need to inform our model about these dependencies between observations. The way we’re going to handle this is to add random effects to our model, just as we  do in frequentist frameworks. Random effects are additional parameters that our Bayesian model estimates.
+In our experiment, we measured pitch multiple times for each subject (since they produced multiple sentences). We also have multiple measures for each sentence (as each sentence was produced by multiple speakers). A crucial assumption of linear regression models is the independence assumptions. Many before us have covered this aspect of linear models \citep[e.g.][]{Winter2013:Linear-models-a, clark1973language} so we won't discuss this important issue here. In a nutshell, we need to inform our model about these dependencies between observations. The way we’re going to handle this is to add random effects to our model, just as we  do in frequentist frameworks. Random effects are additional parameters that our Bayesian model estimates.
 
-Although the results look quite different, running hierarchical models with random effects with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is a function call to a model with the maximal random effect structure licensed by the design:
+Although the results look quite different, running hierarchical randome effect models  with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is a function call to a model with the maximal random effect structure licensed by the design:
 
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
@@ -790,12 +787,7 @@ We now also get information about the parameters implied by the specified random
 structure. Lines 9--21 cover the by-sentence random effects, lines 23--27 cover the by-subject
 random effects. We see from the 95\% credible intervals that the only parameters implied by the
 random effects structure that does seem to receive sufficient a posteriori credence on
-non-trivial values are the by-sentence and by-subject random intercepts.\tr{wait? I don't
-  understand. Where do you get this from? The random intercepts and slopes are SDs, meaning
-  they are bound to zero, so from the CIs, you cannot infer that they are relevant or not. You
-  can for the correlation terms, however, they are rarely systematic} \mf{I think you can infer
-that they are not noticably different from zero; but I agree this is a subtle point and maybe
-not to be touched here}
+non-trivial values are the by-sentence and by-subject random intercepts.
 
 To check the probability of our hypotheses of interest, we can use the \texttt{faintr} package again:
 
@@ -819,19 +811,43 @@ To check the probability of our hypotheses of interest, we can use the \texttt{f
 
 \section{Priors}
 
-\dots in progress \dots
+One important difference between traditional frequentist' inferences and a Bayesian inference is that we can take specific prior beliefs about the relationships between dependent and independent variables into account. 
 
-% The syntax of this function should look very familiar to anyone who has worked with (generalized) linear models in R. Now one important difference between traditional frequentist' inferences and a Bayesian framework is that we can take specific prior beliefs about the relationships between dependent and independent variables into account. 
+Priors are pieces of information about your data that you assume before actually analyzing the data. Assuming information prior to your parameter estimation has several advantages. A very practical advantage is that you can constrain the MCMC sampling procedure to realistic numbers, reducing the computational resources needed to estimate your parameters. For example, pitch values (and many other things we measure in nature) cannot be lower than 0. Moreover, human pitch values are within a certain range which is set by physiological and bio mechanical constraints on our laryngeal system. In adults, values beyond, let's say 1000 Hz are very unlikely even when the speaker uses falsetto. This is prior knowledge about nature that we can use to \textbf{regularize} the possible parameter space of our model. If we don't give our model this information, it will assume that 1000 Hz is as likely as 150 Hz, making the initial search for plausible values slow. So by telling our model about possible values, we help it find plausible parameter values more quickly. These priors are also called \textbf{weakly informative priors}. 
+\marginnote[-1.5cm]{Defining regularizing priors is essential for more complex models which estimate many parameters in order to ensure that your model converges and that it does so sufficiently quickly.}
+ 
+Priors can also express our subjective beliefs about a relationship. For example, knowing what we know about the physiological differences between women and men and the relationship between these physiological differences with producing fundamental frequency, we might be already very certain that female speakers have higher pitch values than male speakers.
 
+But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. We should have a heart of stone and be skeptic about possible relationships in the first place. Practically, these means the following for us: If our research hypothesis is that male voice pitch is lower than female voice pitch, we want to feed our model a \textbf{skeptical} prior. A possible skeptic prior would assume that there is no relationship between speaker gender and pitch (i.e. the average difference is 0). Of course there might be some variability around this average value (nature is messy after all), so we might want to assume that pitch differences between male and female speakers are normally distributed with an average of 0 and a standard deviation of 20 Hz. Importantly, such a skeptical prior is conservative with regard to our research hypothesis. Our point of departure is to assume there is no effect of gender and we the data need to convince us otherwise.
 
+To see all possible priors for your model, use the \texttt{get\_prior} function:
 
+\begin{minipage}[]{1.3\textwidth}
+\begin{lstlisting}[language=R]
+get_prior(formula = pitch ~ gender * context +
+            (1 + gender * context | sentence) +
+            (1 + context | subject),
+          data = politedata)
+\end{lstlisting}
+\end{minipage}
 
-% Priors are subjective pieces of information about your data that you have before analyzing the data. These priors might constrain values that your data can have. For example, mathematically, pitch values  cannot be lower than 0. Practically, human pitch values are within a certain range that is limited by bio mechanical constraints on our laryngeal system. In adults, values beyond, let's say 1000 Hz are very unlikely even when they use falsetto.
-% Priors can also express our subjective beliefs about a relationship. For example, knowing what we know about gender differences in pitch, we might be already very certain that female speakers have higher pitch values than male speakers.
+Alright, let's define some priors for our hierarchical model from above. We keep it simple and define a regularizing prior for the intercept (i.e. our reference level) that defines a normal distribution in plausible pitch value land. We also define a skeptical prior for our predictors (class = b), a normal distribution centered around zero.  
 
-% But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. Although, they are cases in which we might want to specify very concrete priors about our data, practically we will restrict ourselves here to what we call weakly informative priors. Weakly informative priors are priors that constrain possible values of a variable (e.g. possible pitch values). These priors are also called regularizing priors, as they help the statistical model to converge on reasonable estimates. But these priors are also agnostic about possible relationships between variables. 
+\begin{minipage}[]{1.3\textwidth}
+\begin{lstlisting}[language=R]
+priorMaxRE <- c(
+  # define a regularizing prior for the intercept within 
+  # the range of possible pitch values: a normal distribution 
+  # with the mean of 170 and a standard deviation of 50
+  prior(normal(170, 50), class = Intercept),
+  # define a skeptical prior for all relevant fixed effects
+  # all fixed effects
+  prior(normal(0, 50), class = b)
+)
+\end{lstlisting}
+\end{minipage}
 
-
+You can specify every single parameter individually...
 
 % \tr{Below is stuff to mention when we transition to hierarchical models}. 
 
