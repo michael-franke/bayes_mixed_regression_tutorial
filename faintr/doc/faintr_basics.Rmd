@@ -1,0 +1,92 @@
+---
+title: "Comparing groups of factor levels with the `faintr` package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Comparing groups of factor levels with the `faintr` package}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo=TRUE, 
+                      warning=FALSE,
+                      message=FALSE, 
+                      collapse = TRUE,
+                      cache = TRUE,
+                      dev.args = list(bg = 'transparent'), 
+                      fig.align='center', 
+                      fig.height = 3, 
+                      fig.widht=4)
+library(tidyverse)
+theme_set(theme_bw() + theme(plot.background=element_blank()) )
+```
+
+# Motivation
+
+The `faintr` package provides convenience function for the evaluation of a model fit, obtained with the `brms` package, for a Bayesian regression model for data from a factorial design. If the original model fit used (default) dummy coding of factors, the `faintr` package allow extraction of many more meaningful comparisons. For example, it is possible to directly compare the difference between cells which are not comparable by dummy coding, and it is also possible to compare means in sets of cells, so as to recover the outcomes of deviance coding.
+
+# Installation
+
+Install the `faintr` package with `devtools` from GitHub:
+
+```{r, eval = F}
+devtools::install_github('michael-franke/bayes_mixed_regression_tutorial/faintr')
+library(faintr)
+```
+
+```{r, echo = F}
+library(faintr)
+```
+
+# Example
+
+Consider a data set on pitch frequency in the speech of female and male speakers in polite and informal contexts.
+
+```{r, error=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+politedata = read_csv('https://raw.githubusercontent.com/michael-franke/bayes_mixed_regression_tutorial/master/code/politeness_data.csv') 
+head(politedata)
+```
+
+The cell means of this data set are:
+
+```{r}
+politedata %>% group_by(gender, context) %>% summarize(mean_pitch = mean(pitch))
+```
+
+
+A Bayesian regression model for a factorial design with by-subject and by-item random intercepts can be obtained with the `brms` package as follows:
+
+```{r, error=FALSE, warning=FALSE, message=FALSE, results="hide"}
+library(brms)
+m_dummy = brm(pitch ~ gender * context + (1 | subject + sentence), politedata)
+```
+
+The `brm` function uses dummy coding per default.  Look at the estimated coefficients:
+
+```{r}
+fixef(m_dummy)
+```
+
+The reference cell is where `gender:F` and `context:inf`, so female speakers in informal contexts. The estimated mean for the cell with data from male speakers in informal contexts is retrievable by adding the estimated coefficient `genderM` in the output above from the estimated Intercept.
+
+The `faintr` package provides convenience functions to compare different (groups of) cells to each other, based on a model fit like the above. Although the fit of the regression model uses a particular reference cell for dummy-coding, other contrasts of relevance can be retrieved from the posterior samples. For example, if we want to compare two cell diagonally, say, male speakers in informal contexts against female speakers in polite contexts, we can do this:
+
+```{r}
+compare_groups(
+  model = m_dummy, 
+  higher = list(gender = "F", context = "pol"),
+  lower = list(gender = "M", context = "inf")
+)
+```
+
+We can also compare the effect of gender female against the grand mean, to retrieve the information normally obtained by deviance coding:
+
+```{r}
+compare_groups(
+  model = m_dummy, 
+  higher = list(gender = "F"),
+  lower = list()
+)
+```
+
