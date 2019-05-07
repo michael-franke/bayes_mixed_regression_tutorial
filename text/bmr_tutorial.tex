@@ -811,29 +811,18 @@ To check the probability of our hypotheses of interest, we can use the \texttt{f
 
 \section{Priors}
 
-One important difference between traditional frequentist' inferences and a Bayesian inference is that we can take specific prior beliefs about the relationships between dependent and independent variables into account. 
-
-Priors are pieces of information about your data that you assume before actually analyzing the data. Assuming information prior to your parameter estimation has several advantages. A very practical advantage is that you can constrain the MCMC sampling procedure to realistic numbers, reducing the computational resources needed to estimate your parameters. For example, pitch values (and many other things we measure in nature) cannot be lower than 0. Moreover, human pitch values are within a certain range which is set by physiological and bio mechanical constraints on our laryngeal system. In adults, values beyond, let's say 1000 Hz are very unlikely even when the speaker uses falsetto. This is prior knowledge about nature that we can use to \textbf{regularize} the possible parameter space of our model. If we don't give our model this information, it will assume that 1000 Hz is as likely as 150 Hz, making the initial search for plausible values slow. So by telling our model about possible values, we help it find plausible parameter values more quickly. These priors are also called \textbf{weakly informative priors}. 
-\marginnote[-1.5cm]{Defining regularizing priors is essential for more complex models which estimate many parameters in order to ensure that your model converges and that it does so sufficiently quickly.}
+One important difference between traditional frequentist' inferences and Bayesian inference are priors. Priors are pieces of information about our data that we assume before actually analyzing them. Specifying priors has several advantages. First, we can constrain the MCMC sampling procedure to realistic numbers, reducing the computational resources needed to estimate our parameters. For example, pitch values (and many other things we measure in nature) cannot be smaller than 0. Human pitch values are also limited to a certain range defined by physiological and bio mechanical constraints on our laryngeal system. In adults, values larger than let's say 1000 Hz are very unlikely. We can use this prior knowledge about nature to \textbf{regularize} the possible parameter space of our model. If we don't give our model this useful information, it will assume that 1000 Hz is as likely of a value as 150 Hz. This can slow down our parameter estimation. By telling our model about possible values, we help it finding plausible parameter values more quickly. 
+\marginnote[-1.5cm]{Defining regularizing priors is essential for more complex models which have to estimate many parameters. Regularizing priors can help our model to converge more quickly.}
  
-Priors can also express our subjective beliefs about a relationship. For example, knowing what we know about the physiological differences between women and men and the relationship between these physiological differences with producing fundamental frequency, we might be already very certain that female speakers have higher pitch values than male speakers.
+Priors can also express our subjective beliefs about a relationship in our data. For example, knowing what we know about the physiological differences between women and men and the relationship between these physiological differences and pitch, we might be already very certain that female speakers have higher pitch values than male speakers.
 
-But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. We should have a heart of stone and be skeptic about possible relationships in the first place. Practically, these means the following for us: If our research hypothesis is that male voice pitch is lower than female voice pitch, we want to feed our model a \textbf{skeptical} prior. A possible skeptic prior would assume that there is no relationship between speaker gender and pitch (i.e. the average difference is 0). Of course there might be some variability around this average value (nature is messy after all), so we might want to assume that pitch differences between male and female speakers are normally distributed with an average of 0 and a standard deviation of 20 Hz. Importantly, such a skeptical prior is conservative with regard to our research hypothesis. Our point of departure is to assume there is no effect of gender and we the data need to convince us otherwise.
+But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. We should have a heart of stone and be skeptic about possible relationships in the first place. We usually run an experiment to test these relationships.
+Practically, these means the following for us: If our research hypothesis is that male voice pitch is lower than female voice pitch, we obviously don't want to specify a prior that assumes the hypothesized relationship before seeing the data. Instead, we should feed our model a \textbf{skeptical} prior. A possible skeptical prior assumption could be the assumption that there is \textit{no} relationship between speaker gender and pitch (i.e. the average difference is 0). Of course, there might be some variability around this average value (nature is messy after all), so we might want to assume that pitch differences between male and female speakers are normally distributed with an average of 0 and a standard deviation of 20 Hz. Importantly, such a skeptical prior is conservative with regard to our research hypothesis. Our point of departure (before we observed new data) is to assume that there is no effect of gender on pitch. The data need to convince us otherwise.
 
-To see all possible priors for your model, use the \texttt{get\_prior} function:
+How does that look in practice? Let's define some priors for our hierarchical model from above. We keep it simple and define a regularizing prior for the intercept (i.e. our reference level) that defines a normal distribution in plausible-pitch-value-land. We also define a skeptical prior for all our fixed effects (class = b) as a normal distribution centered around zero (again, our prior assumption is that there is no difference between conditions).  
+\marginnote[-1.5cm]{You can specify every single parameter of your model individually. To see all parameters for which you can specify priors, use the \texttt{get\_prior()} function of \texttt{brms}}
 
-\begin{minipage}[]{1.3\textwidth}
-\begin{lstlisting}[language=R]
-get_prior(formula = pitch ~ gender * context +
-            (1 + gender * context | sentence) +
-            (1 + context | subject),
-          data = politedata)
-\end{lstlisting}
-\end{minipage}
-
-Alright, let's define some priors for our hierarchical model from above. We keep it simple and define a regularizing prior for the intercept (i.e. our reference level) that defines a normal distribution in plausible pitch value land. We also define a skeptical prior for our predictors (class = b), a normal distribution centered around zero.  
-
-\begin{minipage}[]{1.3\textwidth}
+\begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
 priorMaxRE <- c(
   # define a regularizing prior for the intercept within 
@@ -841,13 +830,23 @@ priorMaxRE <- c(
   # with the mean of 170 and a standard deviation of 50
   prior(normal(170, 50), class = Intercept),
   # define a skeptical prior for all relevant fixed effects
-  # all fixed effects
   prior(normal(0, 50), class = b)
 )
 \end{lstlisting}
 \end{minipage}
 
-You can specify every single parameter individually...
+We add this prior to the model as an argument:
+
+\begin{minipage}[]{1\textwidth}
+\begin{lstlisting}[language=R]
+model_MaxRE_prior = brm(formula = pitch ~ gender * context +
+                    (1 + gender * context | sentence) +
+                    (1 + context | subject),
+                    prior = priorMaxRE,
+                  data = politedata,
+                  control = list(adapt_delta = 0.99))
+\end{lstlisting}
+\end{minipage}
 
 % \tr{Below is stuff to mention when we transition to hierarchical models}. 
 

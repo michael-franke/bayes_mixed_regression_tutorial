@@ -162,7 +162,7 @@ mean(post_samples_FE$b_contextpol > post_samples_FE$b_genderM)
 library(devtools)
 
 # package with convenience function for Bayesian regression models for factorial designs
-# install_github('michael-franke/bayes_mixed_regression_tutorial/faintr', build_vignettes = TRUE) # install from GitHub
+#install_github('michael-franke/bayes_mixed_regression_tutorial/faintr', build_vignettes = TRUE) # install from GitHub
 library(faintr)
 
 extract_posterior_cell_means(modelFE)
@@ -239,21 +239,17 @@ get_prior(formula = pitch ~ gender * context +
             (1 + context | subject),
           data = politedata)
 
+
 # define priors
 priorMaxRE <- c(
   # define a regularizing prior for the intercept within the range of possible pitch values
   prior(normal(170, 50), class = Intercept),
   # define a skeptical prior for the relevant coefficiants
-  prior(normal(0, 50), class = b),
-  # define a regularizing prior for variability of coefficants, residual variance, and correlation terms
-  prior(normal(100, 100), class = sd),
-  prior(normal(100, 100), class = sigma),
-  prior(lkj(2), class = cor)
+  prior(normal(0, 50), class = b)
 )
 
 
-# hierarchical model with the maximial RE structure licensed by the design
-# (notice that factor 'gender' does not vary for a given value of variable 'subject')
+# let's run our models with our specified priors
 model_MaxRE_prior = brm(formula = pitch ~ gender * context +
                     (1 + gender * context | sentence) +
                     (1 + context | subject),
@@ -261,3 +257,4 @@ model_MaxRE_prior = brm(formula = pitch ~ gender * context +
                   data = politedata,
                   control = list(adapt_delta = 0.99))
 
+get_posterior_beliefs_about_hypotheses_new(model_MaxRE_prior)
