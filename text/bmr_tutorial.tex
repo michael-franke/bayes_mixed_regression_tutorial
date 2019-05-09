@@ -135,11 +135,10 @@ which you can import with the following code:
   available for download here:
   \url{https://github.com/michael-franke/bayes_mixed_regression_tutorial}}
 
-\medskip
+\bigskip
 
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
-
 # package for convenience functions (e.g. plotting)
 library(tidyverse)
 
@@ -167,8 +166,7 @@ presented by \citet{WinterGrawunder2012:The-Phonetic-Pr}}. To load the data into
 run the following code:
 \marginnote{If you are familiar with the previous tutorials by \citet{Winter2013:Linear-models-a}, note that we `massaged' the data a bit, i.e., we renamed variables and removed a line with missing data.}
 
-\medskip
-
+\bigskip
 
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
@@ -184,7 +182,7 @@ data:\marginnote{Here, we show only part of the output
 that you can see when executing this 
 command.}
 
-\medskip
+\bigskip
 
 \begin{minipage}[]{\textwidth}
 \begin{rc}
@@ -365,6 +363,8 @@ so-called \textbf{prior beliefs}?
 
 The R package \texttt{brms} \citep{buerkner2016brms} makes it easy to run Bayesian regression models. It uses a very similar formula syntax as related packages for regression analysis. In our case, we want to regress the dependent variable \texttt{pitch} against the independent variables \texttt{gender} and \texttt{context} and their two-way interaction. This model is expressed by the formula:
 
+\bigskip
+
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
 # formula for (fixed effects) regression model
@@ -373,6 +373,8 @@ formulaFE = pitch ~ gender * context
 \end{minipage}
 
 The Bayesian model can then be fitted with the function \texttt{brm} from the \texttt{brms} package. We only need to specify the formula and supply the data:
+
+\bigskip
 
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
@@ -469,7 +471,7 @@ If you are interested in finding out more about this 'sampling stuff', check out
 
 You can type in \texttt{modelFE} in order to get a summary of the model fit. It should look much like the following output.
 
-\medskip
+\bigskip
 
 \begin{minipage}[]{1.2\textwidth}
 \begin{rc}
@@ -497,10 +499,6 @@ is a crude measure of effective sample size, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 \end{rc}
 \end{minipage}
-
-\tr{is there a way we can keep everything the same line width? maybe we need to rethink the marginnotes. The document looks untidy}
-
-\medskip
 
 This summary looks very much like regression model summaries of non-Bayesian models. Lines 2--5
 give us information about the model and the data used. Lines 6 and 7 tell us about the sampling
@@ -557,6 +555,8 @@ For our purposes, the information about 95\% credible intervals is most interest
 
 How likely is it that $\beta_{\text{pol}}$ is smaller than 0? ---Instead of simply making a binary thumbs-up / thumbs-down decision, it would be even cooler, if we could put a number to it. As Bayesians, we fortunately can. To see how this works, let us have a more intimate look at the samples that the \texttt{brm} function returns. We can access the samples of a model fitted with \texttt{brm} with the function \texttt{posterior\_samples}:
 
+\bigskip
+
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
 # extract posterior samples 
@@ -567,7 +567,7 @@ head(post_samples_FE)
 
 The output of this could look like this:
 
-\medskip
+\bigskip
 
 \begin{minipage}[]{1.2\textwidth}
 \begin{rc}
@@ -603,10 +603,12 @@ contexts, the reference cell) should hover around 261, roughly spreading from ab
 
 Now, here comes a nice gadget. Based on the samples obtained for \texttt{contextpol} ($\beta_{\text{pol}}$), it is very easy to estimate our belief that $\beta_{\text{pol}}$ is indeed negative. We simply have to calculate the proportion of samples that were negative. That's all. For instance, with the code below, which reveals that given the data and the model, the posterior probability that $\beta_{\text{pol}} < 0$ is about 0.99275. This is very close to 1!  
 
+\bigskip
+
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
-# proportion of negative samples for parameter p_contextpol
-# this number approximates P(beta_pol < 0 | model, data)
+# proportion of negative samples for parameter b_contextpol
+# this number approximates P(b_contextpol < 0 | model, data)
 mean(post_samples_FE$b_contextpol < 0)
 \end{lstlisting}
 \end{minipage}
@@ -627,18 +629,20 @@ before, namely \tr{I think this would be easier to follow if we'd keep the refer
   the equation} \mf{aaargh, I cannot do it; that's rock-bottom for me; ;-) it's explained in
   the paragraph above why we \emph{can} leave it out; please \dots}\tr{lol, okay lass es drin haha, aber eine Sache die glaub ich ein wenig unintuitiv ist: Wenn wir die estimates berechnen für die absoluten Posterior Werte der Level,  dann brauchen wir das Intercept wieder...}:
 
+\bigskip
+
 \begin{minipage}[]{1.1\textwidth}
 \begin{lstlisting}[language=R]
-# proportion of samples where the mean for cell 2 was bigger 
+# proportion of samples where the mean for cell 2 was larger 
 # than that of cell 3 
-# this number approximates P(beta_pol > beta_male | model, data)
+# this number approximates P(b_contextpol > b_genderM | model, data)
 mean(post_samples_FE$b_contextpol > post_samples_FE$b_genderM)
 \end{lstlisting}
 \end{minipage}
 
-Based on the posterior samples we obtained, this estimate is 1. That's a strong result. If the model were true, then, given the data, our certainty that hypothesis 3 is true should be pretty much almost at ceiling.
+Based on the posterior samples we obtained, the estimated probability is 1. That's a strong result. If the model was true, then, given the data, our certainty that hypothesis 3 is true should be pretty much almost at ceiling.
 
-To conclude this section, the Bayesian approach to regression modeling allows us to retrieve all direct comparisons between cells in a factorial design (all possible comparisons). It also allows us to retrieve quantitative information about our hypotheses which is accessible. It is easy to communicate and understand. We can calculate the (estimated) posterior probability that a particular hypothesis holds. %(formalized here as an ordering relation of design cell means).
+To conclude this section, the Bayesian approach to regression modeling allows us to retrieve all direct comparisons between cells in a factorial design (all possible comparisons). It also allows us to retrieve quantitative information about our hypotheses which is accessible. It is also easy to communicate and understand. We can calculate the (estimated) posterior probability that a particular hypothesis holds. %(formalized here as an ordering relation of design cell means).
 
 \subsection{The \texttt{faintr} package}
 
@@ -660,10 +664,12 @@ library(faintr)
 \end{lstlisting}
 \end{minipage}
 
-The \texttt{faintr} package provides the function \texttt{extract\_posterior\_cell\_means}
+The \texttt{faintr} package provides the function 
+
+\texttt{extract\_posterior\_cell\_means()}
 which takes as input the output of a factorial-design regression model fitted with
 \textrm{brm}. It outputs samples for all design cell means, and a comparison of all design
-cells against each other. The function \texttt{compare\_groups} takes the same kind of model
+cells against each other. The function \texttt{compare\_groups()} takes the same kind of model
 fit as input, together with a specification of which two (subsets of) cells to compare against
 each other. For example, we can compare (diagonally) the cells for female speakers in polite
 contexts with male speakers in informal contexts with this call:
@@ -693,49 +699,158 @@ P('higher - lower' > 0):  1
 \end{rc}
 \end{minipage}
 
-Using the \texttt{compare\_groups} function, the source code provides a convenient function to
+Using the \texttt{compare\_groups()} function, the source code provides a convenient function to
 produce the posterior probability of the three hypothesis relevant for this tutorial:
 
 \medskip
 
 \begin{minipage}[]{\textwidth}
 \begin{rc}
-> get_posterior_beliefs_about_hypotheses_new(modelFE)
+> get_posterior_beliefs_about_hypotheses_new(model_MaxRE)
 # A tibble: 3 x 2
   hypothesis                      probability
   <chr>                                 <dbl>
-1 Female-polite < Female-informal       0.993
-2 Male-polite < Male-informal           0.842
+1 Female-polite < Female-informal       0.973
+2 Male-polite < Male-informal           0.850
+3 Male-informal < Female-polite         0.922
+\end{rc}
+\end{minipage}
+
+\section{Priors}
+
+One important difference between traditional frequentist' and Bayesian inference are priors. Priors are pieces of information about our data that we assume before actually looking at them. Specifying priors has several advantages. First, we can constrain the sampling procedure to realistic numbers and that reduces the computational resources needed to estimate the model parameters. For example, pitch values (and many other things we measure in nature) cannot be smaller than 0. Human pitch values are also limited to a certain range defined by physiological and bio mechanical constraints on our laryngeal system. In adults, values larger than let's say 1000 Hz are very unlikely. We can use this prior knowledge about nature to \textbf{regularize} the possible parameter space of our model. If we don't specify this information, the model will assume that 1000 Hz is as likely of a value as 150 Hz. This lack of information can slow down our parameter estimation. 
+\marginnote[-1.5cm]{Defining regularizing priors is essential for more complex models which have to estimate many parameters. Regularizing priors can help our model to converge more quickly.}
+ 
+Second, priors can also express our subjective beliefs about our data. For example, knowing what we know about the physiological differences between women and men and the relationship between these physiological differences and pitch, we might be already very certain that female speakers have higher pitch values than male speakers.
+
+But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. We should have a heart of stone and be skeptical about possible relationships in the first place.
+Practically, this means the following for us: If our research hypothesis is that male voice pitch is lower than female voice pitch, we obviously don't want to specify a prior that assumes the hypothesized relationship before having seen the data. Instead, we should feed our model a \textbf{skeptical} prior. A possible skeptical prior could be the assumption that there is \textit{no} relationship between speaker gender and voice pitch (i.e. the average difference is 0). Of course, there might be some variability around this average value (nature is messy after all), so we might want to assume that pitch differences between male and female speakers are normally distributed with an average of 0 and a standard deviation of, say, 50 Hz. Importantly, such a skeptical prior is conservative with regard to our research hypothesis. Our point of departure (before we observed new data) is to assume that there is no effect of gender on pitch. The data need to convince us otherwise.
+
+How does that look in practice? Let's define some priors for our hierarchical model from above. We keep it simple and define a regularizing prior for the intercept (i.e. our reference level) that defines a normal distribution in plausible-pitch-value-land (for convenience we simply pick the mean and sd for our data set). We also define a skeptical prior for all our fixed effects in question (class = b) as normal distributions centered around zero (again, our prior assumption is that there is no difference between conditions).  
+
+\marginnote[-1.5cm]{You can specify every single parameter of your model individually. To see all parameters for which you can specify priors, use the \texttt{get\_prior()} function of \texttt{brms}}
+
+\bigskip
+
+\begin{minipage}[]{1\textwidth}
+\begin{lstlisting}[language=R]
+priorFE <- c(
+  # define a regularizing prior for the intercept within 
+  # the range of possible pitch values: a normal distribution 
+  # with the mean of 194 and a standard deviation of 66
+  prior(normal(194, 66 class = Intercept),
+  # define a skeptical prior for all relevant fixed effects
+  prior(normal(0, 50), class = b)
+)
+\end{lstlisting}
+\end{minipage}
+
+We add this prior to the model as an argument and calculate the probability for our hypotheses again. We can see that our priors did not affect the posteriors very much.
+
+\bigskip
+
+\begin{minipage}[]{1\textwidth}
+\begin{lstlisting}[language=R]
+modelFE_prior = brm(formula = pitch ~ gender * context,
+	# add prior 
+	prior = priorFE,
+	data = politedata,
+	control = list(adapt_delta = 0.99)
+	)    
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}[]{\textwidth}
+\begin{rc}
+> get_posterior_beliefs_about_hypotheses_new(modelFE_prior)
+# A tibble: 3 x 2
+  hypothesis                      probability
+  <chr>                                 <dbl>
+1 Female-polite < Female-informal       0.983
+2 Male-polite < Male-informal           0.917
 3 Male-informal < Female-polite         1  
 \end{rc}
 \end{minipage}
 
-\section{Adding random effects}
+\section{Model criticism}
 
-In our experiment, we measured pitch multiple times for each subject (since they produced multiple sentences). We also have multiple measures for each sentence (as each sentence was produced by multiple speakers). A crucial assumption of linear regression models is the independence assumptions. Many before us have covered this aspect of linear models \citep[e.g.][]{Winter2013:Linear-models-a, clark1973language} so we won't discuss this important issue here. In a nutshell, we need to inform our model about these dependencies between observations. The way we’re going to handle this is to add random effects to our model, just as we  do in frequentist frameworks. Random effects are additional parameters that our Bayesian model estimates.
+So we know now how to extract relevant comparisons to quantify the evidence surrounding our hypothesis. We have also learned how to specify prior information. The next important step is being able to check if our model really reflects the observed data? A common and easy way to answer this question is to use so-called \textbf{posterior predictive checks}. These checks generate new data similar to our posterior distributions and compare them to the observed data. \texttt{brms} offers a neat function called \texttt{pp\_check()}. 
 
-Although the results look quite different, running hierarchical randome effect models  with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is a function call to a model with the maximal random effect structure licensed by the design:
+To illustrate this point, let's run our model from above without the gender predictor. 
+
+\bigskip
 
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
-# hierarchical model with the maximial RE structure licensed by the design
-# (notice that factor 'gender' does not vary for a given value of variable 'subject')
-model_MaxRE = brm(formula = pitch ~ gender * context +
-                    (1 + gender * context | sentence) +
-                    (1 + context | subject),
-                  data = politedata,
-                  control = list(adapt_delta = 0.9))
+modelFE_noGender= brm(formula = pitch ~  context,
+	prior = priorFE,
+	data = politedata,
+	control = list(adapt_delta = 0.99)
+	)
 \end{lstlisting}
 \end{minipage}
 
-The outcome of this is model fit is shown here:
+We know that a big chunk of variation is accounted for by gender, so this model should be a poor fit. If we run \texttt{pp\_check()} on our model (we also specify how many samples we want to compare the observations to), we can see that a model without the \texttt{gender} predictor fails to capture an important property of our data: having pitch values from men and women leads to a bimodal distribution of pitch values (i.e. two bumps).
+
+\bigskip
+
+\begin{minipage}[]{1\textwidth}
+\begin{lstlisting}[language=R]
+pp_check(modelFE_noGender, nsample = 100)
+\end{lstlisting}
+\end{minipage}
+
+\begin{figure}[]
+  \centering
+    \includegraphics[width = 0.8\textwidth]{pics/pp_check_FE_noGender.pdf}
+    \caption{Output of the posterior predictive check for a model \textbf{without} the predictor \texttt{gender}}
+    \label{fig:coefficients_table}
+\end{figure}
+
+
+The model overestimates the probability of very low and high pitch values, underestimates the probability of values that surround our two bumps and heavily overestimates the probability of values around 200 Hz.
+Our earlier model which takes \texttt{gender} into account looks quite a bit better. While still showing much uncertainty surrounding the two bumps in the observed distribution, it clearly captures the evidence better. 
+
+\begin{figure}[]
+  \centering
+    \includegraphics[width = 0.8\textwidth]{pics/pp_check_FE.pdf}
+    \caption{Output of the posterior predictive check for a model with the predictor \texttt{gender}}
+    \label{fig:coefficients_table}
+\end{figure}
+
+
+\section{Adding random effects}
+In our experiment, we measured pitch multiple times for each subject (since they produced multiple sentences). We also have multiple measures for each sentence (as each sentence was produced by multiple speakers). A crucial assumption of linear regression models is the independence assumptions. Many before us have covered this aspect of linear models \citep[e.g.][]{Winter2013:Linear-models-a, clark1973language} so we won't discuss this important issue here in detail. In a nutshell, we need to inform our model about these dependencies between observations. The way we’re going to handle this is to add random effects to our model, just as we do in frequentists' frameworks. Random effects are additional parameters that our Bayesian model estimates.
+
+Although the results look quite different, running hierarchical random effect models with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is the function call to a model with the maximal random effect structure licensed by the design. We also defined regularizing priors for the intercept and skeptical priors for the predictor coefficients.
+The outcome of this is model fit is shown below:
+
+\begin{minipage}[]{1\textwidth}
+\begin{lstlisting}[language=R]
+# define priors
+prior_MaxRE <- c(
+  # define a regularizing prior for the intercept within the range of possible pitch values
+  prior(normal(194, 66), class = Intercept),
+  # define a skeptical prior for the relevant coefficients
+  prior(normal(0, 50), class = b)
+)
+
+# model
+model_MaxRE = brm(formula = pitch ~ gender * context +
+	(1 + gender * context | sentence) +
+	(1 + context | subject),
+	prior = prior_MaxRE,
+	data = politedata,
+	control = list(adapt_delta = 0.99)
+	)
+\end{lstlisting}
+\end{minipage}
 
 \medskip
 
 \begin{minipage}[]{1.5\textwidth}
 \begin{rc}
-> model_MaxRE
- Family: gaussian 
+Family: gaussian 
   Links: mu = identity; sigma = identity 
 Formula: pitch ~ gender * context + (1 + gender * context | sentence) + (1 + context | subject) 
    Data: politedata (Number of observations: 83) 
@@ -745,33 +860,33 @@ Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
 Group-Level Effects: 
 ~sentence (Number of levels: 7) 
                                    Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-sd(Intercept)                         21.84      9.72     7.40    44.90       2116 1.00
-sd(genderM)                           11.13      9.07     0.49    33.29       2435 1.00
-sd(contextpol)                        15.04     11.24     0.55    42.49       1637 1.00
-sd(genderM:contextpol)                16.55     13.43     0.76    47.63       2173 1.00
-cor(Intercept,genderM)                -0.23      0.44    -0.90     0.71       4808 1.00
-cor(Intercept,contextpol)              0.01      0.41    -0.74     0.79       4658 1.00
-cor(genderM,contextpol)               -0.06      0.44    -0.83     0.77       2940 1.00
-cor(Intercept,genderM:contextpol)     -0.10      0.43    -0.84     0.73       5216 1.00
-cor(genderM,genderM:contextpol)       -0.03      0.44    -0.82     0.80       3335 1.00
-cor(contextpol,genderM:contextpol)    -0.15      0.44    -0.87     0.74       3057 1.00
+sd(Intercept)                         21.89     10.35     7.07    46.85       1701 1.00
+sd(genderM)                           10.66      8.59     0.39    31.99       2163 1.00
+sd(contextpol)                        15.23     11.51     0.67    42.78       1495 1.00
+sd(genderM:contextpol)                16.52     12.69     0.72    47.94       1906 1.00
+cor(Intercept,genderM)                -0.23      0.44    -0.89     0.69       3745 1.00
+cor(Intercept,contextpol)              0.00      0.41    -0.75     0.78       3625 1.00
+cor(genderM,contextpol)               -0.07      0.44    -0.83     0.75       2620 1.00
+cor(Intercept,genderM:contextpol)     -0.10      0.43    -0.84     0.73       4391 1.00
+cor(genderM,genderM:contextpol)       -0.04      0.45    -0.82     0.79       2741 1.00
+cor(contextpol,genderM:contextpol)    -0.14      0.45    -0.87     0.74       2562 1.00
 
 ~subject (Number of levels: 6) 
                           Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-sd(Intercept)                36.11     18.30    14.60    84.84       1210 1.00
-sd(contextpol)                9.17      8.73     0.32    32.53       2290 1.00
-cor(Intercept,contextpol)     0.03      0.58    -0.93     0.95       4608 1.00
+sd(Intercept)                41.86     21.82    16.02   100.10       1295 1.00
+sd(contextpol)                9.15      9.11     0.30    32.92       2009 1.00
+cor(Intercept,contextpol)    -0.00      0.58    -0.94     0.95       3461 1.00
 
 Population-Level Effects: 
                    Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-Intercept            261.92     25.73   213.11   312.17       1088 1.00
-genderM             -116.78     35.19  -188.21   -50.38       1011 1.00
-contextpol           -27.16     12.44   -51.30    -2.22       2782 1.00
-genderM:contextpol    15.13     16.84   -17.62    47.40       2863 1.00
+Intercept            238.25     26.09   180.41   282.88       1255 1.00
+genderM              -79.10     34.17  -134.89    -0.44       1188 1.01
+contextpol           -24.30     12.02   -47.03     0.39       2229 1.00
+genderM:contextpol    11.13     16.28   -22.13    43.42       1820 1.00
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-sigma    24.96      2.38    20.73    30.07       3676 1.00
+sigma    25.00      2.36    20.83    30.02       3124 1.00
 
 Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
 is a crude measure of effective sample size, and Rhat is the potential 
@@ -782,9 +897,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 The lines 29--34 again give the estimates of the fixed-effects coefficients. The mean estimates look very similar to the ones that we obtained in the fixed-effect only model above. However, not surprisingly, our uncertainty surrounding these estimates is larger.  
 We now also get information about the parameters implied by the specified random effect
 structure. Lines 9--21 cover the by-sentence random effects, lines 23--27 cover the by-subject
-random effects. We see from the 95\% credible intervals that the only parameters implied by the
-random effects structure that does seem to receive sufficient a posteriori credence on
-non-trivial values are the by-sentence and by-subject random intercepts.
+random effects.
 
 To check the probability of our hypotheses of interest, we can use the \texttt{faintr} package again:
 
@@ -796,78 +909,31 @@ To check the probability of our hypotheses of interest, we can use the \texttt{f
 # A tibble: 3 x 2
   hypothesis                      probability
   <chr>                                 <dbl>
-1 Female-polite < Female-informal       0.981
-2 Male-polite < Male-informal           0.830
-3 Male-informal < Female-polite         0.988
+1 Female-polite < Female-informal       0.974
+2 Male-polite < Male-informal           0.853
+3 Male-informal < Female-polite         0.918
 \end{rc}
 \end{minipage}
 
-\section{Model criticism}
-But does our model really reflect the observed data? A common and easy way to answer this question is to use so-called \textbf{posterior predictive checks}. What these posterior predictive checks do is generating new data similar to our posterior distributions and comparing them to the observed data. \texttt{brms} offers a neat function called \texttt{pp\_check}. 
+When we compare these values to the simpler model above, we can see that our evidence for our hypotheses is a little bit weaker for the maximal random effect model. This is not surprising because the simpler model assumed independence where there was none and therefore underestimated the variance. This is particularly noteworthy for H3. Before, we were certain that H3 was true (the posteriors suggested a probability of 1).
 
-To illustrate this point, let's run our model from above without random intercepts and slopes for participants 
+\section{Reporting the results}
+How do we report our analysis and our results in a Bayesian framework? There are as many ways to write up your analysis as there are authors. The following suggestion is one way to do it. 
 
-\begin{minipage}[]{1\textwidth}
-\begin{lstlisting}[language=R]
-model_no_subj = brm(formula = pitch ~ gender * context +
-                    (1 + gender * context | sentence),
-                  data = politedata,
-                  control = list(adapt_delta = 0.99))
-\end{lstlisting}
-\end{minipage}
+\paragraph{Description of analysis}  
+We fitted Bayesian hierarchical linear models to pitch values as a function of \texttt{gender}, and \texttt{context} and their two-way interaction, using the Stan modeling language \citep{carpenter2016stan} and the package \emph{brms} \citep{buerkner2016brms}.
+The models included maximal random-effect structures justified by the design, allowing the predictors of interest and their interactions to vary by participants (\texttt{context}) and sentences (\textsc{gender}, \textsc{context}).
+We used a regularizing Gaussian prior for the intercept defined centered around the mean of the observation with  \(\sigma = 66\). We used weakly informative Gaussian priors centered around zero with \(\sigma = 50\) for all population-level regression coefficients.  Four sampling chains with 2000 iterations each were run for each model, with a warm-up period of 1000 iterations. 
+For all relevant predictor levels and differences between them, we report 95\% credible
+intervals (CIs) and the posterior probability that a parameter $\beta$ is smaller than zero $P(\beta < 0)$. A 95\% credible interval demarcates the range of values that comprise 95\% of probability density or mass of our posterior beliefs. We judge there to be \emph{compelling evidence
+} for an effect if zero is (by a reasonably clear margin) not included in the 95\% CI and $P(\|beta| < 0)$ is close to one.
 
-\section{Priors}
-
-One important difference between traditional frequentist' and Bayesian inference are priors. Priors are pieces of information about our data that we assume before actually looking at them. Specifying priors has several advantages. First, we can constrain the  sampling procedure to realistic numbers, reducing the computational resources needed to estimate our parameters. For example, pitch values (and many other things we measure in nature) cannot be smaller than 0. Human pitch values are also limited to a certain range defined by physiological and bio mechanical constraints on our laryngeal system. In adults, values larger than let's say 1000 Hz are very unlikely. We can use this prior knowledge about nature to \textbf{regularize} the possible parameter space of our model. If we don't give our model this useful information, it will assume that 1000 Hz is as likely of a value as 150 Hz. This lack of information can slow down our parameter estimation. By telling our model about possible values, we help it finding plausible parameter values more quickly. 
-\marginnote[-1.5cm]{Defining regularizing priors is essential for more complex models which have to estimate many parameters. Regularizing priors can help our model to converge more quickly.}
- 
-Second, priors can also express our subjective beliefs about our data. For example, knowing what we know about the physiological differences between women and men and the relationship between these physiological differences and pitch, we might be already very certain that female speakers have higher pitch values than male speakers.
-
-But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. We should have a heart of stone and be skeptical about possible relationships in the first place.
-Practically, this means the following for us: If our research hypothesis is that male voice pitch is lower than female voice pitch, we obviously don't want to specify a prior that assumes the hypothesized relationship before seeing the data. Instead, we should feed our model a \textbf{skeptical} prior. A possible skeptical prior could be the assumption that there is \textit{no} relationship between speaker gender and voice pitch (i.e. the average difference is 0). Of course, there might be some variability around this average value (nature is messy after all), so we might want to assume that pitch differences between male and female speakers are normally distributed with an average of 0 and a standard deviation of 20 Hz. Importantly, such a skeptical prior is conservative with regard to our research hypothesis. Our point of departure (before we observed new data) is to assume that there is no effect of gender on pitch and the data need to convince us otherwise.
-
-How does that look in practice? Let's define some priors for our hierarchical model from above. We keep it simple and define a regularizing prior for the intercept (i.e. our reference level) that defines a normal distribution in plausible-pitch-value-land. We also define a skeptical prior for all our fixed effects in question (class = b) as normal distributions centered around zero (again, our prior assumption is that there is no difference between conditions).  
-
-\marginnote[-1.5cm]{You can specify every single parameter of your model individually. To see all parameters for which you can specify priors, use the \texttt{get\_prior()} function of \texttt{brms}}
-
-\begin{minipage}[]{1\textwidth}
-\begin{lstlisting}[language=R]
-priorMaxRE <- c(
-  # define a regularizing prior for the intercept within 
-  # the range of possible pitch values: a normal distribution 
-  # with the mean of 170 and a standard deviation of 50
-  prior(normal(170, 50), class = Intercept),
-  # define a skeptical prior for all relevant fixed effects
-  prior(normal(0, 50), class = b)
-)
-\end{lstlisting}
-\end{minipage}
-
-We add this prior to the model as an argument:
-
-\begin{minipage}[]{1\textwidth}
-\begin{lstlisting}[language=R]
-model_MaxRE_prior = brm(formula = pitch ~ gender * context +
-                    (1 + gender * context | sentence) +
-                    (1 + context | subject),
-                    # add prior 
-                    prior = priorMaxRE,
-                  data = politedata,
-                  control = list(adapt_delta = 0.99))
-\end{lstlisting}
-\end{minipage}
-
-% \tr{Below is stuff to mention when we transition to hierarchical models}. 
-
-% These mean values, however, are a very poor and abstract representation of all the pitch values that we have recorded. Different speakers have very different voice pitch ranges. Likewise, speakers are not machines. There is a substantial variability in how a single speaker pronounces an utterance. So we expect some variability here. Likewise,
-% different scenarios might elicit very different pitch values due idiosyncratic aspects of the scenario that are not captured by our independent variables. 
-
-% In our study, we took multiple measures per speaker. That is, each subject gave multiple polite responses and multiple informal responses. 
-% Individual responses from one subject are thus dependent. Also, we took multiple measures per scenario, as each scenario was produced by all speakers. This introduces, again, dependencies between data points. These dependencies need to be taken into account when we try to estimate differences between groups.
+\paragraph{Description of results}  
+\tr{here we need the estimates of each level for our convenient data report, right? we havent done that above. Ideas?}
 
 
-
-
+\section{Further reading}
+e.g. Bayes factor
 
 
 

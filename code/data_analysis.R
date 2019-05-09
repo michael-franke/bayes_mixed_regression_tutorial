@@ -204,21 +204,92 @@ get_posterior_beliefs_about_hypotheses_new = function(model) {
 
 get_posterior_beliefs_about_hypotheses_new(modelFE)
 
+
+############################
+## add prior information
+############################
+
+# get all possible priors for your model
+get_prior(formula = pitch ~ gender * context,
+          data = politedata)
+
+# define priors
+priorFE <- c(
+  # define a regularizing prior for the intercept within the range of possible pitch values
+  prior(normal(194, 66), class = Intercept),
+  # define a skeptical prior for the relevant coefficients
+  prior(normal(0, 50), class = b)
+)
+
+
+# let's run our models with our specified priors
+modelFE_prior = brm(formula = pitch ~ gender * context,
+                        prior = priorFE,
+                        data = politedata,
+                        control = list(adapt_delta = 0.99))
+
+get_posterior_beliefs_about_hypotheses_new(modelFE_prior)
+
+####################
+## model check
+####################
+
+# run model without considering gender
+modelFE_noGender = brm(formula =  pitch ~ context,
+                        data = politedata,
+                        prior = priorFE,
+                        control = list(adapt_delta = 0.99))
+
+pp_check(modelFE_noGender, nsample = 100)
+
+# save the plotted figure
+ggsave(plot = last_plot(), filename = "../text/pics/pp_check_FE_noGender.pdf",
+       width = 6, height = 6)
+
+# model with gender
+pp_check(modelFE, nsample = 100)
+ggsave(plot = last_plot(), filename = "../text/pics/pp_check_FE.pdf",
+       width = 6, height = 6)
+
+
 ###############################################
 ## models with additional random effects
 ###############################################
 
 # hierarchical model with random intercepts
+
+# define priors
+prior_interceptOnly <- c(
+  # define a regularizing prior for the intercept within the range of possible pitch values
+  prior(normal(194, 66), class = Intercept),
+  # define a skeptical prior for the relevant coefficients
+  prior(normal(0, 50), class = b)
+)
+
+# model
 model_interceptOnly = brm(formula = pitch ~ gender * context +
                             (1 | sentence + subject),
                           data = politedata,
+                          prior = prior_interceptOnly,
                           control = list(adapt_delta = 0.99))
 
 # hierarchical model with the maximial RE structure licensed by the design
 # (notice that factor 'gender' does not vary for a given value of variable 'subject')
+
+
+# define priors
+prior_MaxRE <- c(
+  # define a regularizing prior for the intercept within the range of possible pitch values
+  prior(normal(194, 66), class = Intercept),
+  # define a skeptical prior for the relevant coefficients
+  prior(normal(0, 50), class = b)
+)
+
+# model
 model_MaxRE = brm(formula = pitch ~ gender * context +
                     (1 + gender * context | sentence) +
                     (1 + context | subject),
+                  prior = prior_MaxRE,
                   data = politedata,
                   control = list(adapt_delta = 0.99))
 
@@ -230,44 +301,3 @@ get_posterior_beliefs_about_hypotheses_new(modelFE)
 get_posterior_beliefs_about_hypotheses_new(model_interceptOnly)
 get_posterior_beliefs_about_hypotheses_new(model_MaxRE)
 
-####################
-## model check
-####################
-
-# run model without considering gender
-model_FE_noGender = brm(formula =  pitch ~ context,
-                  data = politedata,
-                  control = list(adapt_delta = 0.99))
-
-pp_check(modelFE, nsample = 100)
-pp_check(model_FE_noGender, nsample = 100)
-
-############################
-## add prior information
-############################
-
-# get all possible priors for your model
-get_prior(formula = pitch ~ gender * context +
-            (1 + gender * context | sentence) +
-            (1 + context | subject),
-          data = politedata)
-
-
-# define priors
-priorMaxRE <- c(
-  # define a regularizing prior for the intercept within the range of possible pitch values
-  prior(normal(170, 50), class = Intercept),
-  # define a skeptical prior for the relevant coefficiants
-  prior(normal(0, 50), class = b)
-)
-
-
-# let's run our models with our specified priors
-model_MaxRE_prior = brm(formula = pitch ~ gender * context +
-                    (1 + gender * context | sentence) +
-                    (1 + context | subject),
-                    prior = priorMaxRE,
-                  data = politedata,
-                  control = list(adapt_delta = 0.99))
-
-get_posterior_beliefs_about_hypotheses_new(model_MaxRE_prior)
