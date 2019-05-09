@@ -60,7 +60,7 @@ ggplot(data = politedata.agg,
                       labels = c("informal", "polite"),
                       values = c("#f1a340", "#998ec3")) +
   ylab("pitch in Hz\n") +
-  xlab("\nGender") +
+  xlab("\ngender") +
   theme_classic() +
   theme(legend.position = "right",
         legend.key.height = unit(2,"line"),
@@ -137,7 +137,9 @@ plot_posterior_density_FE =
     #alpha = 0.7,
     data = fixef(modelFE) %>% as.tibble() %>%
       mutate(parameter = c("Intercept", "gender:M", "context:pol", "gender:M__context:pol")) %>%
-      rename( low = Q2.5, high = Q97.5)
+      mutate(parameter = as.factor(parameter)) %>% 
+      mutate(parameter = factor(parameter, levels = c("Intercept", "context:pol", "gender:M", "gender:M__context:pol"))) %>% 
+      rename(low = Q2.5, high = Q97.5)
       )
 
 # save the plotted figure
@@ -228,10 +230,21 @@ get_posterior_beliefs_about_hypotheses_new(modelFE)
 get_posterior_beliefs_about_hypotheses_new(model_interceptOnly)
 get_posterior_beliefs_about_hypotheses_new(model_MaxRE)
 
+####################
+## model check
+####################
 
-###############################################
+# run model without considering gender
+model_FE_noGender = brm(formula =  pitch ~ context,
+                  data = politedata,
+                  control = list(adapt_delta = 0.99))
+
+pp_check(modelFE, nsample = 100)
+pp_check(model_FE_noGender, nsample = 100)
+
+############################
 ## add prior information
-###############################################
+############################
 
 # get all possible priors for your model
 get_prior(formula = pitch ~ gender * context +
