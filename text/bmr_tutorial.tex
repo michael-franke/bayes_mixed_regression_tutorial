@@ -318,42 +318,45 @@ level (C2), the gender level (C3), or both (C4). The $\beta$ terms are also call
     \emph{Bayesian inference: priors, likelihoods and posteriors}
     \medskip
 
-    Jones is a rational scientist. She has recently inherited her grandma's lucky coin. Grandma
-    used this coin many times during Jones' childhood to determine whether Jones was allowed a
-    sweet or not. Jones suspects that grandma's coin might be a trick coin, but she is not
+    Jones is a rational scientist. She has recently inherited her grandma's lucky coin. Jones suspects that grandma's coin might be a trick coin, but she is not
     sure. She is determined to find out. How? Well, naturally, by rationally updating her
     \emph{prior beliefs} about the coin's bias to obtain a new \emph{posterior belief} based on
     empirical observation (outcomes of coin flips). Central to this updating is Jones'
     \emph{likelihood function}, which encodes how likely each relevant coin bias may have
-    generated the observed data. --- Sounds fancifully abstract? It's actually fairly intuitive.
-    Consider this example.
+    generated the observed data.
     
-    \paragraph{Prior beliefs.} Jones knows that there are two factories who produce coins. One
-    produces fair coins, the other produces coins which give heads three times more often than
-    tails. She believes that it's equally likely that the coin is from either factory. Numerically, Jones' \emph{prior beliefs} can be written as, where $\theta \in [0;1]$
-    is the coin's bias: $P(\theta = \nicefrac{1}{2}) = \nicefrac{1}{2}$, and $P(\theta =
-    \nicefrac{3}{4}) = \nicefrac{1}{2}$.
+    \paragraph{Prior beliefs.} Jones knows that there are two coin factories: one produces fair
+    coins, the other produces coins which give heads three times more often than tails. She
+    believes that it's equally likely that the coin is from either factory. In formal notation,
+    if $\theta$ is the coin's bias, i.e., the probability with which it lands heads when
+    tossed, Jones' \emph{prior beliefs} are:
+    \begin{align*}
+      P(\theta = \nicefrac{1}{2}) = P(\theta = \nicefrac{3}{4}) = \nicefrac{1}{2}
+    \end{align*}
+
 
     \paragraph{Likelihood.} The bias $\theta$ is, by definition, the probability of the coin
     landing heads on the next trial. Let's assume that Jones tosses the coin only once (hm,
-    maybe not so rational a scientist after all? or just too busy?). If $D\!=\,\set{\text{heads}, \text{tails}}$ is the set of potential outcomes of this experiment, the \emph{likelihood
+    maybe not so rational a scientist after all? or just too busy?). If $D\!=\!\set{\text{heads}, \text{tails}}$ is the set of potential outcomes of this experiment, the \emph{likelihood
       function} determines the likelihood of observing each observation {$d\!\in D$} for each
-    $\theta$, which in our case is just rather trivial: $P(D = \text{heads} \mid \theta) =
-    \theta$ and $P(D = \text{tails} \mid \theta) = 1 - \theta$.
+    $\theta$, which in our case is:
+    \begin{align*}
+      P(D = \text{heads} \mid \theta) & =  \theta \\
+      P(D = \text{tails} \mid \theta) & = 1 - \theta
+    \end{align*}
 
     \paragraph{Posterior beliefs.} Jones observes that the coin landed heads. What should she
     believe now? By \emph{Bayes rule} her posterior beliefs are defined as:
     \begin{align*}
       P(\theta \mid D = \text{heads}) = \frac{P(\theta) P(D = \text{heads} \mid \theta)}{\sum_{\theta'}P(\theta') P(D = \text{heads} \mid \theta')}
     \end{align*}
-    Jones' posterior belief that the coin is twice as likely to land heads is therefore:
+    Jones' posterior belief that the coin is biased to land heads three times more likely than tails is therefore:
     \begin{align*}
       & P(\theta = \nicefrac{3}{4} \mid D = \text{heads}) =  \\
       & \frac{P(\theta = \nicefrac{3}{4}) \ P(D = \text{heads} \mid \theta = \nicefrac{3}{4})}{P(\theta = \nicefrac{3}{4}) \ P(D = \text{heads} \mid \theta = \nicefrac{3}{4}) + P(\theta = \nicefrac{1}{2}) \ P(D = \text{heads} \mid \theta = \nicefrac{1}{2})} = \\
       & \frac{\nicefrac{1}{2} \ \nicefrac{3}{4}}{\nicefrac{1}{2} \ \nicefrac{3}{4} + \nicefrac{1}{2} \ \nicefrac{1}{2}} = \frac{\nicefrac{3}{8}}{\nicefrac{7}{8}} = \frac{3}{5} 
     \end{align*}
-    After making her observation, rational Jones believes that the bias towards heads has a
-    probability of about $0.6$. So she has updated her prior belief of $0.5$.
+    After making her observation, rational Jones has updated her initial level of credence of $0.5$ in the assumption that the coin is biased to $0.6$.
     
   \end{minipage} \par
   } \par
@@ -424,74 +427,53 @@ If you are interested in finding out more about this 'sampling stuff', check out
 \colorbox{mygray}{\centering
   \begin{minipage}{1\textwidth}
 
-    \emph{MCMC sampling}
+    \emph{Markov Chain Monte Carlo (MCMC) sampling}
     \medskip
  
-    Bayesian ideas are old. Why have they come to such popularity only recently? -- 
-    Part of it is due to our ever growing computational resources. Bayesian inference is computationally very expensive. To understand this,
-    consider Bayes rule for data analysis. We have a prior $P(\theta)$ over parameter vector
-    $\theta$, a likelihood function $P(D\mid\theta)$ and we want to compute the posterior
-    distribution, using Bayes rule like so:
+    Bayesian ideas are old, but they have seen a revival recently, in large part due to
+    advances in computer science (notably: clever algorithms, not just faster computers). To
+    understand this, consider Bayes rule for data analysis. We have a prior $P(\theta)$ over
+    parameter vector $\theta$ and a likelihood function $P(D\mid\theta)$. We want to compute
+    the posterior distribution
+    :
     \begin{eqnarray*}
       P(\theta \mid D) = \frac{P(\theta) \ P(D \mid \theta)}{ \int P(\theta') \ P(D \mid
       \theta') \textrm{d}\theta'}
     \end{eqnarray*}
-    The problem is the integral in the denominator.
-    If $\theta$ is a large vector of parameters
-    (e.g., in a hierarchical regression model), it might not be all that easy (euphemistic for
-    ``quite impossible'') to crack that integral. Fortunately, clever algorithms like \emph{Markov Chain
-      Monte Carlo} allow us to approximate the posterior distribution without having to
-    calculate the integral-of-doom. They do that by giving us \textbf{samples}.
+    If $\theta$ is a large vector of parameters (e.g., in a hierarchical regression model), it
+    might be quite impossible to compute the integral in the denominator. Fortunately, clever
+    algorithms like MCMC allow us to draw \textbf{representative samples} from the
+    posterior distribution without having to calculate the integral-of-doom.
 
-    \begin{itemize}
-    \item We have a total of 4000 samples from the posterior distribution, obtained from 4
-      chains all of which had 2000 iterations but discarded the first 1000 as warm up.
-    \end{itemize}
+    \medskip
     
-\paragraph{Good vs. bad samples?}  
-    For this tutorial, it is not important to understand how MCMC algorithms work precisely.
-    Let's just accept that they give us samples from the posterior distribution, which we can
-    use to plot or reason with, e.g., like in Figure~\ref{fig:Posteriors_FE}. That's nice, but
-    it would be foolish to just trust whatever samples some piece of software gives us without
-    some sanity checking. That's why it is common to inspect our samples either by visual
-    inspection using plots, and/or by certain numeric indexes of  how ``good'' our samples really are.
-    
-    To understand the most basic diagnostics (which is really all we need for common applications), we need to understand one thing about how MCMC methods generate
-    samples. They do that just like a rather dumb frog would hop from one lily pad to another
-    to catch flies. Call the frog ``Franz''. Franz sits on a
-    lily pad and observes the number of flies there. He then considers exactly one other lily
-    pad and wonders: ``Should I jump there?'' If there are more flies, he jumps; if
-    not, he sometimes stays, sometimes jumps (with a probability proportional to the ratio of
-    flies at the current lily and the next one). If he does that over an over again, the probability of visiting a
-    lily pad is proportional to its number of flies (relative to that of all other lily pads
-    Franz might visit). Enough of frogs? Okay, the lily pads are parameter values for
-    $\theta$ and the number of flies is the quantity $P(\theta) \ P(D \mid \theta)$. So,
-    Franz's visits to a lily pad are visits to a vector of parameter values, and
-    the history of these visits gives us information about the relative posterior probability
-    of parameter values $\theta$. --- Roughly, modulo frogs and lilies, that's how basic MCMC
-    works.\tr{its not that easy to understand, I am afraid (and I know how MCMC works), is there any way to make this easier, shorter, split it off or sth?}
+    For common applications, it is not required to understand MCMC
+    algorithms in full detail. It suffices to know that samples are collected by starting at
+    (usually random) initial parameter values, and then ``jump around parameter space'' in such
+    a way that, in the limit, they will visit any particular tuple of parameter values with
+    exactly its posterior probability. So, these algorithms are guaranteed to give us
+    representative samples, given unlimited time to jump around. To make sure the samples we
+    have are still good enough, we take some precautions and use some diagnostic tools for
+    quality control.
 
-    The problem is that we can only be sure that the visits are ``good'' samples from the posterior
-    distribution if we take infinitely many. Usually, Franz is too lazy to jump around the lily pads that  (and we are too busy). If we only have a small-ish number of samples, it might be that
-    Franz was sitting on the same lily pad for a looooong time. While he
-    sat there, we did not learn much about the posterior's shape. Luckily, some MCMC variants mostly avoid this problem in a clever way. \texttt{brms} uses one of the clever Hamiltonian Monte Carlo, so we are in good shape.
+    \medskip
     
-\paragraph{Chains, $\hat{R}$, and efficient samples}      
-    Still, we should not trust Franz alone. So we routinely run several
-    \textbf{chains} (\texttt{brm} uses 4 chains per default). Think of it as letting Franz,
-    Fritz, Frieda, and Frederieke, all starting on random lily pads, doing their myopic jumping
-    all on their own. Usually, we let them jump for a while before we even start recording
-    where they sat, because they might have started at some far-off place with hardly any flies so that the first jumps are really not that representative. This is the so-called
-    \emph{warm-up} period. Finally, we gather the histories of all four froggies and compare
-    whether the outcome was (roughly) the same. That's what the \textbf{$\hat{R}$-value} in the
-    \texttt{brm} output gives us. If this value is below 1.1, we commonly assume that the
-    history of frog jumps are similar enough. The fancy way to say that is that the \textbf{chains have
-      converged}. The number of \textbf{efficient samples} is an estimate of, roughly put, the
-    number of informative jumps that out frogs have made. This means we take all rounds of potential jumps and subtract periods where the frogs
-    were just sitting around in a spot that was, for example, a local maximum of flies (why jump if the fly situation is great?). The
-    higher the proportion of efficient samples, the better.
-    \tr{tried to reduce the width, but that led to it bleeding into next page plus being discontinuous}
+    To ensure trustworthiness of samples, we routinely run several \textbf{chains}, i.e., we
+    start the ``jumping around'' at different random initial starting points and check whether
+    the different chains reached a similar outcome. We do this by plotting (so-called
+    \emph{trace plots}) and the \textbf{$\hat{R}$-value} which is included in the \texttt{brm}
+    model summary. An $\hat{R}$-statistic compares the variance of the samples within each
+    chain to that from all samples across chains (similar to ANOVA). If the $\hat{R}$-value is
+    below 1.1, we commonly assume that the chains have converged sufficiently.
+
+    \medskip
     
+    For example, lines 6--7 of the summary of \texttt{modelFE} tell us that we collected a total of 4000 samples from the posterior distribution. These came from four chains, each running for 2000 iterations, but discarding the first 1000 samples as \textbf{warm up}, since the initial starting point might be quite ``unrepresentative''. The reported estimate of \textbf{efficient samples} is important, too. It gives an estimate of the number of samples, for each parameter, which appear to be sufficiently independent of their prior history (e.g., not the outcome of being stuck for a long time in an ``unrepresentative area'').
+
+    \medskip
+    
+    In practice, the \textrm{brm} model summary and the messages during the fitting process will inform you about potential problems with convergence, and will frequently offer good advice for how to solve the issue. One quick and simple solution is increasing the number of samples (specifying the option \texttt{iter} in the \texttt{brm} function call). 
+   
   \end{minipage} \par
   } \par
   \begin{center}
@@ -565,6 +547,8 @@ More details about the information given in the other columns can be found in In
     give the lower and upper bound of the \textbf{95\% credible interval} for each parameter,
     estimated from the posterior samples.
 
+    \medskip
+    
     The column \texttt{Eff.Sample}, for efficient samples, gives a rough measure of how many of
     all the samples we took (4000 in our case) are contributing non-redundant information to
     our estimation (see Info Box~2). The higher this number, the better. Finally, \texttt{Rhat}
