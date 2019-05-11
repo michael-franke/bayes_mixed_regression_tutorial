@@ -117,7 +117,7 @@ plot_posterior_density_FE =
     geom_density(fill = "grey") +
     facet_wrap(~ parameter, scales = "free") +
   ylab("density\n") +
-  xlab("\nposterior values") +
+  xlab("\nparameter value") +
   theme_classic() +
   theme(legend.position = "right",
         legend.key.height = unit(2,"line"),
@@ -191,7 +191,7 @@ posterior_cell_means_plot = posterior_cell_means %>%
   geom_density(fill = "grey") +
   facet_wrap(~ parameter, scales = "free") +
   ylab("density\n") +
-  xlab("\nposterior values") +
+  xlab("\nparameter value") +
   theme_classic() +
   theme(legend.position = "right",
         legend.key.height = unit(2,"line"),
