@@ -467,12 +467,8 @@ If you are interested in finding out more about this 'sampling stuff', check out
     below 1.1, we commonly assume that the chains have converged sufficiently.
 
     \medskip
-    
-    For example, lines 6--7 of the summary of \texttt{modelFE} tell us that we collected a total of 4000 samples from the posterior distribution. These came from four chains, each running for 2000 iterations, but discarding the first 1000 samples as \textbf{warm up}, since the initial starting point might be quite ``unrepresentative''. The reported estimate of \textbf{efficient samples} is important, too. It gives an estimate of the number of samples, for each parameter, which appear to be sufficiently independent of their prior history (e.g., not the outcome of being stuck for a long time in an ``unrepresentative area'').
-
-    \medskip
-    
-    In practice, the \textrm{brm} model summary and the messages during the fitting process will inform you about potential problems with convergence, and will frequently offer good advice for how to solve the issue. One quick and simple solution is increasing the number of samples (specifying the option \texttt{iter} in the \texttt{brm} function call). 
+  
+    In practice, the \textrm{brm} model summary and the messages during the fitting process will inform you about potential problems with convergence, and will frequently offer good advice for how to solve the issue. One quick and simple solution is increasing the number of samples (specifying the option \texttt{iter} in the \texttt{brm} function call).
    
   \end{minipage} \par
   } \par
@@ -537,31 +533,19 @@ More details about the information given in the other columns can be found in In
     \emph{Information displayed in the summary of a \texttt{brm} model fit}
     \medskip
 
-    The first column \emph{Estimate} gives the mean of the obtained samples, thereby
-    approximating the mean of the posterior distribution (beliefs we should hold) about each
-    parameter. For example, the parameter \texttt{Intercept} is estimated to have a mean of
-    about $261$, which (here) coincides with the mean of the data points in cell 1, as shown in
-    Figure~\ref{fig:BasicPlotData_table}. The other columns give further useful information.
-    \emph{Est.Error} is the estimation error, an indication of the certainty we should have
-    about the whole inference procedure. The columns \texttt{l-95\% CI} and \texttt{u-95\% CI}
-    give the lower and upper bound of the \textbf{95\% credible interval} for each parameter,
-    estimated from the posterior samples.
-
-    \medskip
+    Lines 6--7 of the summary of \texttt{modelFE} tell us that we collected a total of 4000 samples from the posterior distribution. These came from four chains, each running for 2000 iterations, but discarding the first 1000 samples as \textbf{warm up}, since the initial starting point might be quite ``unrepresentative'' (see also Info Box~2).
     
-    The column \texttt{Eff.Sample}, for efficient samples, gives a rough measure of how many of
-    all the samples we took (4000 in our case) are contributing non-redundant information to
-    our estimation (see Info Box~2). The higher this number, the better. Finally, \texttt{Rhat}
-    is a measure of whether the samples obtained are likely representative of the true
-    distribution (again, see Info Box~2). Concretely, it indicates whether the four chains we
-    ran in parallel all ended up with the same results, so to speak. If this column contains
-    values bigger than 1.1 this is an indication that our model fit has not converged. (If
-    your model output indicates non-convergence, you may want to increase the number of
-    samples, but you should also consider the possibility that you are trying to fit a model
-    which cannot be ``trained'' based on the (perhaps too little) data and the particular
-    method of posterior sampling. For common regression analyses, this will usually entail
-    considering a simpler model (e.g., with fewer explanatory factors, less (correlated) random
-    effects, etc.))
+    From the table in lines 9--14, the column \emph{Estimate} gives the mean of the obtained
+    samples, thereby approximating the mean of the posterior distribution (beliefs we should
+    hold) about each parameter. For example, the parameter \texttt{Intercept} is estimated to
+    have a mean of about $261$, which (here) coincides with the mean of the data points in cell
+    1, as shown in Figure~\ref{fig:BasicPlotData_table}. \emph{Est.Error} is the estimation
+    error, an indication of the certainty we should have about the whole inference procedure.
+    The columns \texttt{l-95\% CI} and \texttt{u-95\% CI} give the lower and upper bound of the
+    95\% credible interval for each parameter, as discussed in the main text. The column
+    \texttt{Eff.Sample}, for efficient samples, gives a rough measure of how many of all the
+    samples we took (4000 in our case) are contributing non-redundant information to our
+    estimation. The higher this number, the better. Finally, we get the \texttt{Rhat} column with the $\hat{R}$-values for each parameter (see Info Box~2).
     
   \end{minipage} \par
   } \par
