@@ -7,8 +7,12 @@ library(tidyverse)
 
 # package for Bayesian regression modeling
 library(brms)
-# option for Bayesian regression models: use all available cores for parallel computing
+# option for Bayesian regression models: 
+# use all available cores for parallel computing
 options(mc.cores = parallel::detectCores())
+
+# package for credible interval computation
+library(HDInterval)
 
 # set seed
 set.seed(1702)
@@ -164,10 +168,58 @@ mean(post_samples_FE$b_contextpol > post_samples_FE$b_genderM)
 library(devtools)
 
 # package with convenience function for Bayesian regression models for factorial designs
-#install_github('michael-franke/bayes_mixed_regression_tutorial/faintr', build_vignettes = TRUE) # install from GitHub
+install_github(
+  repo = 'michael-franke/bayes_mixed_regression_tutorial', 
+  subdir = 'faintr',
+  build_vignettes = TRUE) # install from GitHub
 library(faintr)
 
-extract_posterior_cell_means(modelFE)
+# extract cell means and plot them
+posterior_cell_means = extract_posterior_cell_means(modelFE)$predictor_values %>% 
+  select(- n_sample) %>% 
+  gather(key = "parameter", value = "posterior") 
+
+posterior_cell_means_HDIs = posterior_cell_means %>% 
+  group_by(parameter) %>% 
+  summarize(low = hdi(posterior)[1],
+            high = hdi(posterior)[2])
+
+posterior_cell_means_plot = posterior_cell_means %>% 
+  # mutate(parameter = as.factor(parameter)) %>% 
+  # mutate(parameter = factor(parameter, levels = c("Intercept", "context:pol", "gender:M", "gender:M__context:pol"))) %>% 
+  ggplot(aes(x = posterior)) + 
+  geom_density(fill = "grey") +
+  facet_wrap(~ parameter, scales = "free") +
+  ylab("density\n") +
+  xlab("\nposterior values") +
+  theme_classic() +
+  theme(legend.position = "right",
+        legend.key.height = unit(2,"line"),
+        legend.title = element_text(size = 18, face = "bold"),
+        legend.text = element_text(size = 16),
+        legend.background = element_rect(fill = "transparent"),
+        strip.background = element_blank(),
+        strip.text = element_text(size = 18, face = "bold"),
+        axis.line = element_blank(),
+        panel.spacing = unit(2, "lines"),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        panel.background = element_rect(fill = "transparent"),
+        axis.text = element_text(size = 16),
+        axis.title = element_text(size = 18, face = "bold"),
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.margin = unit(c(0.2,0.1,0.2,0.1),"cm")) +
+  geom_segment(
+    mapping = aes(y = 0, yend = 0, x = low, xend = high),
+    color = "firebrick",
+    size = 3,
+    #alpha = 0.7,
+    data = posterior_cell_means_HDIs
+  )
+  
+# save the plotted figure
+ggsave(plot = last_plot(), filename = "../text/pics/posterior_density_cell_means.pdf",
+       width = 9, height = 6)
+
 
 compare_groups(
   model = modelFE, 

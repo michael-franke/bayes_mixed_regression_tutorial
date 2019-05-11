@@ -97,7 +97,7 @@
 %========================================
 
 
-\title{Hands-on non-technical tutorial for Bayesian mixed effects regression}
+\title{Bayesian regression modeling for (factorial designs): A tutorial}
 \author{Michael Franke \& Timo Roettger}
 \date{}
 
@@ -131,7 +131,7 @@ Unless you already have a favorite editor for tinkering with R scripts, we recom
 You will also need some packages,
 \marginnote{Remember that you can install a package called \texttt{XYZ} with the command \texttt{install.packages("XYZ")}.}
 which you can import with the following code:
-\marginnote{If you do not want to copy-paste, all code and data for this tutorial is also
+\marginnote{All code and data for this tutorial is also
   available for download here:
   \url{https://github.com/michael-franke/bayes_mixed_regression_tutorial}}
 
@@ -149,8 +149,11 @@ library(brms)
 # use all available cores for parallel computing
 options(mc.cores = parallel::detectCores())
 
+# package for credible interval computation
+library(HDInterval)
+
 # set the random seed in order to make sure 
-# we generate the same results
+# you can reproduce the same results
 set.seed(1702)
 \end{lstlisting}
 \end{minipage}
@@ -158,15 +161,17 @@ set.seed(1702)
 \section{Data, research questions \& hypotheses}
 \label{sec:data}
 
-Lets assume we are experimental researchers. Therefore, we collect data to answer questions of interest about how nature works. For example, we might want to know whether voice pitch differs across female and male speakers, and whether it differs across social contexts (say: informal and polite contexts). --- To answer our questions, we come up with a nifty experimental design; we lure a group of people into the lab; we ask them to say different words in different social contexts; we record their voices; and we extract pitch values of their voices from these recordings. We then want to find out whether our data provide evidence for any assumed relationships. So far so good. 
+As experimental researchers we collect data to answer questions of interest about how nature works. This tutorial looks at a data set relevant for investigating whether voice pitch differs across female and male speakers, and whether it differs across social contexts (say: informal and polite contexts).
+%
+\marginnote{}
+%
+To load the data into your R environment, run the following code:
+%
+\marginnote{The data is originally from research
+presented by \citet{WinterGrawunder2012:The-Phonetic-Pr}. It is used in the tutorials by \citet{Winter2013:Linear-models-a} as well, but here we `massaged' the data a bit, i.e., we renamed variables and removed a line with missing data.}
+%
 
-In this tutorial, we are looking at exactly these kind of data
-\citep[following][]{Winter2013:Linear-models-a}\marginnote{The data is originally from research
-presented by \citet{WinterGrawunder2012:The-Phonetic-Pr}}. To load the data into your R environment,
-run the following code:
-\marginnote{If you are familiar with the previous tutorials by \citet{Winter2013:Linear-models-a}, note that we `massaged' the data a bit, i.e., we renamed variables and removed a line with missing data.}
-
-\bigskip
+\medskip
 
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
@@ -177,9 +182,10 @@ politedata = read_csv("https://raw.githubusercontent.com/michael-franke/bayes_mi
 
 \vspace*{-0.5cm}
 
-\noindent Type \ri{head(politedata)} and you should see the first lines of the imported
-data:\marginnote{Here, we show only part of the output 
-that you can see when executing this 
+\noindent Type \ri{head(politedata)} and you should see the first lines of the
+data:
+%
+\marginnote{Here, we show only part of the output that you can see when executing this 
 command.}
 
 \bigskip
@@ -208,10 +214,11 @@ Often, we are interested in comparing a \textbf{dependent variable} (here \textt
 across different conditions or groups, i.e. \textbf{independent variables} (here \texttt{gender} and \texttt{context}). Before our data collection,
 we might have formulated concrete predictions about the relationship between the dependent
 variable and the independent variables. For example, we might have formulated the following three
-hypotheses:\marginnote{Notice that our hypotheses are formulated explicitly as comparisons of
-  means / averages. The statistical model we will use indeed compares means, and this is common
-  practice, albeit a particular assumption worth highlighting. Commonly, this assumption is implicit: For example we could simply formulate H1 as something like
-  ``Female speakers' pitch is lower in polite than informal contexts.'' }
+hypotheses:
+% \marginnote{Notice that our hypotheses are formulated explicitly as comparisons of
+%   means / averages. The statistical model we will use indeed compares means, and this is common
+%   practice, albeit a particular assumption worth highlighting. Commonly, this assumption is implicit: For example we could simply formulate H1 as something like
+%   ``Female speakers' pitch is lower in polite than informal contexts.'' }
 
 \begin{enumerate}[{H}1:]
 \item Female speakers have a lower average pitch in polite than in informal contexts.
@@ -229,14 +236,15 @@ sentence (semi-transparent points) across gender and context. The solid points i
 average pitch values across all sentences and speakers. Looking at the plot, we can see that pitch values
 from female speakers are generally higher than those from male speakers (points in the left column
 are higher than in the right column). We also see that pitch values in the informal context are slightly higher than those in the polite context (orange points are
-slightly higher than purple points).\marginnote{The code needed to generated the picture in
-  Figure~\ref{fig:BasicPlotData_data} is not reproduced here, but included in the script in the
-  resources for this tutorial: \url{https://github.com/michael-franke/bayes_mixed_regression_tutorial}}
+slightly higher than purple points).
+% \marginnote{The code needed to generated the picture in
+%   Figure~\ref{fig:BasicPlotData_data} is not reproduced here, but included in the script in the
+%   resources for this tutorial: \url{https://github.com/michael-franke/bayes_mixed_regression_tutorial}}
 
 \begin{figure}[t]
   \centering
     \includegraphics[width = \textwidth]{pics/basic_data_plot.pdf}
-    \caption{Basic plot of the data displaying overall averages (thick points) and averages for individual sentences (smaller semitransparent points)}
+    \caption{Basic plot of the data displaying overall averages (thick points) and averages for individual sentences (smaller semitransparent points).}
      \label{fig:BasicPlotData_data}
 \end{figure}
 
@@ -244,7 +252,7 @@ slightly higher than purple points).\marginnote{The code needed to generated the
 Looking at the plot, we might want to shout: ``Eureka! The data confirm all of our
 hypotheses!'' But, of course, we need to be more careful. As Bayesians, we would like to
 translate the data into an expression of \textbf{evidence}: does the data provide evidence for
-our research hypotheses? Or are the observable differences to meager? -- Also, notice that
+our research hypotheses? Or are the observable differences too meager? -- Also, notice that
 there is quite a lot of variability between different sentences (the semi-transparent points in Figure 1).
 For example, some values from the informal condition for female speakers (orange points in left
 column), are lower than their corresponding polite counterparts. Similarly, there could be differences between individual speakers. What we want are precise
@@ -259,15 +267,25 @@ estimates of potential differences between conditions. We also want a measure of
 
 \section{A regression model for our data}
 
-Another way of looking at the data in connection with our research hypotheses is displayed in Figure~\ref{fig:BasicPlotData_table}. Each cell represents one unique combination of the gender and the context factor, and the table shows the mean pitch value for each cell.\marginnote{In technical terms, this table is the \textbf{design matrix} of our experiment. We have two factors of interest \texttt{context} and \texttt{gender}, each with two levels. The table shows each combination of levels of all relevant factors. The cells in this table are therefore also called \textbf{design cells} \tr{is this marginnote essential or can we maybe get rid of it?}.} 
+Another way of looking at the data in connection with our research hypotheses is displayed in
+Figure~\ref{fig:BasicPlotData_table}. Each cell in this \textbf{design matrix} represents one
+unique combination of the gender and the context factor, and the table shows the mean of
+observed pitch values for each cell.
+%
+% \marginnote{In technical terms, this table is the \textbf{design matrix} of our experiment. We
+%   have two factors of interest \texttt{context} and \texttt{gender}, each with two levels. The
+%   table shows each combination of levels of all relevant factors. The cells in this table are
+%   therefore also called \textbf{design cells} \tr{is this marginnote essential or can we maybe
+%     get rid of it?}.}
+%
 Our hypotheses can be related to the comparison between some of these cell-based means.
 H1 makes a statement about the comparison between C(ells) 1 and 2 (the context effect for female speakers); H2 makes a statement about C3 and C4 (the context effect for male speakers); and H3 makes a statement about C2 and C3 (the difference between informal male speakers and polite female speakers).
 
-One way of testing our hypotheses using a Bayesian approach to data analysis, is to ask whether the relevant differences between cell means are \textit{credibly different from zero}. This is jargon for asking whether, given the observed data, we should believe that the relevant cell means are different from each other. The fact that we are now in Bayesian land should hit us when we hear the phrases ``credibly different'' and the ``should believe''. Bayesian thinking is about updating beliefs based on observations. And we express our beliefs as as probability distributions. 
+One way of testing our hypotheses using a Bayesian approach to data analysis, is to ask whether the relevant differences between cell means are \textit{credibly different from zero}. This is jargon for asking whether, given the observed data, we should believe that the relevant cell means are different from each other. The fact that we are now in Bayesian land should hit us when we hear the phrases ``credibly different'' and e`should believe''. Bayesian thinking is about updating beliefs based on observations. And we express our beliefs as as probability distributions. 
 At first, this may appear scary or technically involved. But at the end of the day, the intuitions captured by this approach are arguably very natural, and perhaps even easier to understand than the reasoning underlying other approaches to statistical inference. Let's walk through our Bayesian approach step-by-step.
 
 First, let's look at the \textbf{regression model} we want to use.
-Our regression models assumes that pitch values observed in each cell are
+Our regression model assumes that pitch values observed in each cell are
 sampled from a population that is normally distribution, where each cell $c_i$ has its own mean $\mu_i$. We are interested in the probability of one cell mean being larger than another cell mean, i.e., the probability that $\mu_i > \mu_j$. Put differently, we are interested in the probability that the difference between $\mu_i$ and $\mu_j$ is larger than zero: $\mu_i - \mu_j > 0$.
 %and since, let's say, it is easier to test whether a value is bigger than zero, we can encode the cell means like in Figure~\ref{fig:coefficients_table}. \tr{I cannot see this in the figure. The figure merely displays how we calculate the individual cell mean in a regression}
 Figure~\ref{fig:coefficients_table} illustrates the encoding scheme of our cell means in terms of a regression analysis. It assumes that
@@ -276,11 +294,14 @@ the factor \texttt{gender} and the level \texttt{informal} for the factor
 \texttt{context}.\marginnote{This is so-called \textbf{dummy coding} of the regression
 coefficients. Other coding schemes exist, but are not discussed here.} 
   
-All cell means can then be expressed in terms of
-differences between the \textbf{intercept} $\beta_0$ which is the cell mean of the reference level (here, the cell mean of female subjects in
-informal contexts), deviations from this \textbf{reference cell} for each individual factor
+All cell means can then be expressed in terms of differences between the \textbf{intercept}
+$\beta_0$ which is the cell mean of the reference level (here, the cell mean of female subjects
+in informal contexts), deviations from this \textbf{reference cell} for each individual factor
 ($\beta_{\text{male}}$, and $\beta_{\text{polite}}$), and a so-called \textbf{interaction term}
-$\beta_{\text{pol\&male}}$. In other words, our regression estimates the mean of the reference level and estimates how much we need to adjust this mean when we change either the context level (C2), the gender level (C3), or both (C4). Each value that the model estimates is called a parameter.
+$\beta_{\text{pol\&male}}$. In other words, our regression estimates the mean of the reference
+level and estimates how much we need to adjust this mean when we change either the context
+level (C2), the gender level (C3), or both (C4). The $\beta$ terms are also called
+\textbf{coefficients}. They are \textbf{free parameters} of the model.
 
 \begin{figure}[]
   \centering
@@ -346,20 +367,25 @@ $\beta_{\text{pol\&male}}$. In other words, our regression estimates the mean of
 
 \section{A Bayesian analysis of a (fixed effects) regression model}
 
-Having spelled out a model like the above, a Bayesian analysis asks: what should we
-believe about the values of the coefficients $\beta_0$, $\beta_{\text{pol}}$,
-$\beta_{\text{male}}$ and $\beta_{\text{pol\&male}}$?; what values for these parameters are
-likely, given the data, the assumed model, and our initial beliefs about the parameters, the
-so-called \textbf{prior beliefs}?
-%
-\marginnote{\textbf{Prior beliefs} are important to get a Bayesian analysis off the ground; a
-  circumstance which is discussed controversially. For many practical purposes, however, the
-  precise choice of prior is not decisive and tools like the \texttt{brms} package which we
-  will use here will default to generically reasonable choices of priors for your model (more
-  on this below).}
+Having spelled out a model like the above, a Bayesian analysis asks: What are credible values for the model's parameters, i.e., what should a rational reasoner believe about the values of,
+in particular, the coefficients $\beta_0$, $\beta_{\text{pol}}$, $\beta_{\text{male}}$ and $\beta_{\text{pol\&male}}$ given the reasoner's initial beliefs and the data, on the assumption that the model is true?
 %
 \marginnote{Info Box~1 provides some background on Bayesian reasoning}
 %
+Formally, if $\theta$ is a vector of parameter values of the model, we are interested in the \textbf{posterior distribution} $P(\theta \mid D)$, which assigns a non-negative number to each tuple of parameters in proportion to how likely that tuple is.
+From a Bayesian point of view, the model consists of a \textbf{likelihood function} $P(D \mid \theta)$, which specifies how likely an observation of data $D$ is for each value of parameters $\theta$, and a \textbf{prior distribution} $P(\theta)$, which specifies how likely we (the rational reasoners) believe each tuple of parameter values is in the first place.
+%
+\marginnote{Supplying a \textbf{prior}, really just \textit{any} prior, is important to get a
+  Bayesian analysis off the ground; a circumstance which is discussed controversially. For many
+  practical purposes, however, the precise choice of prior is not decisive and tools like the
+  \texttt{brms} package which we will use here will default to generically reasonable choices
+  of priors for your model (more on this below).}
+%
+With these ingredients, we can compute the posterior distribution by Bayes rule, as follows:
+\begin{eqnarray*}
+  P(\theta \mid D) = \frac{P(\theta) \ P(D \mid \theta)}{ \int P(\theta') \ P(D \mid
+  \theta') \textrm{d}\theta'}
+\end{eqnarray*}
 
 The R package \texttt{brms} \citep{buerkner2016brms} makes it easy to run Bayesian regression models. It uses a very similar formula syntax as related packages for regression analysis. In our case, we want to regress the dependent variable \texttt{pitch} against the independent variables \texttt{gender} and \texttt{context} and their two-way interaction. This model is expressed by the formula:
 
@@ -404,7 +430,7 @@ If you are interested in finding out more about this 'sampling stuff', check out
  
     Bayesian ideas are old. Why have they come to such popularity only recently? -- 
     Part of it is due to our ever growing computational resources. Bayesian inference is computationally very expensive. To understand this,
-    consider Bayes rule for data analysis. We have a prior $P{\theta}$ over parameter vector
+    consider Bayes rule for data analysis. We have a prior $P(\theta)$ over parameter vector
     $\theta$, a likelihood function $P(D\mid\theta)$ and we want to compute the posterior
     distribution, using Bayes rule like so:
     \begin{eqnarray*}
@@ -418,12 +444,18 @@ If you are interested in finding out more about this 'sampling stuff', check out
       Monte Carlo} allow us to approximate the posterior distribution without having to
     calculate the integral-of-doom. They do that by giving us \textbf{samples}.
 
+    \begin{itemize}
+    \item We have a total of 4000 samples from the posterior distribution, obtained from 4
+      chains all of which had 2000 iterations but discarded the first 1000 as warm up.
+    \end{itemize}
+    
 \paragraph{Good vs. bad samples?}  
     For this tutorial, it is not important to understand how MCMC algorithms work precisely.
     Let's just accept that they give us samples from the posterior distribution, which we can
     use to plot or reason with, e.g., like in Figure~\ref{fig:Posteriors_FE}. That's nice, but
     it would be foolish to just trust whatever samples some piece of software gives us without
-    some sanity checking. That's why it is common to inspect our samples either by visually inspection using plots, and/or by certain numeric indexes of  how ``good'' our samples really are.
+    some sanity checking. That's why it is common to inspect our samples either by visual
+    inspection using plots, and/or by certain numeric indexes of  how ``good'' our samples really are.
     
     To understand the most basic diagnostics (which is really all we need for common applications), we need to understand one thing about how MCMC methods generate
     samples. They do that just like a rather dumb frog would hop from one lily pad to another
@@ -441,7 +473,7 @@ If you are interested in finding out more about this 'sampling stuff', check out
     works.\tr{its not that easy to understand, I am afraid (and I know how MCMC works), is there any way to make this easier, shorter, split it off or sth?}
 
     The problem is that we can only be sure that the visits are ``good'' samples from the posterior
-    distribution if we take infinitely many. Usually, Franz is too lazy to jump around the lily pads that much (and we are too busy). If we only have a small-ish number of samples, it might be that
+    distribution if we take infinitely many. Usually, Franz is too lazy to jump around the lily pads that  (and we are too busy). If we only have a small-ish number of samples, it might be that
     Franz was sitting on the same lily pad for a looooong time. While he
     sat there, we did not learn much about the posterior's shape. Luckily, some MCMC variants mostly avoid this problem in a clever way. \texttt{brms} uses one of the clever Hamiltonian Monte Carlo, so we are in good shape.
     
@@ -469,7 +501,7 @@ If you are interested in finding out more about this 'sampling stuff', check out
 \end{InfoBox}
 
 
-You can type in \texttt{modelFE} in order to get a summary of the model fit. It should look much like the following output.
+You can type in \texttt{modelFE} in order to get a summary of the model fit. It should look like the following output.
 
 \bigskip
 
@@ -500,10 +532,15 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 \end{rc}
 \end{minipage}
 
-This summary looks very much like regression model summaries of non-Bayesian models. Lines 2--5
-give us information about the model and the data used. Lines 6 and 7 tell us about the sampling
-procedure. We have a total of 4000 samples from the posterior distribution, obtained from 4
-chains all of which had 2000 iterations but discarded the first 1000 as warm up (see Info Box~3). Lines 9--14 contain information about our parameters of interest. We will discuss them in detail below. Lines 16--18 contain information that look similar to those in lines 9--14. This is the estimation of the standard deviation \texttt{sigma}, describing the variance of the assumed normal distributions (which describe the distribution of measures in each design cell). Finally, lines 20--22 contain general information about the model fit and the information presented in this summary.\marginnote{If the model failed to converge or other problems occurred, you would see an informative message in the last part of this summary.}
+Lines 2--5 give us information about the model and the data used. Lines 6 and 7 tell us about
+the sampling procedure (see Info Box~2 for more information). Lines 9--14 contain information about our
+parameters of interest. We will discuss them in detail below. Lines 16--18 contain information
+that look similar to those in lines 9--14. This is the estimation of the standard deviation
+\texttt{sigma}, describing the variance of the assumed normal distributions (which describe the
+distribution of measures in each design cell). Finally, lines 20--22 contain general
+information about the model fit and the information presented in this summary.\marginnote{If
+  the model failed to converge or other problems occurred, you would see an informative message
+  in the last part of this summary (see Info Box~3).}
 
 Let us look at lines 9--14 in detail now. What these lines give us is a table with four rows, each of which corresponds to a parameter in the model, namely the coefficients shown in Figure~\ref{fig:coefficients_table}. The variable \texttt{Intercept} refers to our $\beta_0$, which represents the mean of our reference level in cell 1 (female speakers in polite contexts). The variable \texttt{genderM} corresponds to our $\beta_{\text{male}}$, \texttt{contextpol} corresponds to our $\beta_{\text{pol}}$, and \texttt{genderM:contextpol} is the interaction term $\beta_{\text{pol\&male}}$. For each of these parameters, the table contains very useful summary statistics based on the samples returned from the model fit.
 %
@@ -551,9 +588,18 @@ More details about the information given in the other columns can be found in In
 \end{InfoBox}
 
 
-For our purposes, the information about 95\% credible intervals is most interesting. Take the parameter \texttt{contextpol}, corresponding to our coefficient $\beta_{\text{pol}}$. This parameter corresponds to the estimated adjustment of the mean of the reference level when we change the context level to polite. The 95\% CI is roughly [-50;-6]. We would take values outside of this interval to be sufficiently unlikely to be considered plausible values. Consequently, a very special value for this parameter has to be considered implausible, namely 0. In other words, this analysis suggests that 0 is a very unlikely value for the coefficient $\beta_{\text{pol}}$; rather we should believe that $\beta_{\text{pol}}$ is most likely negative. --- Hurray! This directly addresses our first research hypothesis. In a research paper we could now write: ``Based on the regression model, the data suggests that H1 is likely true.''
+For our current purposes, the information in  columns \texttt{l-95\% CI} and \texttt{u-95\% CI} is most important.
+These numbers give the lower and upper bounds of a \textbf{95\% credible interval}.
+Take the parameter \texttt{contextpol}, corresponding to our coefficient $\beta_{\text{pol}}$.
+This parameter corresponds to the estimated adjustment of the mean of the reference level when we change the context level to polite.
+The 95\% CI is roughly [-50;-6].
+We could take values outside of this interval to be sufficiently unlikely to be ignorable for most purposes.
+Consequently, a very special value for this parameter has to be considered implausible, namely 0.
+In other words, this analysis suggests that 0 is a very unlikely value for the coefficient $\beta_{\text{pol}}$; rather we should believe that $\beta_{\text{pol}}$ is most likely negative. --- Hurray!
+This directly addresses our first research hypothesis.
+In a research paper we could now write: ``Based on the regression model, the data suggests that H1 is likely true.''
 
-How likely is it that $\beta_{\text{pol}}$ is smaller than 0? ---Instead of simply making a binary thumbs-up / thumbs-down decision, it would be even cooler, if we could put a number to it. As Bayesians, we fortunately can. To see how this works, let us have a more intimate look at the samples that the \texttt{brm} function returns. We can access the samples of a model fitted with \texttt{brm} with the function \texttt{posterior\_samples}:
+How likely is it that $\beta_{\text{pol}}$ is smaller than 0? ---Instead of simply making a binary thumbs-up / thumbs-down decision, it would be even more elegant, if we could put a number to it. As Bayesians, we fortunately can. To see how this works, let us have a more intimate look at the samples that the \texttt{brm} function returns. We can access the samples of a model fitted with \texttt{brm} with the function \texttt{posterior\_samples}:
 
 \bigskip
 
@@ -582,26 +628,27 @@ The output of this could look like this:
 \end{rc}
 \end{minipage}
 
-What you see here is the top 6 rows of a data frame with columns for each parameter and 4000 rows, corresponding to each sample of that parameter (so our sampling method has generated 4000 likely values for each parameter).
+What you see here is the top 6 rows of a data frame with columns for each parameter and 4000 rows, corresponding to each sample of that parameter (so our sampling method has generated 4000 values for each parameter, where each row is a sample from the posterior distribution $P(\theta \mid D)$).
 %
-\marginnote{The column \texttt{lp\_\_} contains the log-probability of the data for the parameterization in each row. This is useful for model comparison and model criticism but not important for our current adventures. \tr{re marginnote: essential? Id say, get rid of it?}}
+\marginnote{The column \texttt{lp\_\_} contains the log-probability of the data for the parameterization in each row. This is useful for model comparison and model criticism but not important for our current adventures.}
 %
 We can use these samples to produce density plots reflecting out posterior distribution. The plot in Figure~\ref{fig:Posteriors_FE}
 shows, for each of the four main model parameters an estimate of the posterior density. Each
 curve shows how much credence we should put on particular parameter values. For example, we see
 that our beliefs concerning plausible values for the mean of cell 1 (female speakers in polite
-contexts, the reference cell) should hover around 261, roughly spreading from about 240 to 280. We also see that all values that receive substantial probability density for \texttt{context:pol} (our $\beta_{\text{pol}}$) are negative (as captured in the 95\% CI discussed above). Zero is estimated to be a rather unlikely value for this parameter.
+contexts, the reference cell) should hover around 261, roughly spreading from about 240 to 280. We also see that all values that receive substantial probability density for \texttt{context:pol} (our $\beta_{\text{pol}}$) are negative (as captured in the 95\% CI discussed above). Zero is estimated to be a comparatively unlikely value for this parameter.
 
 \begin{figure}
   \centering
   \includegraphics[width=\textwidth]{pics/posterior_density_FE.pdf}
-  \caption[Posteriors fixed-effects model]{Posterior density of parameter values in the
-    fixed-effects regression model. The thick red lines indicate the 95\% credible intervals,
-    i.e., the range of parameter values that it is reasonable to believe in.}
+  \caption[Posterior over coefficients in fixed-effects model]{Posterior density of parameter
+    values in the fixed-effects regression model. The thick red lines indicate the 95\%
+    credible intervals, i.e., the range of parameter values that it is reasonable to believe
+    in.}
   \label{fig:Posteriors_FE}
 \end{figure}
 
-Now, here comes a nice gadget. Based on the samples obtained for \texttt{contextpol} ($\beta_{\text{pol}}$), it is very easy to estimate our belief that $\beta_{\text{pol}}$ is indeed negative. We simply have to calculate the proportion of samples that were negative. That's all. For instance, with the code below, which reveals that given the data and the model, the posterior probability that $\beta_{\text{pol}} < 0$ is about 0.99275. This is very close to 1!  
+Now, here comes a nice gadget. Based on the samples obtained for \texttt{contextpol} ($\beta_{\text{pol}}$), it is very easy to estimate our belief that $\beta_{\text{pol}}$ is indeed negative. We simply have to calculate the proportion of samples that were negative. That's all. For instance, with the code below, which reveals that given the data and the model, the posterior probability of the proposition that $\beta_{\text{pol}} < 0$ is about 0.99275. This is very close to 1!  
 
 \bigskip
 
@@ -619,15 +666,13 @@ Unfortunately, what we have not seen yet is what our model and data say about hy
 %
 \marginnote{A potential way of testing different hypotheses of the kind we have set our here, is to run different regression analyses, each with a different reference cell. This is a rather unhandy work flow. It wouldn't help with hypothesis 3 either, which compares the cell means in our design matrix``diagonally'': there is no way of changing the reference level of either factor such that dummy coding gives us a single coefficient as the difference between cells 2 and 3.}
 %
-However, unlike in more frequentist/classical analysis, the Bayesian approach allows to recover information about any derived measure from the obtained samples. Here's how:
+Fortunately, we can recover information about any derived measure from the obtained samples. Here's how:
 
 Take hypothesis 3 which requires us to compare cells 2 and 3. The hypothesis states that
 $\beta_0 + \beta_{\text{pol}} > \beta_0 + \beta_{\text{male}}$, which reduces to
 $\beta_{\text{pol}} > \beta_{\text{male}}$. We can approximate the posterior probability that
 this is true based on the samples that we obtained for our model in the same general way as
-before, namely \tr{I think this would be easier to follow if we'd keep the reference level in
-  the equation} \mf{aaargh, I cannot do it; that's rock-bottom for me; ;-) it's explained in
-  the paragraph above why we \emph{can} leave it out; please \dots}\tr{lol, okay lass es drin haha, aber eine Sache die glaub ich ein wenig unintuitiv ist: Wenn wir die estimates berechnen für die absoluten Posterior Werte der Level,  dann brauchen wir das Intercept wieder...}:
+before, namely:
 
 \bigskip
 
@@ -635,44 +680,73 @@ before, namely \tr{I think this would be easier to follow if we'd keep the refer
 \begin{lstlisting}[language=R]
 # proportion of samples where the mean for cell 2 was larger 
 # than that of cell 3 
-# this number approximates P(b_contextpol > b_genderM | model, data)
+# this number approximates the quantity:
+#    P(b_contextpol > b_genderM | model, data)
 mean(post_samples_FE$b_contextpol > post_samples_FE$b_genderM)
 \end{lstlisting}
 \end{minipage}
 
 Based on the posterior samples we obtained, the estimated probability is 1. That's a strong result. If the model was true, then, given the data, our certainty that hypothesis 3 is true should be pretty much almost at ceiling.
 
-To conclude this section, the Bayesian approach to regression modeling allows us to retrieve all direct comparisons between cells in a factorial design (all possible comparisons). It also allows us to retrieve quantitative information about our hypotheses which is accessible. It is also easy to communicate and understand. We can calculate the (estimated) posterior probability that a particular hypothesis holds. %(formalized here as an ordering relation of design cell means).
+To conclude this section, the Bayesian approach to regression modeling allows us to retrieve all direct comparisons between cells in a factorial design (all possible comparisons). It also allows us to retrieve quantitative information about our hypotheses in a way which is easy to communicate and understand. We can calculate the (estimated) posterior probability that a particular hypothesis holds. 
 
 \subsection{The \texttt{faintr} package}
 
 To make the comparison of pairs of cells even easier and applicable for even bigger factorial designs, this tutorial comes with a little R package, the \texttt{faintr} package.
 %
-\marginnote[-1.5cm]{The name \texttt{faintr} is indicative of the possibility that the package might break down unexpectedly (we might consider renaming after more extensive testing), but also alludes to ``\emph{fa}ctorial design'' and ``\emph{int}erpretation'' somehow.}
+% \marginnote[-1.5cm]{The name \texttt{faintr} is indicative of the possibility that the package might break down unexpectedly (we might consider renaming after more extensive testing), but also alludes to ``\emph{fa}ctorial design'' and ``\emph{int}erpretation'' somehow.}
 %
 You can install the package from GitHub with the \texttt{devtools} package, as follows:
 
+\medskip 
+
 \begin{minipage}[]{1.3\textwidth}
 \begin{lstlisting}[language=R]
-# package to allow installation from github
+# load package to allow installation from GitHub
 library(devtools)
-# package with convenience function for Bayesian regression 
-# models for factorial designs
-install_github("michael-franke/bayes_mixed_regression_tutorial/faintr", 
-               build_vignettes = TRUE) # install from GitHub
+# install package with convenience function for Bayesian regression 
+# models for factorial designs from GitHub
+install_github(
+  repo = 'michael-franke/bayes_mixed_regression_tutorial', 
+  subdir = 'faintr',
+  build_vignettes = TRUE)
+# load the just installed package
 library(faintr)
 \end{lstlisting}
 \end{minipage}
 
-The \texttt{faintr} package provides the function 
+The \texttt{faintr} package provides two main helper functions.
+%
+\marginnote{You can read a vignette with more information on the \texttt{faintr} package if you type \texttt{vignette("faintr\_basics")} after installing the package.}
+%
+The function \texttt{extract\_posterior\_cell\_means()}
+takes as input the fitted regression model and outputs samples for all design cell means, and a comparison of all design
+cells against each other. For example, although the model fitted $\beta$-coefficients, we can reconstruct posterior estimates of each cell's means by typing:
 
-\texttt{extract\_posterior\_cell\_means()}
-which takes as input the output of a factorial-design regression model fitted with
-\textrm{brm}. It outputs samples for all design cell means, and a comparison of all design
-cells against each other. The function \texttt{compare\_groups()} takes the same kind of model
-fit as input, together with a specification of which two (subsets of) cells to compare against
-each other. For example, we can compare (diagonally) the cells for female speakers in polite
-contexts with male speakers in informal contexts with this call:
+\begin{minipage}[]{1.3\textwidth}
+\begin{lstlisting}[language=R]
+extract_posterior_cell_means(modelFE)$predictor_values
+\end{lstlisting}
+\end{minipage}
+
+\vspace*{-0.5cm}
+
+\noindent Using these reconstructed samples, we can plot approximate posterior estimates for each cell, as in Figure~\ref{fig:Posteriors_cell_means}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{pics/posterior_density_cell_means.pdf}
+  \caption[Posteriors over cell means in fixed-effects model]{Posterior density of cell means
+    in the fixed-effects regression model. The thick red lines indicate the 95\% credible
+    intervals, i.e., the range of parameter values that it is reasonable to believe in.}
+  \label{fig:Posteriors_cell_means}
+\end{figure}
+
+
+Another helpful function is \texttt{compare\_groups()}, which takes as input a fitted
+regression model together with a specification of which two (subsets of) cells to compare
+against each other. For example, we can compare (diagonally) the cells for female speakers in
+polite contexts with male speakers in informal contexts with this call:
 
 \begin{minipage}[]{1.3\textwidth}
 \begin{lstlisting}[language=R]
