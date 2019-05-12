@@ -751,11 +751,15 @@ produce the posterior probability of the three hypothesis relevant for this tuto
 # A tibble: 3 x 2
   hypothesis                      probability
   <chr>                                 <dbl>
-1 Female-polite < Female-informal       0.973
-2 Male-polite < Male-informal           0.850
-3 Male-informal < Female-polite         0.922
+1 Female-polite < Female-informal       0.99 
+2 Male-polite < Male-informal           0.839
+3 Male-informal < Female-polite         1    
 \end{rc}
 \end{minipage}
+
+We would conclude from this that there is reason to believe, based on the currently assumed model and data, that hypotheses 1 and 3 are very likely true, but that there is ample room for doubt about hypothesis 2.
+%
+\marginnote{It is generically reasonable to consider posteriors above 0.95 or 0.975 as large enough to warrant speaking of ``evidence in favor of a hypothesis''.}
 
 \section{Priors}
 
@@ -797,13 +801,12 @@ When we do not set a prior in a Bayesian model, software like \emph{Stan}, which
 This is variably called a \textbf{flat prior} or a \textbf{maximum-entropy prior} because it encodes no bias in either direction at all.
 
 
-Unbiased priors for coefficients is a reasonable, indeed justifiable, generic choice for
+Using unbiased priors for coefficients is a reasonable generic choice for
 \texttt{brm} because it cannot know which hypotheses you want to test. But, since you (should)
 know which hypotheses you care about, you can be more explicit, and use the priors for
-conservative inference. So, let's define some priors for the model with fixed effects. We keep
-it simple and define a skeptical prior for all our fixed effects in
+conservative inference. So, let's define some priors for the model with fixed effects. Our goal is not to provide the ``best'' choice of prior here, but to give just one example of how to manipulate the prior structure to realize a very skeptical stance towards the given hypotheses. Here, we therefore specify the priors for all our fixed effects in
 question (class = b) as normal distributions centered around zero (again, our prior assumption
-is that there is no difference between conditions).
+is that there is no difference between conditions) with a very tight margin (standard deviation 10). We also fix the prior for the intercept to lie very close to the sample mean for that cell (in order to avoid that, having specified very conservative priors for the coefficients, the estimates for this parameter will get more relaxed).
 %
 \marginnote[-1.5cm]{You can specify every single parameter of your model individually. To see all parameters for which you can specify priors, you can use the \texttt{get\_prior()} function of \texttt{brms}, which takes a model formula as input, so allows you to look at the priors \texttt{brms} would assume for a model without actually having to run the model first. (For comparison, the function \texttt{prior\_summary()} takes the fitted model as \texttt{brmsfit} object as input.)}
 %
@@ -813,13 +816,15 @@ is that there is no difference between conditions).
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
 priorFE <- c(
-  # define a modestly skeptical prior for all relevant fixed effects
-  prior(normal(0, 50), class = b)
+  # define a data-informed yet narrow-ranged prior for the reference cell
+  prior(normal(260, 20), class = Intercept),
+  # define a skeptical prior for the relevant coefficients
+  prior(normal(0, 10), class = b)
 )
 \end{lstlisting}
 \end{minipage}
 
-We add this prior to the model as an argument and calculate the probability for our hypotheses again. We can see that our priors did not affect the posteriors very much.
+We add this prior to the model as an argument and calculate the probability for our hypotheses again. We can see that adding very skeptical priors can lead to more conservative conclusions.
 
 \bigskip
 
@@ -840,15 +845,15 @@ modelFE_prior = brm(formula = pitch ~ gender * context,
 # A tibble: 3 x 2
   hypothesis                      probability
   <chr>                                 <dbl>
-1 Female-polite < Female-informal       0.983
-2 Male-polite < Male-informal           0.917
-3 Male-informal < Female-polite         1  
+1 Female-polite < Female-informal       0.750
+2 Male-polite < Male-informal           0.993
+3 Male-informal < Female-polite         1    
 \end{rc}
 \end{minipage}
 
 \section{Model criticism}
 
-So we know now how to extract relevant comparisons to quantify the evidence surrounding our hypothesis. We have also learned how to specify prior information. The next important step is being able to check if our model really reflects the observed data? A common and easy way to answer this question is to use so-called \textbf{posterior predictive checks}. These checks generate new data similar to our posterior distributions and compare them to the observed data. \texttt{brms} offers a neat function called \texttt{pp\_check()}. 
+So we know now how to extract relevant comparisons to quantify the evidence surrounding our hypotheses. We have also learned how to specify prior information. The next important step is being able to check if our model really reflects the observed data. A common and easy way to answer this question is to use so-called \textbf{posterior predictive checks}. These checks generate new hypothetical data, sampled from the so-called \textbf{posterior predicitive distribution}. This distribution quantifies how likely we would expect, given our posterior beliefs about parameters, to see a particular outcome if the experiment were repeated in the same way. We can compare samples from the posterior predictive distribution to the observed data. \texttt{brms} offers a neat function called \texttt{pp\_check()} for this. If the simulated data diverges systematically from the observed data, this is a cause for worry. It would suggest that the model does not capture some of the regularities in the data. This is, therefore, a first and reasonable sanity check of the model itself.
 
 To illustrate this point, let's run our model from above without the gender predictor. 
 
@@ -856,7 +861,7 @@ To illustrate this point, let's run our model from above without the gender pred
 
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
-modelFE_noGender= brm(formula = pitch ~  context,
+modelFE_noGender= brm(formula = pitch ~ context,
 	prior = priorFE,
 	data = politedata,
 	control = list(adapt_delta = 0.99)
@@ -894,7 +899,7 @@ Our earlier model which takes \texttt{gender} into account looks quite a bit bet
 
 
 \section{Adding random effects}
-In our experiment, we measured pitch multiple times for each subject (since they produced multiple sentences). We also have multiple measures for each sentence (as each sentence was produced by multiple speakers). A crucial assumption of linear regression models is the independence assumptions. Many before us have covered this aspect of linear models \citep[e.g.][]{Winter2013:Linear-models-a, clark1973language} so we won't discuss this important issue here in detail. In a nutshell, we need to inform our model about these dependencies between observations. The way we’re going to handle this is to add random effects to our model, just as we do in frequentists' frameworks. Random effects are additional parameters that our Bayesian model estimates.
+In our experiment, we measured pitch multiple times for each subject (since they produced multiple sentences). We also have multiple measures for each sentence (as each sentence was produced by multiple speakers). A crucial assumption of linear regression models is the independence assumptions. Many before us have covered this aspect of linear models \citep[e.g.][]{clark1973language} so we won't discuss this important issue here in detail. In a nutshell, we need to inform our model about these dependencies between observations. The way we’re going to handle this is to add random effects to our model, just as we do in frequentists' frameworks. Random effects are additional parameters that our Bayesian model estimates.
 
 Although the results look quite different, running hierarchical random effect models with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is the function call to a model with the maximal random effect structure licensed by the design. We also defined regularizing priors for the intercept and skeptical priors for the predictor coefficients.
 The outcome of this is model fit is shown below:
@@ -973,7 +978,7 @@ We now also get information about the parameters implied by the specified random
 structure. Lines 9--21 cover the by-sentence random effects, lines 23--27 cover the by-subject
 random effects.
 
-To check the probability of our hypotheses of interest, we can use the \texttt{faintr} package again:
+To check the probability of our hypotheses of interest, we can use the \texttt{faintr} package again, in conjunction with the convenience function for the specific hypotheses relevant for this tutorial:
 
 \medskip
 
@@ -984,8 +989,8 @@ To check the probability of our hypotheses of interest, we can use the \texttt{f
   hypothesis                      probability
   <chr>                                 <dbl>
 1 Female-polite < Female-informal       0.974
-2 Male-polite < Male-informal           0.853
-3 Male-informal < Female-polite         0.918
+2 Male-polite < Male-informal           0.851
+3 Male-informal < Female-polite         0.927
 \end{rc}
 \end{minipage}
 
@@ -1005,6 +1010,7 @@ intervals (CIs) and the posterior probability that a parameter $\beta$ is smalle
 \paragraph{Description of results}  
 \tr{here we need the estimates of each level for our convenient data report, right? we havent done that above. Ideas?}
 
+\mf{the function \texttt{extract\_posterior\_cell\_means} gives us this, or am I missing something? I included this in the section on \texttt{faintr} above}
 
 \section{Further reading}
 e.g. Bayes factor

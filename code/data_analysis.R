@@ -266,10 +266,10 @@ get_prior(formula = pitch ~ gender * context,
 
 # define priors
 priorFE <- c(
-  # define a regularizing prior for the intercept within the range of possible pitch values
-  prior(normal(194, 66), class = Intercept),
+  # define a data-informed yet narrow-ranged prior for the reference cell
+  prior(normal(260, 20), class = Intercept),
   # define a skeptical prior for the relevant coefficients
-  prior(normal(0, 50), class = b)
+  prior(normal(0, 10), class = b)
 )
 
 
@@ -288,7 +288,6 @@ get_posterior_beliefs_about_hypotheses_new(modelFE_prior)
 # run model without considering gender
 modelFE_noGender = brm(formula =  pitch ~ context,
                         data = politedata,
-                        prior = priorFE,
                         control = list(adapt_delta = 0.99))
 
 pp_check(modelFE_noGender, nsample = 100)
@@ -313,7 +312,7 @@ ggsave(plot = last_plot(), filename = "../text/pics/pp_check_FE.pdf",
 prior_interceptOnly <- c(
   # define a regularizing prior for the intercept within the range of possible pitch values
   prior(normal(194, 66), class = Intercept),
-  # define a skeptical prior for the relevant coefficients
+  # define a moderately skeptical prior for the relevant coefficients
   prior(normal(0, 50), class = b)
 )
 
