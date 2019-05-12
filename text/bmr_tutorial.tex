@@ -687,8 +687,8 @@ The \texttt{faintr} package provides two main helper functions.
 \marginnote{You can read a vignette with more information on the \texttt{faintr} package if you type \texttt{vignette("faintr\_basics")} after installing the package.}
 %
 The function \texttt{extract\_posterior\_cell\_means()}
-takes as input the fitted regression model and outputs samples for all design cell means, and a comparison of all design
-cells against each other. For example, although the model fitted $\beta$-coefficients, we can reconstruct posterior estimates of each cell's means by typing:
+takes as input the fitted regression model (technically: the \texttt{brmsfit} object returned by function \texttt{brm}) and outputs samples for all design cell means, and a comparison of all design cells against each other.
+For example, although the model fitted $\beta$-coefficients, we can reconstruct posterior estimates of each cell's means by typing:
 
 \begin{minipage}[]{1.3\textwidth}
 \begin{lstlisting}[language=R]
@@ -710,7 +710,7 @@ extract_posterior_cell_means(modelFE)$predictor_values
 \end{figure}
 
 
-Another helpful function is \texttt{compare\_groups()}, which takes as input a fitted
+Another helpful function is \texttt{compare\_groups()}, which takes the fitted regression model (the \texttt{brmsfit} object) as input a fitted
 regression model together with a specification of which two (subsets of) cells to compare
 against each other. For example, we can compare (diagonally) the cells for female speakers in
 polite contexts with male speakers in informal contexts with this call:
@@ -768,26 +768,52 @@ As a conceptual advantage, priors can also express our relevant subjective belie
 But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. We should have a heart of stone and be skeptical about possible relationships in the first place.
 Practically, this means the following for us. We should not hesitate to make use of the possibility to bring all the potentially relevant background knowledge to bear when analyzing our data. The formalization of background knowledge should, of course, be made transparent and be explicitly justified. But, of course, we should \emph{not} engineer in the conclusions we would like to obtain eventually! If our research hypothesis is that male voice pitch is lower than female voice pitch, we obviously don't want to specify a prior that assumes the hypothesized relationship before having seen the data. Instead, we should feed our model a \textbf{skeptical} prior about the truth of our research hypothesis. A possible skeptical prior could be the assumption that there is likely \textit{no} relationship between speaker gender and voice pitch (i.e. the average difference is 0). Of course, there might be some variability around this average value (nature is messy after all), so we might want to assume that pitch differences between male and female speakers are normally distributed with an average of 0 and a standard deviation of, say, 50 Hz. Importantly, such a skeptical prior is conservative with regard to our research hypothesis. Our point of departure (before we observed new data) is to assume that there is no effect of gender on pitch. The data need to convince us otherwise.
 
-How does that look in practice?
+How does that look in practice? --- First of all, you do not have to specify priors by hand; a call to \textrm{brm} will invoke generically defensible priors for your model. For example, to see the priors for the model fit we obtained above, which is stored in \texttt{modelFE}, we could type and inspect the automatically assumed priors like this:
 
-\begin{itemize}
-\item show brms defaults for our model
-\end{itemize}
+\medskip
 
-Let's define some priors for our hierarchical model from above. We keep it simple and define a regularizing prior for the intercept (i.e. our reference level) that defines a normal distribution in plausible-pitch-value-land (for convenience we simply pick the mean and sd for our data set). We also define a skeptical prior for all our fixed effects in question (class = b) as normal distributions centered around zero (again, our prior assumption is that there is no difference between conditions).  
+\begin{minipage}[]{\textwidth}
+\begin{rc}
+> prior_summary(modelFE)
+                  prior     class               coef 
+1 student_t(3, 204, 83) Intercept                    
+2                               b                    
+3                               b         contextpol 
+4                               b            genderM 
+5                               b genderM:contextpol 
+6   student_t(3, 0, 83)     sigma  
+\end{rc}
+\end{minipage}
 
-\marginnote[-1.5cm]{You can specify every single parameter of your model individually. To see all parameters for which you can specify priors, use the \texttt{get\_prior()} function of \texttt{brms}}
+This table tells us that \texttt{brm} assumed that the intercept was sampled from a Student's $t$ distribution with a mean at 204, a standard deviation of 83 and 3 degrees of freedom. These parameters have been determined for you behind the scenes by looking at the distribution of observed pitch values in the data set.
+%
+\marginnote{Think of a Student's $t$ distribution as a normal distribution with thicker tails, where the thickness is determined by the degrees of freedom.}
+%
+Similarly, the prior for the standard deviation $\sigma$ is also a Student's $t$ distribution with suitable parameters determined from the data.
+But the column with information about the priors over coefficients (``class $b$'' in the table above) is empty!
+That does not mean that these priors are a secret.
+It means that they have not been set.
+When we do not set a prior in a Bayesian model, software like \emph{Stan}, which we use here in the background, assumes that any logically possible parameter value is equally likely.
+This is variably called a \textbf{flat prior} or a \textbf{maximum-entropy prior} because it encodes no bias in either direction at all.
+
+
+Unbiased priors for coefficients is a reasonable, indeed justifiable, generic choice for
+\texttt{brm} because it cannot know which hypotheses you want to test. But, since you (should)
+know which hypotheses you care about, you can be more explicit, and use the priors for
+conservative inference. So, let's define some priors for the model with fixed effects. We keep
+it simple and define a skeptical prior for all our fixed effects in
+question (class = b) as normal distributions centered around zero (again, our prior assumption
+is that there is no difference between conditions).
+%
+\marginnote[-1.5cm]{You can specify every single parameter of your model individually. To see all parameters for which you can specify priors, you can use the \texttt{get\_prior()} function of \texttt{brms}, which takes a model formula as input, so allows you to look at the priors \texttt{brms} would assume for a model without actually having to run the model first. (For comparison, the function \texttt{prior\_summary()} takes the fitted model as \texttt{brmsfit} object as input.)}
+%
 
 \bigskip
 
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
 priorFE <- c(
-  # define a regularizing prior for the intercept within 
-  # the range of possible pitch values: a normal distribution 
-  # with the mean of 194 and a standard deviation of 66
-  prior(normal(194, 66 class = Intercept),
-  # define a skeptical prior for all relevant fixed effects
+  # define a modestly skeptical prior for all relevant fixed effects
   prior(normal(0, 50), class = b)
 )
 \end{lstlisting}

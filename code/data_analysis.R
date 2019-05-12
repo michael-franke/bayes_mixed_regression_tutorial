@@ -168,10 +168,10 @@ mean(post_samples_FE$b_contextpol > post_samples_FE$b_genderM)
 library(devtools)
 
 # package with convenience function for Bayesian regression models for factorial designs
-install_github(
-  repo = 'michael-franke/bayes_mixed_regression_tutorial', 
-  subdir = 'faintr',
-  build_vignettes = TRUE) # install from GitHub
+# install_github(
+#   repo = 'michael-franke/bayes_mixed_regression_tutorial', 
+#   subdir = 'faintr',
+#   build_vignettes = TRUE) # install from GitHub
 library(faintr)
 
 # extract cell means and plot them
@@ -219,7 +219,6 @@ posterior_cell_means_plot = posterior_cell_means %>%
 # save the plotted figure
 ggsave(plot = last_plot(), filename = "../text/pics/posterior_density_cell_means.pdf",
        width = 9, height = 6)
-
 
 compare_groups(
   model = modelFE, 
