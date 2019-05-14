@@ -566,7 +566,7 @@ In other words, this analysis suggests that 0 is a very unlikely value for the c
 This directly addresses our first research hypothesis.
 In a research paper we could now write: ``Based on the regression model, the data suggests that H1 is likely true.''
 
-How likely is it that $\beta_{\text{pol}}$ is smaller than 0? ---Instead of simply making a binary thumbs-up / thumbs-down decision, it would be even more elegant, if we could put a number to it. As Bayesians, we fortunately can. To see how this works, let us have a more intimate look at the samples that the \texttt{brm} function returns. We can access the samples of a model fitted with \texttt{brm} with the function \texttt{posterior\_samples}:
+But how likely? How likely is it that $\beta_{\text{pol}}$ is smaller than 0? ---Instead of simply making a binary thumbs-up / thumbs-down decision, it would be even more elegant, if we could put a number to it. As Bayesians, we fortunately can. To see how this works, let us have a more intimate look at the samples that the \texttt{brm} function returns. We can access the samples of a model fitted with \texttt{brm} with the function \texttt{posterior\_samples}:
 
 \bigskip
 
@@ -705,13 +705,12 @@ extract_posterior_cell_means(modelFE)$predictor_values
   \includegraphics[width=\textwidth]{pics/posterior_density_cell_means.pdf}
   \caption[Posteriors over cell means in fixed-effects model]{Posterior density of cell means
     in the fixed-effects regression model. The thick red lines indicate the 95\% credible
-    intervals, i.e., the range of parameter values that it is reasonable to believe in.}
+    intervals, i.e., the range of parameter values that are reasonable to believe in (given the data and the model.}
   \label{fig:Posteriors_cell_means}
 \end{figure}
 
 
-Another helpful function is \texttt{compare\_groups()}, which takes the fitted regression model (the \texttt{brmsfit} object) as input a fitted
-regression model together with a specification of which two (subsets of) cells to compare
+Another helpful function is \texttt{compare\_groups()}, which takes the fitted regression model (the \texttt{brmsfit} object) as input together with a specification of which two (subsets of) cells to compare
 against each other. For example, we can compare (diagonally) the cells for female speakers in
 polite contexts with male speakers in informal contexts with this call:
 
@@ -734,8 +733,8 @@ The output looks like this:
 Outcome of comparing groups:
  * higher:  gender:F context:pol 
  * lower:   gender:M context:inf 
-Mean 'higher - lower':  88.97 
-95% CI: [ 67.33 ; 110.2 ]
+Mean 'higher - lower':  88.84 
+95% CI: [ 67.03 ; 110.1 ]
 P('higher - lower' > 0):  1 
 \end{rc}
 \end{minipage}
@@ -747,17 +746,18 @@ produce the posterior probability of the three hypothesis relevant for this tuto
 
 \begin{minipage}[]{\textwidth}
 \begin{rc}
-> get_posterior_beliefs_about_hypotheses_new(model_MaxRE)
+> get_posterior_beliefs_about_hypotheses_new(model_FE)
 # A tibble: 3 x 2
   hypothesis                      probability
   <chr>                                 <dbl>
-1 Female-polite < Female-informal       0.99 
-2 Male-polite < Male-informal           0.839
-3 Male-informal < Female-polite         1    
+1 Female-polite < Female-informal       0.997
+2 Male-polite < Male-informal           0.842
+3 Male-informal < Female-polite         1  
 \end{rc}
 \end{minipage}
 
-We would conclude from this that there is reason to believe, based on the currently assumed model and data, that hypotheses 1 and 3 are very likely true, but that there is ample room for doubt about hypothesis 2.
+We would conclude from this that there is reason to believe, based on the currently assumed model and data, that hypotheses 1 and 3 are very likely true, but we can also see that there is quite a bit of uncertainty associated with hypothesis 2. The probability of H2 (given the data and the model) is only 0.842. So we should be sufficiently suspicious about H2 until more evidence is available.
+
 %
 \marginnote{It is generically reasonable to consider posteriors above 0.95 or 0.975 as large enough to warrant speaking of ``evidence in favor of a hypothesis''.}
 
@@ -770,7 +770,7 @@ One important difference between traditional frequentist and Bayesian inference 
 As a conceptual advantage, priors can also express our relevant subjective beliefs about the situation or problem at hand. For example, pitch values (and many other things we measure in nature) cannot be smaller than 0. Human pitch values are also limited to a certain range defined by physiological and bio-mechanical constraints on our laryngeal system. In adults, values larger than let's say 1000 Hz are very unlikely. 
  
 But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. We should have a heart of stone and be skeptical about possible relationships in the first place.
-Practically, this means the following for us. We should not hesitate to make use of the possibility to bring all the potentially relevant background knowledge to bear when analyzing our data. The formalization of background knowledge should, of course, be made transparent and be explicitly justified. But, of course, we should \emph{not} engineer in the conclusions we would like to obtain eventually! If our research hypothesis is that male voice pitch is lower than female voice pitch, we obviously don't want to specify a prior that assumes the hypothesized relationship before having seen the data. Instead, we should feed our model a \textbf{skeptical} prior about the truth of our research hypothesis. A possible skeptical prior could be the assumption that there is likely \textit{no} relationship between speaker gender and voice pitch (i.e. the average difference is 0). Of course, there might be some variability around this average value (nature is messy after all), so we might want to assume that pitch differences between male and female speakers are normally distributed with an average of 0 and a standard deviation of, say, 50 Hz. Importantly, such a skeptical prior is conservative with regard to our research hypothesis. Our point of departure (before we observed new data) is to assume that there is no effect of gender on pitch. The data need to convince us otherwise.
+Practically, this means the following for us. We should not hesitate to make use of the possibility to bring all the potentially relevant background knowledge to bear when analyzing our data. The formalization of background knowledge should, of course, be made transparent and be explicitly justified. But, of course, we should \emph{not} engineer the conclusions we would like to obtain eventually! If our research hypothesis is that male voice pitch is lower than female voice pitch, we obviously don't want to specify a prior that assumes the hypothesized relationship before having seen the data. Instead, we should feed our model a \textbf{skeptical} prior about the truth of our research hypothesis. A possible skeptical prior could be the assumption that there is likely \textit{no} relationship between speaker gender and voice pitch (i.e. the average difference is 0). Of course, there might be some variability around this average value (nature is messy after all), so we might want to assume that pitch differences between male and female speakers are normally distributed with an average of 0 and a standard deviation of, say, 50 Hz. Importantly, such a skeptical prior is conservative with regard to our research hypothesis. Our point of departure (before we observed new data) is to assume that there is no effect of gender on pitch. The data need to convince us otherwise.
 
 How does that look in practice? --- First of all, you do not have to specify priors by hand; a call to \textrm{brm} will invoke generically defensible priors for your model. For example, to see the priors for the model fit we obtained above, which is stored in \texttt{modelFE}, we could type and inspect the automatically assumed priors like this:
 
@@ -851,6 +851,8 @@ modelFE_prior = brm(formula = pitch ~ gender * context,
 \end{rc}
 \end{minipage}
 
+\tr{why is p of H2 higher, while H1 is obviously lower?}
+
 \section{Model criticism}
 
 So we know now how to extract relevant comparisons to quantify the evidence surrounding our hypotheses. We have also learned how to specify prior information. The next important step is being able to check if our model really reflects the observed data. A common and easy way to answer this question is to use so-called \textbf{posterior predictive checks}. These checks generate new hypothetical data, sampled from the so-called \textbf{posterior predicitive distribution}. This distribution quantifies how likely we would expect, given our posterior beliefs about parameters, to see a particular outcome if the experiment were repeated in the same way. We can compare samples from the posterior predictive distribution to the observed data. \texttt{brms} offers a neat function called \texttt{pp\_check()} for this. If the simulated data diverges systematically from the observed data, this is a cause for worry. It would suggest that the model does not capture some of the regularities in the data. This is, therefore, a first and reasonable sanity check of the model itself.
@@ -901,18 +903,13 @@ Our earlier model which takes \texttt{gender} into account looks quite a bit bet
 \section{Adding random effects}
 In our experiment, we measured pitch multiple times for each subject (since they produced multiple sentences). We also have multiple measures for each sentence (as each sentence was produced by multiple speakers). A crucial assumption of linear regression models is the independence assumptions. Many before us have covered this aspect of linear models \citep[e.g.][]{clark1973language} so we won't discuss this important issue here in detail. In a nutshell, we need to inform our model about these dependencies between observations. The way we’re going to handle this is to add random effects to our model, just as we do in frequentists' frameworks. Random effects are additional parameters that our Bayesian model estimates.
 
-Although the results look quite different, running hierarchical random effect models with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is the function call to a model with the maximal random effect structure licensed by the design. We also defined regularizing priors for the intercept and skeptical priors for the predictor coefficients.
+Although the results look quite different, running hierarchical random effect models with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is the function call to a model with the maximal random effect structure licensed by the design (to keep it simple, we use the same priors that we defined for the fixed effect only model).
 The outcome of this is model fit is shown below:
+
+\bigskip
 
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
-# define priors
-prior_MaxRE <- c(
-  # define a regularizing prior for the intercept within the range of possible pitch values
-  prior(normal(194, 66), class = Intercept),
-  # define a skeptical prior for the relevant coefficients
-  prior(normal(0, 50), class = b)
-)
 
 # model
 model_MaxRE = brm(formula = pitch ~ gender * context +
@@ -939,33 +936,33 @@ Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
 Group-Level Effects: 
 ~sentence (Number of levels: 7) 
                                    Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-sd(Intercept)                         21.89     10.35     7.07    46.85       1701 1.00
-sd(genderM)                           10.66      8.59     0.39    31.99       2163 1.00
-sd(contextpol)                        15.23     11.51     0.67    42.78       1495 1.00
-sd(genderM:contextpol)                16.52     12.69     0.72    47.94       1906 1.00
-cor(Intercept,genderM)                -0.23      0.44    -0.89     0.69       3745 1.00
-cor(Intercept,contextpol)              0.00      0.41    -0.75     0.78       3625 1.00
-cor(genderM,contextpol)               -0.07      0.44    -0.83     0.75       2620 1.00
-cor(Intercept,genderM:contextpol)     -0.10      0.43    -0.84     0.73       4391 1.00
-cor(genderM,genderM:contextpol)       -0.04      0.45    -0.82     0.79       2741 1.00
-cor(contextpol,genderM:contextpol)    -0.14      0.45    -0.87     0.74       2562 1.00
+sd(Intercept)                         22.40     11.81     6.22    51.29       1432 1.00
+sd(genderM)                           11.51     10.22     0.40    37.81       1739 1.00
+sd(contextpol)                        18.11     13.03     0.91    50.36       1411 1.00
+sd(genderM:contextpol)                16.26     12.09     0.62    45.50       1633 1.00
+cor(Intercept,genderM)                -0.21      0.44    -0.89     0.69       3196 1.00
+cor(Intercept,contextpol)              0.03      0.42    -0.74     0.79       2714 1.00
+cor(genderM,contextpol)               -0.05      0.44    -0.83     0.77       2331 1.00
+cor(Intercept,genderM:contextpol)     -0.11      0.43    -0.82     0.74       4081 1.00
+cor(genderM,genderM:contextpol)       -0.03      0.45    -0.80     0.80       3631 1.00
+cor(contextpol,genderM:contextpol)    -0.16      0.44    -0.87     0.73       2585 1.00
 
 ~subject (Number of levels: 6) 
                           Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-sd(Intercept)                41.86     21.82    16.02   100.10       1295 1.00
-sd(contextpol)                9.15      9.11     0.30    32.92       2009 1.00
-cor(Intercept,contextpol)    -0.00      0.58    -0.94     0.95       3461 1.00
+sd(Intercept)                83.40     30.75    42.35   158.64       1365 1.00
+sd(contextpol)                9.68      8.62     0.33    32.18       2573 1.00
+cor(Intercept,contextpol)    -0.10      0.59    -0.97     0.94       3536 1.00
 
 Population-Level Effects: 
                    Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-Intercept            238.25     26.09   180.41   282.88       1255 1.00
-genderM              -79.10     34.17  -134.89    -0.44       1188 1.01
-contextpol           -24.30     12.02   -47.03     0.39       2229 1.00
-genderM:contextpol    11.13     16.28   -22.13    43.42       1820 1.00
+Intercept            248.24     19.37   211.16   287.82       1501 1.00
+genderM               -3.29     10.02   -22.73    16.56       4818 1.00
+contextpol           -10.39      8.06   -24.77     6.65       2300 1.00
+genderM:contextpol     0.82      8.67   -16.45    17.72       3753 1.00
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-sigma    25.00      2.36    20.83    30.02       3124 1.00
+sigma    25.07      2.42    20.86    30.32       2562 1.00
 
 Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
 is a crude measure of effective sample size, and Rhat is the potential 
@@ -988,29 +985,35 @@ To check the probability of our hypotheses of interest, we can use the \texttt{f
 # A tibble: 3 x 2
   hypothesis                      probability
   <chr>                                 <dbl>
-1 Female-polite < Female-informal       0.974
-2 Male-polite < Male-informal           0.851
-3 Male-informal < Female-polite         0.927
+1 Female-polite < Female-informal       0.898
+2 Male-polite < Male-informal           0.818
+3 Male-informal < Female-polite         0.289
 \end{rc}
 \end{minipage}
 
-When we compare these values to the simpler model above, we can see that our evidence for our hypotheses is a little bit weaker for the maximal random effect model. This is not surprising because the simpler model assumed independence where there was none and therefore underestimated the variance. This is particularly noteworthy for H3. Before, we were certain that H3 was true (the posteriors suggested a probability of 1).
+When we compare these values to the simpler model above, we can see that our evidence for our hypotheses is a weaker for the maximal random effect model. This is not surprising because the simpler model assumed independence where there was none and therefore underestimated the variance. This is particularly noteworthy for H3. Before, we were certain that H3 was true (the posteriors suggested a probability of 1). Now we actually are very uncertain about H3. Speech is a messy aspect of human behavior. Speakers differ quite drastically in their pronunciation and even the same speaker varies a lot in how they speak.
 
 \section{Reporting the results}
-How do we report our analysis and our results in a Bayesian framework? There are as many ways to write up your analysis as there are authors. The following suggestion is one way to do it. 
+How do we report our analysis and our results in a Bayesian framework? There are as many ways to write up your analysis as there are authors. The following suggestion is one way to do it that gives information about the priors and the inference procedure.
 
 \paragraph{Description of analysis}  
 We fitted Bayesian hierarchical linear models to pitch values as a function of \texttt{gender}, and \texttt{context} and their two-way interaction, using the Stan modeling language \citep{carpenter2016stan} and the package \emph{brms} \citep{buerkner2016brms}.
-The models included maximal random-effect structures justified by the design, allowing the predictors of interest and their interactions to vary by participants (\texttt{context}) and sentences (\textsc{gender}, \textsc{context}).
-We used a regularizing Gaussian prior for the intercept defined centered around the mean of the observation with  \(\sigma = 66\). We used weakly informative Gaussian priors centered around zero with \(\sigma = 50\) for all population-level regression coefficients.  Four sampling chains with 2000 iterations each were run for each model, with a warm-up period of 1000 iterations. 
+The models included maximal random-effect structures justified by the design, allowing the predictors of interest and their interactions to vary by participants (\textsc{context}) and sentences (\textsc{gender}, \textsc{context}).
+We used a regularizing Gaussian prior for the intercept  centered around the mean of the reference level ($\mu = 260$, $\sigma = 20$). We used weakly informative Gaussian priors for all population-level regression coefficients ($\mu = 0$, $\sigma = 10$) . We used brms' default priors for SDs of random effects (normal[$\mu = 260$,  $\sigma = 20$]), as well as for correlation coefficients in interaction models (LKJ $\eta = 1$).
+
+Four sampling chains with 2000 iterations with a warm-up period of 1000 iterations were run for each model. 
 For all relevant predictor levels and differences between them, we report 95\% credible
-intervals (CIs) and the posterior probability that a parameter $\beta$ is smaller than zero $P(\beta < 0)$. A 95\% credible interval demarcates the range of values that comprise 95\% of probability density or mass of our posterior beliefs. We judge there to be \emph{compelling evidence
+intervals (CIs) and the posterior probability that a parameter |$\beta$| is greater than zero $P(\|beta| < 0)$. A 95\% credible interval demarcates the range of values that comprise 95\% of probability density or mass of our posterior beliefs. We judge there to be \emph{compelling evidence
 } for an effect if zero is (by a reasonably clear margin) not included in the 95\% CI and $P(\|beta| < 0)$ is close to one.
 
 \paragraph{Description of results}  
 \tr{here we need the estimates of each level for our convenient data report, right? we havent done that above. Ideas?}
 
 \mf{the function \texttt{extract\_posterior\_cell\_means} gives us this, or am I missing something? I included this in the section on \texttt{faintr} above}
+
+\tr{we also need the 95\% CIs for this function don't we? For reporting the results, we would need a handy table with the cell means and the CIs, right?}
+
+to do: describe the results: estimates of cells, estimates and probs of differences between cells as hypothesized.
 
 \section{Further reading}
 e.g. Bayes factor

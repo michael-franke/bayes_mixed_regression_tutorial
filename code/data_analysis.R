@@ -184,14 +184,19 @@ posterior_cell_means_HDIs = posterior_cell_means %>%
   summarize(low = hdi(posterior)[1],
             high = hdi(posterior)[2])
 
+
+recode_factor(letters[1:3], b = "z", c = "y")
+
 posterior_cell_means_plot = posterior_cell_means %>% 
-  # mutate(parameter = as.factor(parameter)) %>% 
-  # mutate(parameter = factor(parameter, levels = c("Intercept", "context:pol", "gender:M", "gender:M__context:pol"))) %>% 
+  mutate(parameter = as.factor(parameter)) %>% 
+  mutate(parameter = factor(parameter, labels = c("female - informal", "female - polite", "male - informal", "male - polite"))) %>% 
   ggplot(aes(x = posterior)) + 
   geom_density(fill = "grey") +
   facet_wrap(~ parameter, scales = "free") +
   ylab("density\n") +
   xlab("\nparameter value") +
+  scale_x_continuous(expand = c(0, 0), breaks = (c(100,200,300)), limits = c(80,300)) + 
+  scale_y_continuous(expand = c(0, 0), breaks = (c(0,0.02,0.04,0.06)), limits = c(0,0.06)) + 
   theme_classic() +
   theme(legend.position = "right",
         legend.key.height = unit(2,"line"),
@@ -213,7 +218,9 @@ posterior_cell_means_plot = posterior_cell_means %>%
     color = "firebrick",
     size = 3,
     #alpha = 0.7,
-    data = posterior_cell_means_HDIs
+    data = posterior_cell_means_HDIs %>% 
+      mutate(parameter = as.factor(parameter)) %>% 
+      mutate(parameter = factor(parameter, labels = c("female - informal", "female - polite", "male - informal", "male - polite"))) 
   )
   
 # save the plotted figure
@@ -308,40 +315,33 @@ ggsave(plot = last_plot(), filename = "../text/pics/pp_check_FE.pdf",
 
 # hierarchical model with random intercepts
 
-# define priors
-prior_interceptOnly <- c(
-  # define a regularizing prior for the intercept within the range of possible pitch values
-  prior(normal(194, 66), class = Intercept),
-  # define a moderately skeptical prior for the relevant coefficients
-  prior(normal(0, 50), class = b)
-)
-
 # model
 model_interceptOnly = brm(formula = pitch ~ gender * context +
                             (1 | sentence + subject),
                           data = politedata,
-                          prior = prior_interceptOnly,
+                          prior = priorFE,
                           control = list(adapt_delta = 0.99))
 
 # hierarchical model with the maximial RE structure licensed by the design
 # (notice that factor 'gender' does not vary for a given value of variable 'subject')
 
-
-# define priors
-prior_MaxRE <- c(
-  # define a regularizing prior for the intercept within the range of possible pitch values
-  prior(normal(194, 66), class = Intercept),
-  # define a skeptical prior for the relevant coefficients
-  prior(normal(0, 50), class = b)
-)
-
 # model
 model_MaxRE = brm(formula = pitch ~ gender * context +
                     (1 + gender * context | sentence) +
                     (1 + context | subject),
-                  prior = prior_MaxRE,
+                  prior = priorFE,
                   data = politedata,
                   control = list(adapt_delta = 0.99))
+
+
+# extract cell means and 95% CIs
+posterior_cell_means = extract_posterior_cell_means(model_MaxRE)$predictor_values %>% 
+  select(- n_sample) %>% 
+  gather(key = "parameter", value = "posterior") %>% 
+  group_by(parameter) %>% 
+  summarize(mean = mean(posterior),
+              low = hdi(posterior)[1],
+              high = hdi(posterior)[2])
 
 ##################################
 ## comparing selected hypotheses
