@@ -5,5 +5,5 @@ To obtain the `faintr` package type:
 
 ```
 library(devtools)
-install_github(’michael-franke/bayes_mixed_regression_tutorial/ faintr’, build_vignettes = TRUE)
+install_github('michael-franke/bayes_mixed_regression_tutorial/ faintr', build_vignettes = TRUE)
 ```
