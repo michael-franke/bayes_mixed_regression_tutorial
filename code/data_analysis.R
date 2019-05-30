@@ -93,18 +93,21 @@ ggsave(filename = "../text/pics/basic_data_plot.pdf",
 ## run & inspect model with only fixed effects
 #####################################################
 
-formulaFE = pitch ~ gender * context
+formula_FE = pitch ~ gender * context
 
 # model with only fixed effects (non-hierarchical)
-modelFE = brm(formula = formulaFE, data = politedata)
+model_FE = brm(
+  formula = formula_FE, 
+  data = politedata, 
+  seed = 1702)
 
 # extract posterior samples 
-post_samples_FE = posterior_samples(modelFE)
-head(post_samples_FE)
+post_samples_FE = posterior_samples(model_FE)
+head(post_samples_FE %>% round(1))
 
 # plotting the posterior distributions
 plot_posterior_density_FE = 
-  modelFE %>% as.tibble() %>% 
+  model_FE %>% as.tibble() %>% 
   select(- lp__, - sigma) %>% 
   gather(key = "parameter", value = "posterior") %>% 
   mutate(parameter = case_when(parameter == "b_Intercept" ~ "Intercept",
@@ -139,7 +142,7 @@ plot_posterior_density_FE =
     color = "firebrick",
     size = 3,
     #alpha = 0.7,
-    data = fixef(modelFE) %>% as.tibble() %>%
+    data = fixef(model_FE) %>% as.tibble() %>%
       mutate(parameter = c("Intercept", "gender:M", "context:pol", "gender:M__context:pol")) %>%
       mutate(parameter = as.factor(parameter)) %>% 
       mutate(parameter = factor(parameter, levels = c("Intercept", "context:pol", "gender:M", "gender:M__context:pol"))) %>% 
@@ -175,7 +178,7 @@ library(devtools)
 library(faintr)
 
 # extract cell means and plot them
-posterior_cell_means = extract_posterior_cell_means(modelFE)$predictor_values %>% 
+posterior_cell_means = extract_posterior_cell_means(model_FE)$predictor_values %>% 
   select(- n_sample) %>% 
   gather(key = "parameter", value = "posterior") 
 
@@ -184,8 +187,7 @@ posterior_cell_means_HDIs = posterior_cell_means %>%
   summarize(low = hdi(posterior)[1],
             high = hdi(posterior)[2])
 
-
-recode_factor(letters[1:3], b = "z", c = "y")
+# recode_factor(letters[1:3], b = "z", c = "y")
 
 posterior_cell_means_plot = posterior_cell_means %>% 
   mutate(parameter = as.factor(parameter)) %>% 
@@ -228,7 +230,7 @@ ggsave(plot = last_plot(), filename = "../text/pics/posterior_density_cell_means
        width = 9, height = 6)
 
 compare_groups(
-  model = modelFE, 
+  model = model_FE, 
   lower = list(gender = "M", context = "inf"),
   higher = list(gender = "F", context = "pol")
 )
@@ -260,8 +262,7 @@ get_posterior_beliefs_about_hypotheses_new = function(model) {
   )
 }
 
-get_posterior_beliefs_about_hypotheses_new(modelFE)
-
+get_posterior_beliefs_about_hypotheses_new(model_FE)
 
 ############################
 ## add prior information
@@ -273,41 +274,39 @@ get_prior(formula = pitch ~ gender * context,
 
 # define priors
 priorFE <- c(
-  # define a data-informed yet narrow-ranged prior for the reference cell
-  prior(normal(260, 20), class = Intercept),
   # define a skeptical prior for the relevant coefficients
-  prior(normal(0, 10), class = b)
+  prior(normal(0, 10), coef = contextpol)
 )
 
-
 # let's run our models with our specified priors
-modelFE_prior = brm(formula = pitch ~ gender * context,
-                        prior = priorFE,
-                        data = politedata,
-                        control = list(adapt_delta = 0.99))
+model_FE_prior = brm(formula = pitch ~ gender * context,
+                    prior = priorFE,
+                    data = politedata,
+                    control = list(adapt_delta = 0.99),
+                    seed = 1702)                        
 
-get_posterior_beliefs_about_hypotheses_new(modelFE_prior)
+get_posterior_beliefs_about_hypotheses_new(model_FE_prior)
 
 ####################
 ## model check
 ####################
 
 # run model without considering gender
-modelFE_noGender = brm(formula =  pitch ~ context,
-                        data = politedata,
-                        control = list(adapt_delta = 0.99))
+model_FE_noGender = brm(formula =  pitch ~ context,
+                       data = politedata,
+                       control = list(adapt_delta = 0.99),
+                       seed = 1702)
 
-pp_check(modelFE_noGender, nsample = 100)
+pp_check(model_FE_noGender, nsample = 100)
 
 # save the plotted figure
 ggsave(plot = last_plot(), filename = "../text/pics/pp_check_FE_noGender.pdf",
        width = 6, height = 6)
 
 # model with gender
-pp_check(modelFE, nsample = 100)
+pp_check(model_FE, nsample = 100)
 ggsave(plot = last_plot(), filename = "../text/pics/pp_check_FE.pdf",
        width = 6, height = 6)
-
 
 ###############################################
 ## models with additional random effects
@@ -320,7 +319,8 @@ model_interceptOnly = brm(formula = pitch ~ gender * context +
                             (1 | sentence + subject),
                           data = politedata,
                           prior = priorFE,
-                          control = list(adapt_delta = 0.99))
+                          control = list(adapt_delta = 0.99),
+                          seed = 1702)
 
 # hierarchical model with the maximial RE structure licensed by the design
 # (notice that factor 'gender' does not vary for a given value of variable 'subject')
@@ -331,8 +331,8 @@ model_MaxRE = brm(formula = pitch ~ gender * context +
                     (1 + context | subject),
                   prior = priorFE,
                   data = politedata,
-                  control = list(adapt_delta = 0.99))
-
+                  control = list(adapt_delta = 0.99),
+                  seed = 1702)
 
 # extract cell means and 95% CIs
 posterior_cell_means = extract_posterior_cell_means(model_MaxRE)$predictor_values %>% 
@@ -347,7 +347,7 @@ posterior_cell_means = extract_posterior_cell_means(model_MaxRE)$predictor_value
 ## comparing selected hypotheses
 ##################################
 
-get_posterior_beliefs_about_hypotheses_new(modelFE)
+get_posterior_beliefs_about_hypotheses_new(model_FE)
 get_posterior_beliefs_about_hypotheses_new(model_interceptOnly)
 get_posterior_beliefs_about_hypotheses_new(model_MaxRE)
 
