@@ -9,8 +9,14 @@
 \arguments{
 \item{model}{Model fit from brms package.}
 }
+\value{
+string
+}
 \description{
 Print comparison object between factor groups
+}
+\examples{
+print(model_fit)
 }
 \keyword{brms}
 \keyword{design,}

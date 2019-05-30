@@ -92,7 +92,7 @@ The factor level(s) '", paste0(factor_levels[check_permitted_characters(factor_l
 #' @keywords regression, factorial design, brms
 #' @import tidyverse brms
 #' @export
-#' @return list with (i) samples of estimated means of all cells and (ii) pairwise comparison of each cell (whether one has credibly a higher inferred mean than the other)
+#' @return list with (i) samples of estimated means of all cells, (ii) pairwise comparison of each cell (whether one has credibly a higher inferred mean than the other), and (iii) a summary (mean & 95% HDI) for each posterior estimate of cell means.
 #' @examples
 #' #' library(brms)
 #' m = brm(yield ~ N * P * K, npk)
@@ -211,12 +211,31 @@ extract_posterior_cell_means = function(model) {
              predictor_values[all_cells_compared$cell_name_low[i]])
     }  
   )
+
+  ## safely remove column with sample number
+  if ("n_sample" %in% names(predictor_values)) {
+    predictor_values = predictor_values %>% select(-n_sample)
+  }
   
+  cell_summary = full_join(
+    map_df(predictor_values, function(x){HDInterval::hdi(x)[1]}) %>% gather(key = "cell", value = "lower 95% CI"),
+    map_df(predictor_values, mean) %>% gather(key = "cell", value = "mean"),
+    by = "cell"
+  ) %>% 
+  full_join(
+    map_df(predictor_values, function(x){HDInterval::hdi(x)[2]}) %>% gather(key = "cell", value = "upper 95% CI"),
+    by = "cell"
+  ) 
+    
   ## output
   
-  return(list(
-    predictor_values = predictor_values, 
-    all_cells_compared = all_cells_compared))
+  return(
+    list(
+      predictor_values =predictor_values,
+      all_cells_compared = all_cells_compared,
+      cell_summary = cell_summary
+    )
+  )
   
 }
 
@@ -331,8 +350,8 @@ compare_groups = function(model, higher, lower) {
 #' @param model Model fit from brms package.
 #' @keywords regression, factorial design, brms
 #' @export
-#' @return 
-#' @examples
+#' @return string
+#' @examples print(model_fit)
 print.faintCompare = function(obj) {
   cat("Outcome of comparing groups:\n")
   cat(" * higher: ", obj$higher, "\n")

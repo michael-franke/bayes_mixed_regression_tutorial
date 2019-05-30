@@ -10,7 +10,7 @@ extract_posterior_cell_means(model)
 \item{model}{Model fit from brms package.}
 }
 \value{
-list with (i) samples of estimated means of all cells and (ii) pairwise comparison of each cell (whether one has credibly a higher inferred mean than the other)
+list with (i) samples of estimated means of all cells, (ii) pairwise comparison of each cell (whether one has credibly a higher inferred mean than the other), and (iii) a summary (mean & 95% HDI) for each posterior estimate of cell means.
 }
 \description{
 This function takes a brms model fit for a factorial design and outputs a comparison of all factor levels against each other, and posterior samples of all cell means. 
