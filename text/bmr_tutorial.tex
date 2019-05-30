@@ -1048,17 +1048,31 @@ drastically in their pronunciation and even the same speaker varies a lot in how
 This variation can create the illusion of effects when unaccounted for.
 
 \section{Reporting the results}
-How do we report our analysis and our results in a Bayesian framework? There are as many ways to write up your analysis as there are authors. The following suggestion is one way to do it that gives information about the priors and the inference procedure.
+How do we report our analysis and our results in a Bayesian framework? There is no gold
+standard. But the following is one example for how to do it.
 
 \paragraph{Description of analysis}  
-We fitted Bayesian hierarchical linear models to pitch values as a function of \texttt{gender}, and \texttt{context} and their two-way interaction, using the Stan modeling language \citep{carpenter2016stan} and the package \emph{brms} \citep{buerkner2016brms}.
-The models included maximal random-effect structures justified by the design, allowing the predictors of interest and their interactions to vary by participants (\textsc{context}) and sentences (\textsc{gender}, \textsc{context}).
-We used a regularizing Gaussian prior for the intercept  centered around the mean of the reference level ($\mu = 260$, $\sigma = 20$). We used weakly informative Gaussian priors for all population-level regression coefficients ($\mu = 0$, $\sigma = 10$) . We used brms' default priors for SDs of random effects (normal[$\mu = 260$,  $\sigma = 20$]), as well as for correlation coefficients in interaction models (LKJ $\eta = 1$).
+We fitted Bayesian hierarchical linear models to pitch values as a function of dummy coded
+factors \texttt{gender} (reference level ``female''), and \texttt{context} (reference level
+``informal'') and their two-way interaction, using the Stan modeling language
+\citep{carpenter2016stan} and the package \emph{brms} \citep{buerkner2016brms}. The models
+included maximal random-effect structures justified by the design, allowing the predictors of
+interest and their interactions to vary by participants (\textsc{context}) and sentences
+(\textsc{gender}, \textsc{context}). We used the default priors of the \texttt{brms} package,
+namely a Student's t-distribution ($\nu = 3, \mu = 204, \sigma = 83$) for the mean of the
+reference cell (female speakers in an informal context), another Student's t-distribution ($\nu
+= 3, \mu = 0, \sigma = 83$) for standard deviation for the likelihood function, and unbiased
+priors for regression coefficients. We used \texttt{brms}' default priors for standard
+deviations of random effects (a Student's t-distribution with $\nu = 3, \mu = 0$ and $\sigma =
+20$), as well as for correlation coefficients in interaction models (LKJ $\eta = 1$).
 
-Four sampling chains with 2000 iterations with a warm-up period of 1000 iterations were run for each model. 
+Four sampling chains with 2000 iterations with a warm-up period of 1000 iterations were run for
+each model, thereby yielding 4000 samples for each parameter tuple.
+We ensured converges by examination of traceplots and $\hat{R}$-statistics.
 For all relevant predictor levels and differences between them, we report 95\% credible
-intervals (CIs) and the posterior probability that a parameter |$\beta$| is greater than zero $P(\|beta| < 0)$. A 95\% credible interval demarcates the range of values that comprise 95\% of probability density or mass of our posterior beliefs. We judge there to be \emph{compelling evidence
-} for an effect if zero is (by a reasonably clear margin) not included in the 95\% CI and $P(\|beta| < 0)$ is close to one.
+intervals (CIs) and the posterior probability that a parameter $\beta$, or a measure derived
+from estimated parameters, is greater than zero $P(\beta < 0)$. A 95\% credible interval demarcates the range of values that comprise 95\% of probability density or mass of our posterior beliefs. We judge there to be \emph{compelling evidence
+} for an effect if zero is (by a reasonably clear margin) not included in the 95\% CI and $P(\beta < 0)$ is close to one.
 
 \paragraph{Description of results}  
 \tr{here we need the estimates of each level for our convenient data report, right? we havent done that above. Ideas?}
@@ -1070,8 +1084,10 @@ intervals (CIs) and the posterior probability that a parameter |$\beta$| is grea
 to do: describe the results: estimates of cells, estimates and probs of differences between cells as hypothesized.
 
 \section{Further reading}
-e.g. Bayes factor
 
+\begin{itemize}
+\item 
+\end{itemize}
 
 
 
