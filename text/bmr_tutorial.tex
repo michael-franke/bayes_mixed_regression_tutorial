@@ -665,7 +665,7 @@ Based on the posterior samples we obtained, the estimated probability is 1. That
 
 To conclude this section, the Bayesian approach to regression modeling allows us to retrieve all direct comparisons between cells in a factorial design. It also allows us to retrieve quantitative information about our hypotheses in a way which is easy to communicate and understand. We can calculate the (estimated) posterior probability that a particular hypothesis holds. 
 
-\subsection{The \texttt{faintr} package}
+\section{The \texttt{faintr} package}
 
 To make the comparison of pairs of cells even easier and applicable for even bigger factorial designs, this tutorial comes with a little R package, the \texttt{faintr} package.
 %
@@ -695,7 +695,9 @@ The \texttt{faintr} package provides two main helper functions.
 \marginnote{You can read a vignette with more information on the \texttt{faintr} package if you type \texttt{vignette("faintr\_basics")} after installing the package.}
 %
 The function \texttt{extract\_posterior\_cell\_means()}
-takes as input the fitted regression model (technically: the \texttt{brmsfit} object returned by function \texttt{brm}) and outputs samples for all design cell means, and a comparison of all design cells against each other.
+takes as input the fitted regression model (technically: the \texttt{brmsfit} object returned
+by function \texttt{brm}) and outputs samples for all design cell means, a comparison of all
+design cells against each other, and a summary of each cells inferred mean value.
 For example, although the model fitted $\beta$-coefficients, we can reconstruct posterior estimates of each cell's means by typing:
 
 \begin{minipage}[]{1.3\textwidth}
@@ -1080,6 +1082,8 @@ from estimated parameters, is greater than zero $P(\beta < 0)$. A 95\% credible 
 \mf{the function \texttt{extract\_posterior\_cell\_means} gives us this, or am I missing something? I included this in the section on \texttt{faintr} above}
 
 \tr{we also need the 95\% CIs for this function don't we? For reporting the results, we would need a handy table with the cell means and the CIs, right?}
+
+\mf{ah, got it! implemented now; reinstall faintr and do \texttt{extract_posterior_cell_means(model_name)$cell\_summary$}}
 
 to do: describe the results: estimates of cells, estimates and probs of differences between cells as hypothesized.
 

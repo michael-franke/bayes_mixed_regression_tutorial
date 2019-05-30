@@ -187,7 +187,7 @@ posterior_cell_means_HDIs = posterior_cell_means %>%
   summarize(low = hdi(posterior)[1],
             high = hdi(posterior)[2])
 
-# recode_factor(letters[1:3], b = "z", c = "y")
+stop()
 
 posterior_cell_means_plot = posterior_cell_means %>% 
   mutate(parameter = as.factor(parameter)) %>% 
