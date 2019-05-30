@@ -902,12 +902,18 @@ To illustrate this point, let's run our model from above without the gender pred
 modelFE_noGender= brm(formula = pitch ~ context,
 	prior = priorFE,
 	data = politedata,
-	control = list(adapt_delta = 0.99)
+	control = list(adapt_delta = 0.99),
+  seed = 1702
 	)
 \end{lstlisting}
 \end{minipage}
 
-We know that a big chunk of variation is accounted for by gender, so this model should be a poor fit. If we run \texttt{pp\_check()} on our model (we also specify how many samples we want to compare the observations to), we can see that a model without the \texttt{gender} predictor fails to capture an important property of our data: having pitch values from men and women leads to a bimodal distribution of pitch values (i.e. two bumps).
+We know that a big chunk of variation is accounted for by gender, so this model should be a
+poor fit. If we run \texttt{pp\_check()} on our model (we also specify how many samples we want
+to compare the observations to), we can see that a model without the \texttt{gender} predictor
+fails to capture an important property of our data: having pitch values from men and women
+leads to a bimodal distribution of pitch values (i.e. two bumps).
+Figure~\ref{fig:coefficients_table} show the output of the following function call:
 
 \bigskip
 
@@ -926,7 +932,8 @@ pp_check(modelFE_noGender, nsample = 100)
 
 
 The model overestimates the probability of very low and high pitch values, underestimates the probability of values that surround our two bumps and heavily overestimates the probability of values around 200 Hz.
-Our earlier model which takes \texttt{gender} into account looks quite a bit better. While still showing much uncertainty surrounding the two bumps in the observed distribution, it clearly captures the evidence better. 
+Our earlier model which takes \texttt{gender} into account looks quite a bit better, as shown
+in Figure~\ref{fig:coefficients_table}. While still showing much uncertainty surrounding the two bumps in the observed distribution, it clearly captures the evidence better. 
 
 \begin{figure}[]
   \centering
@@ -937,9 +944,16 @@ Our earlier model which takes \texttt{gender} into account looks quite a bit bet
 
 
 \section{Adding random effects}
-In our experiment, we measured pitch multiple times for each subject (since they produced multiple sentences). We also have multiple measures for each sentence (as each sentence was produced by multiple speakers). A crucial assumption of linear regression models is the independence assumptions. Many before us have covered this aspect of linear models \citep[e.g.][]{clark1973language} so we won't discuss this important issue here in detail. In a nutshell, we need to inform our model about these dependencies between observations. The way we’re going to handle this is to add random effects to our model, just as we do in frequentists' frameworks. Random effects are additional parameters that our Bayesian model estimates.
 
-Although the results look quite different, running hierarchical random effect models with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is the function call to a model with the maximal random effect structure licensed by the design (to keep it simple, we use the same priors that we defined for the fixed effect only model).
+In our experiment, we measured pitch multiple times for each subject (since they produced
+multiple sentences). We also have multiple measures for each sentence (as each sentence was
+produced by multiple speakers). A crucial assumption of linear regression models is the
+assumption that all samples (data points) are independent of each other
+\citep[e.g.][]{clark1973language}. But if two data points are produced by the same participant,
+and that participants voice is, say, particularly high, then observations will not be
+independent anymore. In a nutshell, we need to inform our model about these dependencies between observations. The way we’re going to handle this is to add random effects to our model, just as we do in frequentists' frameworks. Random effects are additional parameters that our Bayesian model estimates.
+
+Although the results look quite different, running hierarchical random effect models with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is the function call to a model with the maximal random effect structure licensed by the design.
 The outcome of this is model fit is shown below:
 
 \bigskip
@@ -951,7 +965,6 @@ The outcome of this is model fit is shown below:
 model_MaxRE = brm(formula = pitch ~ gender * context +
 	(1 + gender * context | sentence) +
 	(1 + context | subject),
-	prior = prior_MaxRE,
 	data = politedata,
 	control = list(adapt_delta = 0.99)
 	)
@@ -962,7 +975,7 @@ model_MaxRE = brm(formula = pitch ~ gender * context +
 
 \begin{minipage}[]{1.5\textwidth}
 \begin{rc}
-Family: gaussian 
+ Family: gaussian 
   Links: mu = identity; sigma = identity 
 Formula: pitch ~ gender * context + (1 + gender * context | sentence) + (1 + context | subject) 
    Data: politedata (Number of observations: 83) 
@@ -972,33 +985,33 @@ Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
 Group-Level Effects: 
 ~sentence (Number of levels: 7) 
                                    Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-sd(Intercept)                         22.40     11.81     6.22    51.29       1432 1.00
-sd(genderM)                           11.51     10.22     0.40    37.81       1739 1.00
-sd(contextpol)                        18.11     13.03     0.91    50.36       1411 1.00
-sd(genderM:contextpol)                16.26     12.09     0.62    45.50       1633 1.00
-cor(Intercept,genderM)                -0.21      0.44    -0.89     0.69       3196 1.00
-cor(Intercept,contextpol)              0.03      0.42    -0.74     0.79       2714 1.00
-cor(genderM,contextpol)               -0.05      0.44    -0.83     0.77       2331 1.00
-cor(Intercept,genderM:contextpol)     -0.11      0.43    -0.82     0.74       4081 1.00
-cor(genderM,genderM:contextpol)       -0.03      0.45    -0.80     0.80       3631 1.00
-cor(contextpol,genderM:contextpol)    -0.16      0.44    -0.87     0.73       2585 1.00
+sd(Intercept)                         21.60     10.11     6.94    47.11       1827 1.00
+sd(genderM)                           10.65      8.59     0.41    30.40       2060 1.00
+sd(contextpol)                        14.97     11.58     0.72    42.70       1526 1.00
+sd(genderM:contextpol)                17.20     13.20     0.80    49.12       1785 1.00
+cor(Intercept,genderM)                -0.22      0.44    -0.89     0.68       5035 1.00
+cor(Intercept,contextpol)              0.02      0.42    -0.75     0.78       4760 1.00
+cor(genderM,contextpol)               -0.06      0.45    -0.86     0.78       3019 1.00
+cor(Intercept,genderM:contextpol)     -0.10      0.42    -0.81     0.73       4905 1.00
+cor(genderM,genderM:contextpol)       -0.04      0.44    -0.83     0.78       3158 1.00
+cor(contextpol,genderM:contextpol)    -0.15      0.44    -0.88     0.74       2897 1.00
 
 ~subject (Number of levels: 6) 
                           Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-sd(Intercept)                83.40     30.75    42.35   158.64       1365 1.00
-sd(contextpol)                9.68      8.62     0.33    32.18       2573 1.00
-cor(Intercept,contextpol)    -0.10      0.59    -0.97     0.94       3536 1.00
+sd(Intercept)                35.63     17.94    14.55    80.85       1643 1.00
+sd(contextpol)                9.38      8.99     0.33    33.61       2508 1.00
+cor(Intercept,contextpol)     0.05      0.58    -0.94     0.97       4544 1.00
 
 Population-Level Effects: 
                    Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-Intercept            248.24     19.37   211.16   287.82       1501 1.00
-genderM               -3.29     10.02   -22.73    16.56       4818 1.00
-contextpol           -10.39      8.06   -24.77     6.65       2300 1.00
-genderM:contextpol     0.82      8.67   -16.45    17.72       3753 1.00
+Intercept            260.76     24.85   210.02   311.66       1557 1.00
+genderM             -115.40     33.23  -181.79   -43.70       1438 1.00
+contextpol           -27.53     12.96   -53.34    -2.40       2470 1.00
+genderM:contextpol    16.21     16.90   -17.83    50.05       2441 1.00
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-sigma    25.07      2.42    20.86    30.32       2562 1.00
+sigma    25.01      2.37    20.88    30.09       3342 1.00
 
 Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
 is a crude measure of effective sample size, and Rhat is the potential 
@@ -1006,9 +1019,9 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 \end{rc}
 \end{minipage}
 
-The lines 29--34 again give the estimates of the fixed-effects coefficients. The mean estimates look very similar to the ones that we obtained in the fixed-effect only model above. However, not surprisingly, our uncertainty surrounding these estimates is larger.  
+The lines 28--33 again give the estimates of the fixed-effects coefficients. The mean estimates look very similar to the ones that we obtained in the fixed-effect only model above. However, not surprisingly, our uncertainty surrounding these estimates is larger.  
 We now also get information about the parameters implied by the specified random effect
-structure. Lines 9--21 cover the by-sentence random effects, lines 23--27 cover the by-subject
+structure. Lines 8--20 cover the by-sentence random effects, lines 22--26 cover the by-subject
 random effects.
 
 To check the probability of our hypotheses of interest, we can use the \texttt{faintr} package again, in conjunction with the convenience function for the specific hypotheses relevant for this tutorial:
@@ -1021,13 +1034,18 @@ To check the probability of our hypotheses of interest, we can use the \texttt{f
 # A tibble: 3 x 2
   hypothesis                      probability
   <chr>                                 <dbl>
-1 Female-polite < Female-informal       0.898
-2 Male-polite < Male-informal           0.818
-3 Male-informal < Female-polite         0.289
+1 Female-polite < Female-informal       0.982
+2 Male-polite < Male-informal           0.808
+3 Male-informal < Female-polite         0.985
 \end{rc}
 \end{minipage}
 
-When we compare these values to the simpler model above, we can see that our evidence for our hypotheses is a weaker for the maximal random effect model. This is not surprising because the simpler model assumed independence where there was none and therefore underestimated the variance. This is particularly noteworthy for H3. Before, we were certain that H3 was true (the posteriors suggested a probability of 1). Now we actually are very uncertain about H3. Speech is a messy aspect of human behavior. Speakers differ quite drastically in their pronunciation and even the same speaker varies a lot in how they speak.
+When we compare these values to the simpler model above, we can see that our evidence for our
+hypotheses seems a bit weaker for the maximal random effect model. This is not surprising
+because the simpler model assumed independence where there was none and therefore
+underestimated the variance. Speech is a messy aspect of human behavior. Speakers differ quite
+drastically in their pronunciation and even the same speaker varies a lot in how they speak.
+This variation can create the illusion of effects when unaccounted for.
 
 \section{Reporting the results}
 How do we report our analysis and our results in a Bayesian framework? There are as many ways to write up your analysis as there are authors. The following suggestion is one way to do it that gives information about the priors and the inference procedure.

@@ -318,7 +318,6 @@ ggsave(plot = last_plot(), filename = "../text/pics/pp_check_FE.pdf",
 model_interceptOnly = brm(formula = pitch ~ gender * context +
                             (1 | sentence + subject),
                           data = politedata,
-                          prior = priorFE,
                           control = list(adapt_delta = 0.99),
                           seed = 1702)
 
@@ -329,7 +328,6 @@ model_interceptOnly = brm(formula = pitch ~ gender * context +
 model_MaxRE = brm(formula = pitch ~ gender * context +
                     (1 + gender * context | sentence) +
                     (1 + context | subject),
-                  prior = priorFE,
                   data = politedata,
                   control = list(adapt_delta = 0.99),
                   seed = 1702)
