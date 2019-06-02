@@ -214,7 +214,7 @@ posterior_cell_means_plot = posterior_cell_means %>%
         axis.text = element_text(size = 16),
         axis.title = element_text(size = 18, face = "bold"),
         plot.title = element_text(size = 18, face = "bold"),
-        plot.margin = unit(c(0.2,0.1,0.2,0.1),"cm")) +
+        plot.margin = unit(c(0.2,0.4,0.2,0.1),"cm")) +
   geom_segment(
     mapping = aes(y = 0, yend = 0, x = low, xend = high),
     color = "firebrick",
