@@ -107,7 +107,7 @@ head(post_samples_FE %>% round(1))
 
 # plotting the posterior distributions
 plot_posterior_density_FE = 
-  model_FE %>% as.tibble() %>% 
+  model_FE %>% as_tibble() %>% 
   select(- lp__, - sigma) %>% 
   gather(key = "parameter", value = "posterior") %>% 
   mutate(parameter = case_when(parameter == "b_Intercept" ~ "Intercept",
@@ -142,7 +142,7 @@ plot_posterior_density_FE =
     color = "firebrick",
     size = 3,
     #alpha = 0.7,
-    data = fixef(model_FE) %>% as.tibble() %>%
+    data = fixef(model_FE) %>% as_tibble() %>%
       mutate(parameter = c("Intercept", "gender:M", "context:pol", "gender:M__context:pol")) %>%
       mutate(parameter = as.factor(parameter)) %>% 
       mutate(parameter = factor(parameter, levels = c("Intercept", "context:pol", "gender:M", "gender:M__context:pol"))) %>% 
@@ -172,22 +172,19 @@ library(devtools)
 
 # package with convenience function for Bayesian regression models for factorial designs
 # install_github(
-#   repo = 'michael-franke/bayes_mixed_regression_tutorial', 
+#   repo = 'michael-franke/bayes_mixed_regression_tutorial',
 #   subdir = 'faintr',
 #   build_vignettes = TRUE) # install from GitHub
 library(faintr)
 
 # extract cell means and plot them
 posterior_cell_means = extract_posterior_cell_means(model_FE)$predictor_values %>% 
-  select(- n_sample) %>% 
   gather(key = "parameter", value = "posterior") 
 
 posterior_cell_means_HDIs = posterior_cell_means %>% 
   group_by(parameter) %>% 
   summarize(low = hdi(posterior)[1],
             high = hdi(posterior)[2])
-
-stop()
 
 posterior_cell_means_plot = posterior_cell_means %>% 
   mutate(parameter = as.factor(parameter)) %>% 
@@ -235,7 +232,7 @@ compare_groups(
   higher = list(gender = "F", context = "pol")
 )
 
-get_posterior_beliefs_about_hypotheses_new = function(model) {
+get_posterior_beliefs_about_hypotheses = function(model) {
   # insert the comparisons you are interested in as strings 
   tibble(
     hypothesis = c("Female-polite < Female-informal", 
@@ -262,7 +259,7 @@ get_posterior_beliefs_about_hypotheses_new = function(model) {
   )
 }
 
-get_posterior_beliefs_about_hypotheses_new(model_FE)
+get_posterior_beliefs_about_hypotheses(model_FE)
 
 ############################
 ## add prior information
@@ -285,7 +282,7 @@ model_FE_prior = brm(formula = pitch ~ gender * context,
                     control = list(adapt_delta = 0.99),
                     seed = 1702)                        
 
-get_posterior_beliefs_about_hypotheses_new(model_FE_prior)
+get_posterior_beliefs_about_hypotheses(model_FE_prior)
 
 ####################
 ## model check
@@ -334,7 +331,6 @@ model_MaxRE = brm(formula = pitch ~ gender * context +
 
 # extract cell means and 95% CIs
 posterior_cell_means = extract_posterior_cell_means(model_MaxRE)$predictor_values %>% 
-  select(- n_sample) %>% 
   gather(key = "parameter", value = "posterior") %>% 
   group_by(parameter) %>% 
   summarize(mean = mean(posterior),
@@ -345,7 +341,29 @@ posterior_cell_means = extract_posterior_cell_means(model_MaxRE)$predictor_value
 ## comparing selected hypotheses
 ##################################
 
-get_posterior_beliefs_about_hypotheses_new(model_FE)
-get_posterior_beliefs_about_hypotheses_new(model_interceptOnly)
-get_posterior_beliefs_about_hypotheses_new(model_MaxRE)
+get_posterior_beliefs_about_hypotheses(model_FE)
+get_posterior_beliefs_about_hypotheses(model_interceptOnly)
+get_posterior_beliefs_about_hypotheses(model_MaxRE)
 
+#################################
+## posteriors of cell differences
+## for final data report
+#################################
+
+compare_groups(
+  model = model_MaxRE, 
+  lower = list(gender = "F", context = "pol"), 
+  higher = list(gender = "F", context = "inf")
+)
+
+compare_groups(
+  model = model_MaxRE, 
+  lower = list(gender = "M", context = "pol"), 
+  higher = list(gender = "M", context = "inf")
+)
+
+compare_groups(
+  model = model_MaxRE, 
+  lower = list(gender = "M", context = "inf"),
+  higher = list(gender = "F", context = "pol")
+)

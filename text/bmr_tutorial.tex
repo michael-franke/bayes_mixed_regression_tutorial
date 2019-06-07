@@ -484,7 +484,7 @@ If you are interested in finding out more about this 'sampling stuff', check out
 \end{InfoBox}
 
 
-You can enter \texttt{modelFE} in order to get a summary of the model fit. It should look like the following output.
+You can enter \texttt{model\_FE} in order to get a summary of the model fit. It should look like the following output.
 
 \bigskip
 
@@ -538,7 +538,7 @@ More details about the information given in the other columns can be found in In
     \emph{Information displayed in the summary of a \texttt{brm} model fit}
     \medskip
 
-    Lines 6--7 of the summary of \texttt{modelFE} tell us that we collected a total of 4000 samples from the posterior distribution. These came from four chains, each running for 2000 iterations, but discarding the first 1000 samples as \textbf{warm up}, since the initial starting point might be quite ``unrepresentative'' (see also Info Box~2).
+    Lines 6--7 of the summary of \texttt{model\_FE} tell us that we collected a total of 4000 samples from the posterior distribution. These came from four chains, each running for 2000 iterations, but discarding the first 1000 samples as \textbf{warm up}, since the initial starting point might be quite ``unrepresentative'' (see also Info Box~2).
     
     From the table in lines 9--14, the column \emph{Estimate} gives the mean of the obtained
     samples, thereby approximating the mean of the posterior distribution (beliefs we should
@@ -579,7 +579,7 @@ But how likely? How likely is it that $\beta_{\text{pol}}$ is smaller than 0? In
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
 # extract posterior samples 
-post_samples_FE = posterior_samples(modelFE)
+post_samples_FE = posterior_samples(model_FE)
 head(post_samples_FE %>% round(1))
 \end{lstlisting}
 \end{minipage}
@@ -637,8 +637,7 @@ As an interim summary, we have seen how to run a Bayesian regression analysis wi
 
 Unfortunately, what we have not seen yet is what our model and data say about hypotheses 2 or 3. This is because there is no single parameter in the (dummy-coded) regression model that corresponds to the differences between cells 3 and 4 (for hypothesis 2) and cells 2 and 3 (for hypothesis 3). Notice that this problem is not specific to Bayesian analyses, but inherent in the way the regression coefficients were set up.
 %
-\marginnote{A potential way of testing different hypotheses of the kind we have set our here, is to run different regression analyses, each with a different reference cell. This is a rather unhandy work flow. It wouldn't help with hypothesis 3 either, which compares the cell means in our design matrix``diagonally'': there is no way of changing the reference level of either factor such that dummy coding gives us a single coefficient as the difference between cells 2 and 3.}
-\tr{Typographic remark: marginnote starting with "A potential way..." is cut off by the code chunk below it.}
+\marginnote[-1cm]{A potential way of testing different hypotheses of the kind we have set our here, is to run different regression analyses, each with a different reference cell. This is a rather unhandy work flow. It wouldn't help with hypothesis 3 either, which compares the cell means in our design matrix``diagonally'': there is no way of changing the reference level of either factor such that dummy coding gives us a single coefficient as the difference between cells 2 and 3.}
 %
 Fortunately, we can recover information about any derived measure from the obtained samples. Here's how:
 
@@ -701,7 +700,7 @@ For example, although the model fitted $\beta$-coefficients, we can reconstruct 
 
 \begin{minipage}[]{1.3\textwidth}
 \begin{lstlisting}[language=R]
-extract_posterior_cell_means(modelFE)$predictor_values
+extract_posterior_cell_means(model_FE)$predictor_values
 \end{lstlisting}
 \end{minipage}
 
@@ -726,7 +725,7 @@ polite contexts with male speakers in informal contexts with this call:
 \begin{minipage}[]{1.3\textwidth}
 \begin{lstlisting}[language=R]
 compare_groups(
-  model = modelFE, 
+  model = model_FE, 
   lower = list(gender = "M", context = "inf"),
   higher = list(gender = "F", context = "pol")
 )
@@ -756,7 +755,7 @@ this tutorial:
 
 \begin{minipage}[]{\textwidth}
 \begin{rc}
-> get_posterior_beliefs_about_hypotheses_new(model_FE)
+> get_posterior_beliefs_about_hypotheses(model_FE)
 # A tibble: 3 x 2
   hypothesis                      probability
   <chr>                                 <dbl>
@@ -777,32 +776,34 @@ One important difference between traditional frequentist and Bayesian inference 
 %
 \marginnote[-1.5cm]{Defining regularizing priors is essential for more complex models which have to estimate many parameters. Regularizing priors can help our model to converge more quickly.}
 %
-As a conceptual advantage, priors can also express relevant \textbf{subjective prior beliefs} about the situation or problem at hand. For example, pitch values (and many other things we measure in nature) cannot be smaller than 0. Human pitch values are also limited to a certain range defined by physiological and bio-mechanical constraints on our laryngeal system. In adults, values larger than let's say 1000 Hz are very unlikely. 
+As a conceptual advantage, priors can also express relevant \textbf{subjective prior beliefs} about the situation or problem at hand. For example, pitch values (and many other things we measure in nature) cannot be smaller than 0. Human pitch values are also limited to a certain range defined by physiological and bio-mechanical constraints on our laryngeal system. In adults, values larger than, let's say, 1000 Hz are very unlikely. 
  
-But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right? You are right. We should have a heart of stone and be skeptical about possible relationships in the first place.
-Practically, this means the following for us: We should not hesitate to make use of the
+But wait a minute. Subjective beliefs? This is science. We are supposed to be objective, right?
+We should have a heart of stone and be skeptical about possible relationships in the first
+place. Practically, this means the following for us: We should not hesitate to make use of the
 possibility to bring all the potentially relevant background knowledge to bear when analyzing
 our data. The formalization of background knowledge should, of course, be made transparent and
 be explicitly justified. So, any pieces of reasonably uncontroversial background knowledge
 might well be included in the model. But, of course, when it comes to the specific hypotheses
-we would like to test, we should \emph{not} engineer the conclusions we
-would like to eventually draw, no matter what our subjective beliefs (possibly inspired by
-hope) are! If our research hypothesis is that female speakers lower their voices in polite contexts, we obviously don't want to specify a prior that assumes the
-hypothesized relationship before having seen the data. Instead, we should feed our model a
-\textbf{skeptical} prior about the truth of our research hypothesis. Since there is probably
-little doubt about an effect of gender on voice pitch, the following explores what happens when
-we entertain a skeptical prior about the effect of context (on female speakers).
+we would like to test, we should \emph{not} engineer the conclusions we would like to
+eventually draw, no matter what our subjective beliefs (possibly inspired by hope) are! If our
+research hypothesis is that female speakers lower their voices in polite contexts, we obviously
+don't want to specify a prior that assumes the hypothesized relationship before having seen the
+data. Instead, we can feed our model with a \textbf{skeptical prior} about the truth of our
+research hypothesis. Since there is probably little doubt about an effect of gender on voice
+pitch, the following explores what happens when we entertain a skeptical prior about the effect
+of context (on female speakers).
 
 % Concretely, we could believe \emph{a priori} that it is not
 % likely that   could be the assumption that there is likely \textit{no} relationship between speaker gender and voice pitch (i.e. the average difference is 0). Of course, there might be some variability around this average value (nature is messy after all), so we might want to assume that pitch differences between male and female speakers are normally distributed with an average of 0 and a standard deviation of, say, 50 Hz. Importantly, such a skeptical prior is conservative with regard to our research hypothesis. Our point of departure (before we observed new data) is to assume that there is no effect of gender on pitch. The data need to convince us otherwise.
 
-How does that look in practice? --- First of all, you do not have to specify priors by hand; a call to \texttt{brm} will invoke generically defensible priors for your model. For example, to see the priors for the model fit we obtained above, which is stored in \texttt{modelFE}, we could type and inspect the automatically assumed priors like this:
+How does that look in practice? --- First of all, you do not have to specify priors by hand; a call to \texttt{brm} will invoke generically defensible priors for your model. For example, to see the priors for the model fit we obtained above, which is stored in \texttt{model\_FE}, we could type and inspect the automatically assumed priors like this:
 
 \medskip
 
 \begin{minipage}[]{\textwidth}
 \begin{rc}
-> prior_summary(modelFE)
+> prior_summary(model_FE)
                   prior     class               coef 
 1 student_t(3, 204, 83) Intercept                    
 2                               b                    
@@ -834,7 +835,7 @@ you care about, you can be more explicit, and use the priors for conservative in
 So,
 let's define some priors for the model with fixed effects. Our goal is not to provide the
 ``best'' choice of prior here (which is highly debatable), but to show one example of realizing
-a skeptical stance towards a given hypotheses. Here, we therefore specify the priors for the
+a skeptical stance towards a given hypothesis. Here, we therefore specify the priors for the
 coefficient $\beta_{\text{pol}}$ as normal distributions centered around zero with a rather
 small standard deviation of 20. This encodes a prior belief that there is likely no difference
 between (female speakers') voice pitch in informal and polite contexts.
@@ -862,7 +863,7 @@ We add this prior to the model as an argument, like so:
 
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
-modelFE_prior = brm(formula = pitch ~ gender * context,
+model_FE_prior = brm(formula = pitch ~ gender * context,
 	prior = priorFE, 	# add prior 
 	data = politedata,
 	control = list(adapt_delta = 0.99),
@@ -901,7 +902,7 @@ To illustrate this point, let's run our model from above without the gender pred
 
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
-modelFE_noGender= brm(formula = pitch ~ context,
+model_FE_noGender= brm(formula = pitch ~ context,
 	prior = priorFE,
 	data = politedata,
 	control = list(adapt_delta = 0.99),
@@ -921,7 +922,7 @@ Figure~\ref{fig:coefficients_table} show the output of the following function ca
 
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
-pp_check(modelFE_noGender, nsample = 100)
+pp_check(model_FE_noGender, nsample = 100)
 \end{lstlisting}
 \end{minipage}
 
@@ -1031,7 +1032,7 @@ To check the probability of our hypotheses of interest, we can use the \texttt{f
 
 \begin{minipage}[]{\textwidth}
 \begin{rc}
-> get_posterior_beliefs_about_hypotheses_new(model_MaxRE)
+> get_posterior_beliefs_about_hypotheses(model_MaxRE)
 # A tibble: 3 x 2
   hypothesis                      probability
   <chr>                                 <dbl>
@@ -1052,40 +1053,54 @@ This variation can evoke false positives when unaccounted for.
 How do we report our analysis and our results in a Bayesian framework? There is no gold
 standard. But the following is one example for how to do it.
 
-\paragraph{Description of analysis}  
-We fitted Bayesian hierarchical linear models to pitch values as a function of dummy coded
+\paragraph{Description of analysis.}
+
+We fitted Bayesian hierarchical linear models to pitch values as a function of dummy-coded
 factors \texttt{gender} (reference level ``female''), and \texttt{context} (reference level
 ``informal'') and their two-way interaction, using the Stan modeling language
 \citep{carpenter2016stan} and the package \emph{brms} \citep{buerkner2016brms}. The models
 included maximal random-effect structures justified by the design, allowing the predictors of
 interest and their interactions to vary by participants (\textsc{context}) and sentences
 (\textsc{gender}, \textsc{context}). We used the default priors of the \texttt{brms} package,
-namely a Student's t-distribution ($\nu = 3, \mu = 204, \sigma = 83$) for the mean of the
-reference cell (female speakers in an informal context), a Student's t-distribution ($\nu
-= 3, \mu = 0, \sigma = 83$) for standard deviation for the likelihood function, and unbiased
-priors for regression coefficients. We used \texttt{brms}' default priors for standard
-deviations of random effects (a Student's t-distribution with $\nu = 3, \mu = 0$ and $\sigma =
-20$), as well as for correlation coefficients in interaction models (LKJ $\eta = 1$).
+namely a Student's $t$-distribution ($\nu = 3$, $\mu = 204$, $\sigma = 83$) for the mean of the
+reference cell (female speakers in an informal context), a Student's $t$-distribution ($\nu =
+3$, $\mu = 0$, $\sigma = 83$) for standard deviation for the likelihood function, and unbiased
+priors for regression coefficients. We used the \textit{brms} package's default priors for
+standard deviations of random effects (a Student's $t$-distribution with $\nu = 3$, $\mu = 0$
+and $\sigma = 20$), as well as for correlation coefficients in interaction models (LKJ $\eta =
+1$).
 
-Four sampling chains with 2000 iterations with a warm-up period of 1000 iterations were run for
-each model, thereby yielding 4000 samples for each parameter tuple.
-We ensured converges by examination of traceplots and $\hat{R}$-statistics.
-For all relevant predictor levels and differences between them, we report 95\% credible
-intervals (CIs) and the posterior probability that a parameter $\beta$, or a measure derived
-from estimated parameters, is greater than zero $P(\beta  < 0)$ \tr{shouldnt it be |beta|?}. A 95\% credible interval demarcates the range of values that comprise 95\% of probability density or mass of our posterior beliefs. We judge there to be \emph{compelling evidence
-} for an effect if zero is (by a reasonably clear margin) not included in the 95\% CI and $P(\beta < 0)$ is close to one.
+Four sampling chains ran for 2000 iterations with a warm-up period of 1000 iterations for each
+model, thereby yielding 4000 samples for each parameter tuple. We ensured converges by
+examination of traceplots and $\hat{R}$-statistics. For all relevant cell means and differences
+between them, we report the expected values under the posterior distribution and their 95\%
+credible intervals (CIs). For differences between cells, we also report the posterior
+probability that a difference $\delta$ is bigger than zero. If a hypothesis states that
+$\delta >0$, we judge there to be \emph{compelling evidence} for this hypothesis if zero is (by
+a reasonably clear margin) not included in the 95\%\,CI of $\delta$ and the posterior $P(\delta
+>0)$ is close to one.
 
-\paragraph{Description of results}  
+\paragraph{Description of results.}  
 
-%\mf{ah, got it! implemented now; reinstall faintr and do %\texttt{extract_posterior_cell_means(model_name)$cell\_summary$}}
+Female speakers produced higher voice pitch in informal contexts ($\mathbb{E}(\mu_{\text{fem,
+    inf}}) = 261$, CI = [210, 312]) than in polite contexts ($\mathbb{E}(\mu_{\text{fem,
+    pol}}) = 233$, CI = [179, 288]). There is compelling evidence for this difference
+($\mathbb{E}(\mu_{\text{fem, inf}} - \mu_{\text{fem, pol}}) = 28$, CI = [2, 53] $P(§\delta
+> 0) = 0.982$). We conclude that the data and the model support H1.
 
-\tr{misunderstanding: I thought it would be nice to have a dummy description of our results, so people know how to describe their results (see my attempt below). Also the function doesn't work for me. "extract posterior cell means" function call doesn't spit out summaries (returns NULL), I assume you meant the all cells compared vector? you get a posterior. I assume its the mean? would be nice to get also the CIs here. See missing values below}
+Male speakers also produced higher voice pitch in informal contexts
+($\mathbb{E}(\mu_{\text{male, inf}}) = 145$, CI = [94, 191]) than in polite contexts
+($\mathbb{E}(\mu_{\text{male, pol}}) = 134$, CI = [77, 184]). However, there is no
+evidence for this difference being larger than zero ($\mathbb{E}(\mu_{\text{male, inf}} - \mu_{\text{male, pol}}) =$ 11, CI =
+[-16, 40], $P(\delta > 0) = 0.809$). We conclude that the data and the model do not
+support H2.
 
-Female speakers produced higher voice pitch in informal contexts ($\beta = 261$, 95\%CI = 210, 312) than in polite contexts ($\beta = 233$, 95\%CI = 179, 288). There is compelling evidence that the difference is larger than 0 ($\beta = -28$, 95\%CI = -53, -2, $P(\beta  < 0) = 0.982$). We conclude that the data and the model support H1.
-
-Male speakers also produced higher voice pitch in informal contexts ($\beta = 145$, 95\%CI = 94, 191) than in polite contexts ($\beta = 134$, 95\%CI = 77, 184). However, there is only weak evidence for this difference being larger than zero ($\beta =$ [INSERT VALUE], 95\%CI = [INSERT VALUEs], $P(\beta  < 0) = 0.808$). We conclude that the data and the model do not support H2.
-
-Female speakers in polite contexts produced higher voice pitch ($\beta = 233$, 95\%CI = 179, 288) than male speakers in informal contexts ($\beta = 145$, 95\%CI = 94, 191). There is compelling evidence that the difference is larger than 0 ($\beta =$ [INSERT VALUE], 95\%CI = [INSERT VALUEs], $P(\beta  < 0) = 0.985$). We conclude that the data and the model support H3.
+Female speakers in polite contexts produced higher voice pitch ($\mathbb{E}(\mu_{\text{fem,
+    pol}}) = 233$, CI = $[179, 288]$) than male speakers in informal contexts
+($\mathbb{E}(\mu_{\text{male, inf}}) = 145$, CI = $[94, 191]$). There is compelling
+evidence that the difference between these cells is larger than 0 ($\mathbb{E}(\mu_{\text{fem,
+    pol}} - \mu_{\text{male, inf}}) = $ 86, CI = [18, 162], $P(\delta >
+0) = 0.985$). We conclude that the data and the model support H3.
 
 
 \section{Further reading}
