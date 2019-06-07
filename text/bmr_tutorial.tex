@@ -916,7 +916,7 @@ poor fit. If we run \texttt{pp\_check()} on our model (we also specify how many 
 to compare the observations to), we can see that a model without the \texttt{gender} predictor
 fails to capture an important property of our data: having pitch values from men and women
 leads to a bimodal distribution of pitch values (i.e. two bumps).
-Figure~\ref{fig:coefficients_table} show the output of the following function call:
+Figure~\ref{fig:PPC_without_gender} show the output of the following function call:
 
 \bigskip
 
@@ -930,19 +930,19 @@ pp_check(model_FE_noGender, nsample = 100)
   \centering
     \includegraphics[width = 0.8\textwidth]{pics/pp_check_FE_noGender.pdf}
     \caption{Output of the posterior predictive check for a model \textbf{without} the predictor \texttt{gender}}
-    \label{fig:coefficients_table}
+    \label{fig:PPC_without_gender}
 \end{figure}
 
 
 The model overestimates the probability of very low and high pitch values, underestimates the probability of values that surround our two bumps and heavily overestimates the probability of values around 200 Hz.
 Our earlier model which takes \texttt{gender} into account looks quite a bit better, as shown
-in Figure~\ref{fig:coefficients_table}. While still showing much uncertainty surrounding the two bumps in the observed distribution, it clearly captures the evidence better. 
+in Figure~\ref{fig:PPC_with_gender}. While still showing much uncertainty surrounding the two bumps in the observed distribution, it clearly captures the evidence better. 
 
 \begin{figure}[]
   \centering
     \includegraphics[width = 0.8\textwidth]{pics/pp_check_FE.pdf}
     \caption{Output of the posterior predictive check for a model with the predictor \texttt{gender}}
-    \label{fig:coefficients_table}
+    \label{fig:PPC_with_gender}
 \end{figure}
 
 
