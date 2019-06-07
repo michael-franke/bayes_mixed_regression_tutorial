@@ -296,8 +296,7 @@ compare_groups = function(model, higher, lower) {
   }
   
   # get posterior samples for all cell means
-  post_cell_samples = extract_posterior_cell_means(model)$predictor_values %>% 
-    select(- n_sample)
+  post_cell_samples = extract_posterior_cell_means(model)$predictor_values
   
   ## helper function :: recursive extraction of cell names
   collect_cell_names = function(remaining_names, remaining_factors) {
