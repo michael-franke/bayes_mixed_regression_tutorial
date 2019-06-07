@@ -18,7 +18,7 @@ get_factor_information = function(model) {
   dependent_variable = as.character(formula(model)[[1]])[[2]]
   independent_variables = strsplit(x = gsub(pattern = "\\(.*\\|.*\\)", "", as.character(formula(model)[[1]])[[3]]),
                                    split =  "(\\*|\\+)",
-                                   fixed = FALSE)[[1]] %>% trimws()
+                                   fixed = FALSE)[[1]] %>% trimws() %>% unique()
   independent_variables = independent_variables[which(independent_variables != "")]
   
   # stop this if there are not at least two factors
