@@ -345,10 +345,10 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>The <code>brm</code> function uses dummy coding per default. Look at the estimated coefficients:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">fixef</span>(m_dummy)</a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="co">##                      Estimate Est.Error        Q2.5     Q97.5</span></a>
-<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="co">## Intercept           261.09612  23.53896  212.387243 309.90781</span></a>
-<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="co">## genderM            -116.18593  31.54758 -181.969202 -53.44587</span></a>
-<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="co">## contextpol          -27.20819   8.04560  -43.554231 -11.42730</span></a>
-<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co">## genderM:contextpol   15.46316  11.29796   -6.683901  37.70644</span></a></code></pre></div>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="co">## Intercept           260.35880 22.929231  212.728122 306.44387</span></a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="co">## genderM            -116.15262 31.456805 -181.674219 -48.68117</span></a>
+<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="co">## contextpol          -27.53459  7.989948  -43.017830 -11.42914</span></a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co">## genderM:contextpol   15.79928 11.441650   -6.971499  38.66109</span></a></code></pre></div>
 <p>The reference cell is where <code>gender:F</code> and <code>context:inf</code>, so female speakers in informal contexts. The estimated mean for the cell with data from male speakers in informal contexts is retrievable by adding the estimated coefficient <code>genderM</code> in the output above from the estimated Intercept.</p>
 <p>The <code>faintr</code> package provides convenience functions to compare different (groups of) cells to each other, based on a model fit like the above. Although the fit of the regression model uses a particular reference cell for dummy-coding, other contrasts of relevance can be retrieved from the posterior samples. For example, if we want to compare two cell diagonally, say, male speakers in informal contexts against female speakers in polite contexts, we can do this:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">compare_groups</span>(</a>
@@ -359,9 +359,9 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb6-6" data-line-number="6"><span class="co">## Outcome of comparing groups:</span></a>
 <a class="sourceLine" id="cb6-7" data-line-number="7"><span class="co">##  * higher:  gender:F context:pol </span></a>
 <a class="sourceLine" id="cb6-8" data-line-number="8"><span class="co">##  * lower:   gender:M context:inf </span></a>
-<a class="sourceLine" id="cb6-9" data-line-number="9"><span class="co">## Mean 'higher - lower':  88.98 </span></a>
-<a class="sourceLine" id="cb6-10" data-line-number="10"><span class="co">## 95% CI: [ 27.39 ; 155.2 ]</span></a>
-<a class="sourceLine" id="cb6-11" data-line-number="11"><span class="co">## P('higher - lower' &gt; 0):  0.992</span></a></code></pre></div>
+<a class="sourceLine" id="cb6-9" data-line-number="9"><span class="co">## Mean 'higher - lower':  88.62 </span></a>
+<a class="sourceLine" id="cb6-10" data-line-number="10"><span class="co">## 95% CI: [ 23.12 ; 153.7 ]</span></a>
+<a class="sourceLine" id="cb6-11" data-line-number="11"><span class="co">## P('higher - lower' &gt; 0):  0.9915</span></a></code></pre></div>
 <p>We can also compare the effect of gender female against the grand mean, to retrieve the information normally obtained by deviance coding:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">compare_groups</span>(</a>
 <a class="sourceLine" id="cb7-2" data-line-number="2">  <span class="dt">model =</span> m_dummy, </a>
@@ -371,9 +371,9 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb7-6" data-line-number="6"><span class="co">## Outcome of comparing groups:</span></a>
 <a class="sourceLine" id="cb7-7" data-line-number="7"><span class="co">##  * higher:  gender:F </span></a>
 <a class="sourceLine" id="cb7-8" data-line-number="8"><span class="co">##  * lower:   grand mean </span></a>
-<a class="sourceLine" id="cb7-9" data-line-number="9"><span class="co">## Mean 'higher - lower':  54.23 </span></a>
-<a class="sourceLine" id="cb7-10" data-line-number="10"><span class="co">## 95% CI: [ 23.53 ; 86.34 ]</span></a>
-<a class="sourceLine" id="cb7-11" data-line-number="11"><span class="co">## P('higher - lower' &gt; 0):  0.9975</span></a></code></pre></div>
+<a class="sourceLine" id="cb7-9" data-line-number="9"><span class="co">## Mean 'higher - lower':  54.13 </span></a>
+<a class="sourceLine" id="cb7-10" data-line-number="10"><span class="co">## 95% CI: [ 23.49 ; 88.03 ]</span></a>
+<a class="sourceLine" id="cb7-11" data-line-number="11"><span class="co">## P('higher - lower' &gt; 0):  0.9972</span></a></code></pre></div>
 </div>
 
 

@@ -171,10 +171,18 @@ mean(post_samples_FE$b_contextpol > post_samples_FE$b_genderM)
 library(devtools)
 
 # package with convenience function for Bayesian regression models for factorial designs
+## install without building vignette
+# install_github(
+#   repo = 'michael-franke/bayes_mixed_regression_tutorial',
+#   subdir = 'faintr'
+#   ) # install from GitHub
+## install with automative build of vignette (takes a while!)
 # install_github(
 #   repo = 'michael-franke/bayes_mixed_regression_tutorial',
 #   subdir = 'faintr',
-#   build_vignettes = TRUE) # install from GitHub
+#   build = TRUE,
+#   build_opts = c("--no-resave-data", "--no-manual"),
+# )
 library(faintr)
 
 # extract cell means and plot them
