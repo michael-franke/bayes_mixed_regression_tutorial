@@ -20,8 +20,7 @@ design cells, and a complete pairwise comparison between cells.
 \code{\link{compare_groups}} allows the comparison of any pair of 
 (subsets) of cells.
 
-For more information type \code{vignette("faintr_basics")}
-#'
+For more information see \href{https://michael-franke.github.io/bayes_mixed_regression_tutorial/faintr/doc/faintr_basics.html}{the basic tutorial online}
 }
 \seealso{
 \code{\link{brm}}, 
