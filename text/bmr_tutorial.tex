@@ -455,12 +455,12 @@ If you are interested in finding out more about this 'sampling stuff', check out
     
     For common applications, it is not required to understand MCMC algorithms in full detail.
     It suffices to know that samples are collected by starting at (usually random) initial
-    parameter values, and then ``jump around the parameter space'' in such a way that, in the
-    limit \tr{this sounds odd, what do you mean with "in the limit"? at least?}, they will have visited any particular tuple of parameter values with a relative
-    frequency that corresponds exactly to its posterior probability. So these algorithms are
-    guaranteed to give us representative samples, given unlimited time to jump around. Since we
-    cannot wait forever, we make sure that the samples we have are good enough by some
-    diagnostic tools.
+    parameter values, and then ``jump around the parameter space'' in such a way that, if we
+    were to jump infinitely often, we will have visited any particular tuple of parameter
+    values with a relative frequency that corresponds exactly to its posterior probability. So
+    these algorithms are guaranteed to give us representative samples, given unlimited time to
+    jump around. Since we cannot wait forever, we make sure that the samples we have are good
+    enough by some diagnostic tools.
 
     \medskip
     
@@ -1105,15 +1105,25 @@ evidence that the difference between these cells is larger than 0 ($\mathbb{E}(\
 
 \section{Further reading}
 
+Excellent textbooks on R are freely available online:
 \begin{itemize}
-\item Bayes factors; bridge sampling \tr{controversial topic, link to multiple works?}
-\item R4SD
-\item Rethinking and Kurz's revamped web book \tr{yes for sure the brms web book}
-\item JASP
-\item differences between confidence and credible intervals
-\item other factor coding schemes 
-\item LOO model comparison (?)
+\item R for Data Science: \url{https://r4ds.had.co.nz}
+\item Advanced R: \url{https://adv-r.hadley.nz}
 \end{itemize}
+
+The textbook by \citet{GelmanCarlin2014:Bayesian-Data-A} is a standard reference for Bayesian
+data analysis. \citet{Kruschke2011:Doing-Bayesian-} provides a less technical, lucid
+introduction to Bayesian methods. For readers with some prior exposition to statistical
+analyses, \citet{McElreath2016:Statistical-Ret} could be an excellent step into Bayesian
+analyses.\marginnote{A. Solomon Kurz has an online book based on
+  \citet{McElreath2016:Statistical-Ret}, which uses the same tools as we did here, namely the
+  \emph{tidyverse} and the \emph{brms} packages: \url{https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/}}
+
+If you want to explore Bayesian approaches to data analysis with a graphical user interface,
+check out JASP: \url{https://jasp-stats.org}.
+
+
+
 
 
 
