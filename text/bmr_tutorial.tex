@@ -681,8 +681,7 @@ library(devtools)
 # models for factorial designs from GitHub
 install_github(
   repo = 'michael-franke/bayes_mixed_regression_tutorial', 
-  subdir = 'faintr',
-  build_vignettes = TRUE)
+  subdir = 'faintr')
 # load the just installed package
 library(faintr)
 \end{lstlisting}
@@ -690,7 +689,7 @@ library(faintr)
 
 The \texttt{faintr} package provides two main helper functions.
 %
-\marginnote{You can read a vignette with more information on the \texttt{faintr} package if you type \texttt{vignette("faintr\_basics")} after installing the package.}
+\marginnote{More on the use of the \texttt{faintr} package can be found here: \url{https://michael-franke.github.io/bayes_mixed_regression_tutorial/faintr/doc/faintr_basics.html}.}
 %
 The function \texttt{extract\_posterior\_cell\_means()}
 takes as input the fitted regression model (technically: the \texttt{brmsfit} object returned
