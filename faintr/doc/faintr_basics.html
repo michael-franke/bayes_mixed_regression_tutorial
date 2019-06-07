@@ -1,84 +1,392 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title>Motivation</title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="1671.4">
-  <style type="text/css">
-    p.p2 {margin: 0.0px 0.0px 13.0px 0.0px; line-height: 20.0px; font: 13.0px Helvetica; color: #000000; -webkit-text-stroke: #000000}
-    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; line-height: 20.0px; font: 12.0px Monaco; color: #000000; -webkit-text-stroke: #000000; background-color: #f6f6f6}
-    span.s1 {font-kerning: none}
-    span.s2 {font: 12.0px Monaco; font-kerning: none}
-  </style>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>Comparing groups of factor levels with the faintr package</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
 </head>
+
 <body>
-<h1 style="margin: 0.0px 0.0px 19.2px 0.0px; line-height: 20.0px; font: 28.6px Helvetica; color: #000000; -webkit-text-stroke: #000000"><span class="s1"><b>Motivation</b></span></h1>
-<p class="p2"><span class="s1">The </span><span class="s2">faintr</span><span class="s1"> package provides convenience function for the evaluation of a model fit, obtained with the </span><span class="s2">brms</span><span class="s1"> package, for a Bayesian regression model for data from a factorial design. If the original model fit used (default) dummy coding of factors, the </span><span class="s2">faintr</span><span class="s1"> package allows extraction of many more meaningful comparisons. For example, it is possible to directly compare the difference between cells which are not comparable by dummy coding, and it is also possible to compare means in sets of cells, so as to recover the outcomes of deviance coding.</span></p>
-<h1 style="margin: 0.0px 0.0px 19.2px 0.0px; line-height: 20.0px; font: 28.6px Helvetica; color: #000000; -webkit-text-stroke: #000000"><span class="s1"><b>Installation</b></span></h1>
-<p class="p2"><span class="s1">Install the </span><span class="s2">faintr</span><span class="s1"> package with </span><span class="s2">devtools</span><span class="s1"> from GitHub:</span></p>
-<p class="p3"><span class="s1">devtools::install_github('michael-franke/bayes_mixed_regression_tutorial/faintr',<span class="Apple-converted-space"> </span></span></p>
-<p class="p3"><span class="s1"><span class="Apple-converted-space">                         </span>build_vignettes = TRUE)</span></p>
-<p class="p3"><span class="s1">library(faintr)</span></p>
-<h1 style="margin: 0.0px 0.0px 19.2px 0.0px; line-height: 20.0px; font: 28.6px Helvetica; color: #000000; -webkit-text-stroke: #000000"><span class="s1"><b>Example</b></span></h1>
-<p class="p2"><span class="s1">Consider a data set on pitch frequency in the speech of female and male speakers in polite and informal contexts.</span></p>
-<p class="p3"><span class="s1">library(tidyverse)</span></p>
-<p class="p3"><span class="s1">politedata = read_csv('https://raw.githubusercontent.com/michael-franke/bayes_mixed_regression_tutorial/master/code/politeness_data.csv')<span class="Apple-converted-space"> </span></span></p>
-<p class="p3"><span class="s1">head(politedata)</span></p>
-<p class="p3"><span class="s1">## # A tibble: 6 x 5</span></p>
-<p class="p3"><span class="s1">## <span class="Apple-converted-space">  </span>subject gender sentence context pitch</span></p>
-<p class="p3"><span class="s1">## <span class="Apple-converted-space">  </span>&lt;chr&gt; <span class="Apple-converted-space">  </span>&lt;chr&gt;<span class="Apple-converted-space">  </span>&lt;chr&gt;<span class="Apple-converted-space">    </span>&lt;chr&gt; <span class="Apple-converted-space">  </span>&lt;dbl&gt;</span></p>
-<p class="p3"><span class="s1">## 1 F1<span class="Apple-converted-space">      </span>F<span class="Apple-converted-space">      </span>S1 <span class="Apple-converted-space">      </span>pol<span class="Apple-converted-space">      </span>213.</span></p>
-<p class="p3"><span class="s1">## 2 F1<span class="Apple-converted-space">      </span>F<span class="Apple-converted-space">      </span>S1 <span class="Apple-converted-space">      </span>inf<span class="Apple-converted-space">      </span>204.</span></p>
-<p class="p3"><span class="s1">## 3 F1<span class="Apple-converted-space">      </span>F<span class="Apple-converted-space">      </span>S2 <span class="Apple-converted-space">      </span>pol<span class="Apple-converted-space">      </span>285.</span></p>
-<p class="p3"><span class="s1">## 4 F1<span class="Apple-converted-space">      </span>F<span class="Apple-converted-space">      </span>S2 <span class="Apple-converted-space">      </span>inf<span class="Apple-converted-space">      </span>260.</span></p>
-<p class="p3"><span class="s1">## 5 F1<span class="Apple-converted-space">      </span>F<span class="Apple-converted-space">      </span>S3 <span class="Apple-converted-space">      </span>pol<span class="Apple-converted-space">      </span>204.</span></p>
-<p class="p3"><span class="s1">## 6 F1<span class="Apple-converted-space">      </span>F<span class="Apple-converted-space">      </span>S3 <span class="Apple-converted-space">      </span>inf<span class="Apple-converted-space">      </span>287.</span></p>
-<p class="p2"><span class="s1">The cell means of this data set are:</span></p>
-<p class="p3"><span class="s1">politedata %&gt;% group_by(gender, context) %&gt;% summarize(mean_pitch = mean(pitch))</span></p>
-<p class="p3"><span class="s1">## # A tibble: 4 x 3</span></p>
-<p class="p3"><span class="s1">## # Groups: <span class="Apple-converted-space">  </span>gender [2]</span></p>
-<p class="p3"><span class="s1">## <span class="Apple-converted-space">  </span>gender context mean_pitch</span></p>
-<p class="p3"><span class="s1">## <span class="Apple-converted-space">  </span>&lt;chr&gt;<span class="Apple-converted-space">  </span>&lt;chr&gt;<span class="Apple-converted-space">        </span>&lt;dbl&gt;</span></p>
-<p class="p3"><span class="s1">## 1 F<span class="Apple-converted-space">      </span>inf <span class="Apple-converted-space">          </span>261.</span></p>
-<p class="p3"><span class="s1">## 2 F<span class="Apple-converted-space">      </span>pol <span class="Apple-converted-space">          </span>233.</span></p>
-<p class="p3"><span class="s1">## 3 M<span class="Apple-converted-space">      </span>inf <span class="Apple-converted-space">          </span>144.</span></p>
-<p class="p3"><span class="s1">## 4 M<span class="Apple-converted-space">      </span>pol <span class="Apple-converted-space">          </span>133.</span></p>
-<p class="p2"><span class="s1">A Bayesian regression model for a factorial design with by-subject and by-item random intercepts can be obtained with the </span><span class="s2">brms</span><span class="s1"> package as follows:</span></p>
-<p class="p3"><span class="s1">library(brms)</span></p>
-<p class="p3"><span class="s1">m_dummy = brm(pitch ~ gender * context + (1 | subject + sentence), politedata)</span></p>
-<p class="p2"><span class="s1">The </span><span class="s2">brm</span><span class="s1"> function uses dummy coding per default. Look at the estimated coefficients:</span></p>
-<p class="p3"><span class="s1">fixef(m_dummy)</span></p>
-<p class="p3"><span class="s1">##<span class="Apple-converted-space">                      </span>Estimate Est.Error<span class="Apple-converted-space">        </span>Q2.5 <span class="Apple-converted-space">    </span>Q97.5</span></p>
-<p class="p3"><span class="s1">## Intercept <span class="Apple-converted-space">          </span>260.55672 22.894586<span class="Apple-converted-space">  </span>212.747198 306.55812</span></p>
-<p class="p3"><span class="s1">## genderM<span class="Apple-converted-space">            </span>-116.65491 29.789504 -177.970877 -55.97815</span></p>
-<p class="p3"><span class="s1">## contextpol<span class="Apple-converted-space">          </span>-27.44564<span class="Apple-converted-space">  </span>7.865963<span class="Apple-converted-space">  </span>-42.595914 -12.26362</span></p>
-<p class="p3"><span class="s1">## genderM:contextpol <span class="Apple-converted-space">  </span>15.80439 11.350807 <span class="Apple-converted-space">  </span>-5.893805<span class="Apple-converted-space">  </span>38.33587</span></p>
-<p class="p2"><span class="s1">The reference cell is where </span><span class="s2">gender:F</span><span class="s1"> and </span><span class="s2">context:inf</span><span class="s1">, so female speakers in informal contexts. The estimated mean for the cell with data from male speakers in informal contexts is retrievable by adding the estimated coefficient </span><span class="s2">genderM</span><span class="s1"> in the output above from the estimated Intercept.</span></p>
-<p class="p2"><span class="s1">The </span><span class="s2">faintr</span><span class="s1"> package provides convenience functions to compare different (groups of) cells to each other, based on a model fit like the above. Although the fit of the regression model uses a particular reference cell for dummy-coding, other contrasts of relevance can be retrieved from the posterior samples. For example, if we want to compare two cell diagonally, say, male speakers in informal contexts against female speakers in polite contexts, we can do this:</span></p>
-<p class="p3"><span class="s1">compare_groups(</span></p>
-<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>model = m_dummy,<span class="Apple-converted-space"> </span></span></p>
-<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>higher = list(gender = "F", context = "pol"),</span></p>
-<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>lower = list(gender = "M", context = "inf")</span></p>
-<p class="p3"><span class="s1">)</span></p>
-<p class="p3"><span class="s1">## Outcome of comparing groups:</span></p>
-<p class="p3"><span class="s1">##<span class="Apple-converted-space">  </span>* higher:<span class="Apple-converted-space">  </span>gender:F context:pol<span class="Apple-converted-space"> </span></span></p>
-<p class="p3"><span class="s1">##<span class="Apple-converted-space">  </span>* lower: <span class="Apple-converted-space">  </span>gender:M context:inf<span class="Apple-converted-space"> </span></span></p>
-<p class="p3"><span class="s1">## Mean 'higher - lower':<span class="Apple-converted-space">  </span>89.21<span class="Apple-converted-space"> </span></span></p>
-<p class="p3"><span class="s1">## 95% CI: [ 25.13 ; 148.5 ]</span></p>
-<p class="p3"><span class="s1">## P('higher - lower' &gt; 0):<span class="Apple-converted-space">  </span>0.9952</span></p>
-<p class="p2"><span class="s1">We can also compare the effect of gender female against the grand mean, to retrieve the information normally obtained by deviance coding:</span></p>
-<p class="p3"><span class="s1">compare_groups(</span></p>
-<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>model = m_dummy,<span class="Apple-converted-space"> </span></span></p>
-<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>higher = list(gender = "F"),</span></p>
-<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>lower = list()</span></p>
-<p class="p3"><span class="s1">)</span></p>
-<p class="p3"><span class="s1">## Outcome of comparing groups:</span></p>
-<p class="p3"><span class="s1">##<span class="Apple-converted-space">  </span>* higher:<span class="Apple-converted-space">  </span>gender:F<span class="Apple-converted-space"> </span></span></p>
-<p class="p3"><span class="s1">##<span class="Apple-converted-space">  </span>* lower: <span class="Apple-converted-space">  </span>grand mean<span class="Apple-converted-space"> </span></span></p>
-<p class="p3"><span class="s1">## Mean 'higher - lower':<span class="Apple-converted-space">  </span>54.38<span class="Apple-converted-space"> </span></span></p>
-<p class="p3"><span class="s1">## 95% CI: [ 25.1 ; 85.1 ]</span></p>
-<p class="p3"><span class="s1">## P('higher - lower' &gt; 0):<span class="Apple-converted-space">  </span>0.9995</span></p>
+
+
+
+
+<h1 class="title toc-ignore">Comparing groups of factor levels with the <code>faintr</code> package</h1>
+
+
+
+<div id="motivation" class="section level1">
+<h1>Motivation</h1>
+<p>The <code>faintr</code> package provides convenience function for the evaluation of a model fit, obtained with the <code>brms</code> package, for a Bayesian regression model for data from a factorial design. If the original model fit used (default) dummy coding of factors, the <code>faintr</code> package allow extraction of many more meaningful comparisons. For example, it is possible to directly compare the difference between cells which are not comparable by dummy coding, and it is also possible to compare means in sets of cells, so as to recover the outcomes of deviance coding.</p>
+</div>
+<div id="installation" class="section level1">
+<h1>Installation</h1>
+<p>Install the <code>faintr</code> package with <code>devtools</code> from GitHub:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">'michael-franke/bayes_mixed_regression_tutorial/faintr'</span>, </a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">                         <span class="dt">build_vignettes =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">library</span>(faintr)</a></code></pre></div>
+</div>
+<div id="example" class="section level1">
+<h1>Example</h1>
+<p>Consider a data set on pitch frequency in the speech of female and male speakers in polite and informal contexts.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">library</span>(tidyverse)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">politedata =<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">'https://raw.githubusercontent.com/michael-franke/bayes_mixed_regression_tutorial/master/code/politeness_data.csv'</span>) </a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="kw">head</span>(politedata)</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co">## # A tibble: 6 x 5</span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="co">##   subject gender sentence context pitch</span></a>
+<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="co">##   &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;   &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb2-7" data-line-number="7"><span class="co">## 1 F1      F      S1       pol      213.</span></a>
+<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="co">## 2 F1      F      S1       inf      204.</span></a>
+<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="co">## 3 F1      F      S2       pol      285.</span></a>
+<a class="sourceLine" id="cb2-10" data-line-number="10"><span class="co">## 4 F1      F      S2       inf      260.</span></a>
+<a class="sourceLine" id="cb2-11" data-line-number="11"><span class="co">## 5 F1      F      S3       pol      204.</span></a>
+<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="co">## 6 F1      F      S3       inf      287.</span></a></code></pre></div>
+<p>The cell means of this data set are:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">politedata <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(gender, context) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarize</span>(<span class="dt">mean_pitch =</span> <span class="kw">mean</span>(pitch))</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="co">## # A tibble: 4 x 3</span></a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">## # Groups:   gender [2]</span></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="co">##   gender context mean_pitch</span></a>
+<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="co">##   &lt;chr&gt;  &lt;chr&gt;        &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="co">## 1 F      inf           261.</span></a>
+<a class="sourceLine" id="cb3-7" data-line-number="7"><span class="co">## 2 F      pol           233.</span></a>
+<a class="sourceLine" id="cb3-8" data-line-number="8"><span class="co">## 3 M      inf           144.</span></a>
+<a class="sourceLine" id="cb3-9" data-line-number="9"><span class="co">## 4 M      pol           133.</span></a></code></pre></div>
+<p>A Bayesian regression model for a factorial design with by-subject and by-item random intercepts can be obtained with the <code>brms</code> package as follows:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">library</span>(brms)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">m_dummy =<span class="st"> </span><span class="kw">brm</span>(pitch <span class="op">~</span><span class="st"> </span>gender <span class="op">*</span><span class="st"> </span>context <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">|</span><span class="st"> </span>subject <span class="op">+</span><span class="st"> </span>sentence), politedata)</a></code></pre></div>
+<p>The <code>brm</code> function uses dummy coding per default. Look at the estimated coefficients:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">fixef</span>(m_dummy)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="co">##                      Estimate Est.Error        Q2.5     Q97.5</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="co">## Intercept           261.09612  23.53896  212.387243 309.90781</span></a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="co">## genderM            -116.18593  31.54758 -181.969202 -53.44587</span></a>
+<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="co">## contextpol          -27.20819   8.04560  -43.554231 -11.42730</span></a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co">## genderM:contextpol   15.46316  11.29796   -6.683901  37.70644</span></a></code></pre></div>
+<p>The reference cell is where <code>gender:F</code> and <code>context:inf</code>, so female speakers in informal contexts. The estimated mean for the cell with data from male speakers in informal contexts is retrievable by adding the estimated coefficient <code>genderM</code> in the output above from the estimated Intercept.</p>
+<p>The <code>faintr</code> package provides convenience functions to compare different (groups of) cells to each other, based on a model fit like the above. Although the fit of the regression model uses a particular reference cell for dummy-coding, other contrasts of relevance can be retrieved from the posterior samples. For example, if we want to compare two cell diagonally, say, male speakers in informal contexts against female speakers in polite contexts, we can do this:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">compare_groups</span>(</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">  <span class="dt">model =</span> m_dummy, </a>
+<a class="sourceLine" id="cb6-3" data-line-number="3">  <span class="dt">higher =</span> <span class="kw">list</span>(<span class="dt">gender =</span> <span class="st">&quot;F&quot;</span>, <span class="dt">context =</span> <span class="st">&quot;pol&quot;</span>),</a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">  <span class="dt">lower =</span> <span class="kw">list</span>(<span class="dt">gender =</span> <span class="st">&quot;M&quot;</span>, <span class="dt">context =</span> <span class="st">&quot;inf&quot;</span>)</a>
+<a class="sourceLine" id="cb6-5" data-line-number="5">)</a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="co">## Outcome of comparing groups:</span></a>
+<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="co">##  * higher:  gender:F context:pol </span></a>
+<a class="sourceLine" id="cb6-8" data-line-number="8"><span class="co">##  * lower:   gender:M context:inf </span></a>
+<a class="sourceLine" id="cb6-9" data-line-number="9"><span class="co">## Mean 'higher - lower':  88.98 </span></a>
+<a class="sourceLine" id="cb6-10" data-line-number="10"><span class="co">## 95% CI: [ 27.39 ; 155.2 ]</span></a>
+<a class="sourceLine" id="cb6-11" data-line-number="11"><span class="co">## P('higher - lower' &gt; 0):  0.992</span></a></code></pre></div>
+<p>We can also compare the effect of gender female against the grand mean, to retrieve the information normally obtained by deviance coding:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">compare_groups</span>(</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">  <span class="dt">model =</span> m_dummy, </a>
+<a class="sourceLine" id="cb7-3" data-line-number="3">  <span class="dt">higher =</span> <span class="kw">list</span>(<span class="dt">gender =</span> <span class="st">&quot;F&quot;</span>),</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">  <span class="dt">lower =</span> <span class="kw">list</span>()</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">)</a>
+<a class="sourceLine" id="cb7-6" data-line-number="6"><span class="co">## Outcome of comparing groups:</span></a>
+<a class="sourceLine" id="cb7-7" data-line-number="7"><span class="co">##  * higher:  gender:F </span></a>
+<a class="sourceLine" id="cb7-8" data-line-number="8"><span class="co">##  * lower:   grand mean </span></a>
+<a class="sourceLine" id="cb7-9" data-line-number="9"><span class="co">## Mean 'higher - lower':  54.23 </span></a>
+<a class="sourceLine" id="cb7-10" data-line-number="10"><span class="co">## 95% CI: [ 23.53 ; 86.34 ]</span></a>
+<a class="sourceLine" id="cb7-11" data-line-number="11"><span class="co">## P('higher - lower' &gt; 0):  0.9975</span></a></code></pre></div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
 </body>
 </html>
