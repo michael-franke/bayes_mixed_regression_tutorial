@@ -91,3 +91,15 @@ compare_groups(
 )
 ```
 
+To explore all pairwise comparisons between design cells, try:
+
+```{r}
+extract_posterior_cell_means(m_dummy)$all_cells_compared
+```
+
+We can also extract the estimated means of each cell:
+
+```{r}
+extract_posterior_cell_means(m_dummy)$cell_summary
+```
+

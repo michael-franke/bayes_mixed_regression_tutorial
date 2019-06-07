@@ -345,10 +345,10 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>The <code>brm</code> function uses dummy coding per default. Look at the estimated coefficients:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">fixef</span>(m_dummy)</a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="co">##                      Estimate Est.Error        Q2.5     Q97.5</span></a>
-<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="co">## Intercept           260.35880 22.929231  212.728122 306.44387</span></a>
-<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="co">## genderM            -116.15262 31.456805 -181.674219 -48.68117</span></a>
-<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="co">## contextpol          -27.53459  7.989948  -43.017830 -11.42914</span></a>
-<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co">## genderM:contextpol   15.79928 11.441650   -6.971499  38.66109</span></a></code></pre></div>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="co">## Intercept           261.02934 22.093681  217.330291 303.64922</span></a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="co">## genderM            -116.70584 29.203414 -177.641515 -57.72146</span></a>
+<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="co">## contextpol          -27.16302  7.971296  -42.355886 -11.50569</span></a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co">## genderM:contextpol   15.27829 11.352729   -7.025012  37.81053</span></a></code></pre></div>
 <p>The reference cell is where <code>gender:F</code> and <code>context:inf</code>, so female speakers in informal contexts. The estimated mean for the cell with data from male speakers in informal contexts is retrievable by adding the estimated coefficient <code>genderM</code> in the output above from the estimated Intercept.</p>
 <p>The <code>faintr</code> package provides convenience functions to compare different (groups of) cells to each other, based on a model fit like the above. Although the fit of the regression model uses a particular reference cell for dummy-coding, other contrasts of relevance can be retrieved from the posterior samples. For example, if we want to compare two cell diagonally, say, male speakers in informal contexts against female speakers in polite contexts, we can do this:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">compare_groups</span>(</a>
@@ -359,9 +359,9 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb6-6" data-line-number="6"><span class="co">## Outcome of comparing groups:</span></a>
 <a class="sourceLine" id="cb6-7" data-line-number="7"><span class="co">##  * higher:  gender:F context:pol </span></a>
 <a class="sourceLine" id="cb6-8" data-line-number="8"><span class="co">##  * lower:   gender:M context:inf </span></a>
-<a class="sourceLine" id="cb6-9" data-line-number="9"><span class="co">## Mean 'higher - lower':  88.62 </span></a>
-<a class="sourceLine" id="cb6-10" data-line-number="10"><span class="co">## 95% CI: [ 23.12 ; 153.7 ]</span></a>
-<a class="sourceLine" id="cb6-11" data-line-number="11"><span class="co">## P('higher - lower' &gt; 0):  0.9915</span></a></code></pre></div>
+<a class="sourceLine" id="cb6-9" data-line-number="9"><span class="co">## Mean 'higher - lower':  89.54 </span></a>
+<a class="sourceLine" id="cb6-10" data-line-number="10"><span class="co">## 95% CI: [ 30.12 ; 149.4 ]</span></a>
+<a class="sourceLine" id="cb6-11" data-line-number="11"><span class="co">## P('higher - lower' &gt; 0):  0.9962</span></a></code></pre></div>
 <p>We can also compare the effect of gender female against the grand mean, to retrieve the information normally obtained by deviance coding:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">compare_groups</span>(</a>
 <a class="sourceLine" id="cb7-2" data-line-number="2">  <span class="dt">model =</span> m_dummy, </a>
@@ -371,9 +371,46 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb7-6" data-line-number="6"><span class="co">## Outcome of comparing groups:</span></a>
 <a class="sourceLine" id="cb7-7" data-line-number="7"><span class="co">##  * higher:  gender:F </span></a>
 <a class="sourceLine" id="cb7-8" data-line-number="8"><span class="co">##  * lower:   grand mean </span></a>
-<a class="sourceLine" id="cb7-9" data-line-number="9"><span class="co">## Mean 'higher - lower':  54.13 </span></a>
-<a class="sourceLine" id="cb7-10" data-line-number="10"><span class="co">## 95% CI: [ 23.49 ; 88.03 ]</span></a>
-<a class="sourceLine" id="cb7-11" data-line-number="11"><span class="co">## P('higher - lower' &gt; 0):  0.9972</span></a></code></pre></div>
+<a class="sourceLine" id="cb7-9" data-line-number="9"><span class="co">## Mean 'higher - lower':  54.53 </span></a>
+<a class="sourceLine" id="cb7-10" data-line-number="10"><span class="co">## 95% CI: [ 25.56 ; 84.37 ]</span></a>
+<a class="sourceLine" id="cb7-11" data-line-number="11"><span class="co">## P('higher - lower' &gt; 0):  0.998</span></a></code></pre></div>
+<p>To explore all pairwise comparisons between design cells, try:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">extract_posterior_cell_means</span>(m_dummy)<span class="op">$</span>all_cells_compared</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="co">##    gender_high context_high        cell_name_high gender_low context_low</span></a>
+<a class="sourceLine" id="cb8-3" data-line-number="3"><span class="co">## 1            M          inf gender:M__context:inf          F         inf</span></a>
+<a class="sourceLine" id="cb8-4" data-line-number="4"><span class="co">## 2            F          pol gender:F__context:pol          F         inf</span></a>
+<a class="sourceLine" id="cb8-5" data-line-number="5"><span class="co">## 3            M          pol gender:M__context:pol          F         inf</span></a>
+<a class="sourceLine" id="cb8-6" data-line-number="6"><span class="co">## 4            F          inf gender:F__context:inf          M         inf</span></a>
+<a class="sourceLine" id="cb8-7" data-line-number="7"><span class="co">## 5            F          pol gender:F__context:pol          M         inf</span></a>
+<a class="sourceLine" id="cb8-8" data-line-number="8"><span class="co">## 6            M          pol gender:M__context:pol          M         inf</span></a>
+<a class="sourceLine" id="cb8-9" data-line-number="9"><span class="co">## 7            F          inf gender:F__context:inf          F         pol</span></a>
+<a class="sourceLine" id="cb8-10" data-line-number="10"><span class="co">## 8            M          inf gender:M__context:inf          F         pol</span></a>
+<a class="sourceLine" id="cb8-11" data-line-number="11"><span class="co">## 9            M          pol gender:M__context:pol          F         pol</span></a>
+<a class="sourceLine" id="cb8-12" data-line-number="12"><span class="co">## 10           F          inf gender:F__context:inf          M         pol</span></a>
+<a class="sourceLine" id="cb8-13" data-line-number="13"><span class="co">## 11           M          inf gender:M__context:inf          M         pol</span></a>
+<a class="sourceLine" id="cb8-14" data-line-number="14"><span class="co">## 12           F          pol gender:F__context:pol          M         pol</span></a>
+<a class="sourceLine" id="cb8-15" data-line-number="15"><span class="co">##            cell_name_low posterior</span></a>
+<a class="sourceLine" id="cb8-16" data-line-number="16"><span class="co">## 1  gender:F__context:inf   0.00100</span></a>
+<a class="sourceLine" id="cb8-17" data-line-number="17"><span class="co">## 2  gender:F__context:inf   0.00050</span></a>
+<a class="sourceLine" id="cb8-18" data-line-number="18"><span class="co">## 3  gender:F__context:inf   0.00075</span></a>
+<a class="sourceLine" id="cb8-19" data-line-number="19"><span class="co">## 4  gender:M__context:inf   0.99900</span></a>
+<a class="sourceLine" id="cb8-20" data-line-number="20"><span class="co">## 5  gender:M__context:inf   0.99625</span></a>
+<a class="sourceLine" id="cb8-21" data-line-number="21"><span class="co">## 6  gender:M__context:inf   0.06675</span></a>
+<a class="sourceLine" id="cb8-22" data-line-number="22"><span class="co">## 7  gender:F__context:pol   0.99950</span></a>
+<a class="sourceLine" id="cb8-23" data-line-number="23"><span class="co">## 8  gender:F__context:pol   0.00375</span></a>
+<a class="sourceLine" id="cb8-24" data-line-number="24"><span class="co">## 9  gender:F__context:pol   0.00275</span></a>
+<a class="sourceLine" id="cb8-25" data-line-number="25"><span class="co">## 10 gender:M__context:pol   0.99925</span></a>
+<a class="sourceLine" id="cb8-26" data-line-number="26"><span class="co">## 11 gender:M__context:pol   0.93325</span></a>
+<a class="sourceLine" id="cb8-27" data-line-number="27"><span class="co">## 12 gender:M__context:pol   0.99725</span></a></code></pre></div>
+<p>We can also extract the estimated means of each cell:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">extract_posterior_cell_means</span>(m_dummy)<span class="op">$</span>cell_summary</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="co">## # A tibble: 4 x 4</span></a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="co">##   cell                  `lower 95% CI`  mean `upper 95% CI`</span></a>
+<a class="sourceLine" id="cb9-4" data-line-number="4"><span class="co">##   &lt;chr&gt;                          &lt;dbl&gt; &lt;dbl&gt;          &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb9-5" data-line-number="5"><span class="co">## 1 gender:F__context:inf          219.   261.           305.</span></a>
+<a class="sourceLine" id="cb9-6" data-line-number="6"><span class="co">## 2 gender:F__context:pol          192.   234.           279.</span></a>
+<a class="sourceLine" id="cb9-7" data-line-number="7"><span class="co">## 3 gender:M__context:inf           98.2  144.           191.</span></a>
+<a class="sourceLine" id="cb9-8" data-line-number="8"><span class="co">## 4 gender:M__context:pol           87.3  132.           180.</span></a></code></pre></div>
 </div>
 
 

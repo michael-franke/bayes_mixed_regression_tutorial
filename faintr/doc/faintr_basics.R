@@ -48,3 +48,9 @@ compare_groups(
   lower = list()
 )
 
+## ------------------------------------------------------------------------
+extract_posterior_cell_means(m_dummy)$all_cells_compared
+
+## ------------------------------------------------------------------------
+extract_posterior_cell_means(m_dummy)$cell_summary
+

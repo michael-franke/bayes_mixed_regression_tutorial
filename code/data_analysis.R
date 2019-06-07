@@ -181,7 +181,7 @@ library(devtools)
 #   repo = 'michael-franke/bayes_mixed_regression_tutorial',
 #   subdir = 'faintr',
 #   build = TRUE,
-#   build_opts = c("--no-resave-data", "--no-manual"),
+#   build_opts = c("--no-resave-data", "--no-manual")
 # )
 library(faintr)
 
