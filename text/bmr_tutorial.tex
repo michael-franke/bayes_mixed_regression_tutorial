@@ -127,7 +127,7 @@ This tutorial provides a very basic introduction to Bayesian regression modeling
 The information is sometimes a bit technical but never absolutely necessary for understanding the main ideas.
 So feel free to read or skip any of the text boxes to suit your needs.}
 
-If you don’t have any experience with regression modeling, you will probably still be able to follow, but you might also want to consider doing a crash course. To bring you up to speed, we recommend the excellent two-part tutorial by Bodo \citet{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~classical or frequentist--- paradigm. In a sense, this tutorial could be considered part three of Bodo's nice and lofty introduction. We will for example use the same data set.
+If you don’t have any experience with regression modeling, you will probably still be able to follow, but you might also want to consider doing a crash course. To bring you up to speed, we recommend the excellent two-part tutorial by Bodo \citet{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~frequentist--- paradigm. In a sense, this tutorial could be considered part three of Bodo's nice and lofty introduction. We will for example use the same data set.
 
 To follow this tutorial, you should have R installed on your computer (\url{https://www.r-project.org}).
 Unless you already have a favorite editor for tinkering with R scripts, we recommend to try out RStudio (\url{https://www.rstudio.com}).
@@ -200,6 +200,7 @@ command.}
  3 F1      F      S2       pol      285.
  4 F1      F      S2       inf      260.
  5 F1      F      S3       pol      204.
+ 6 F1      F      S3       inf      287.
 \end{rc}
 \end{minipage}
 
@@ -207,15 +208,12 @@ command.}
 \medskip
 
 \noindent This data set contains information about different subjects, with an anonymous identifier stored in variable \texttt{subject}.
-Because voice pitch is highly dependent on gender (i.e. there are anatomical differences
-between women and men that affect voice pitch), the variable \texttt{gender} stored whether a subject is F(emale) or M(ale).
+Because voice pitch is highly dependent on gender (i.e. there are anatomical differences between women and men that affect voice pitch), the variable \texttt{gender} stored whether a subject is F(emale) or M(ale).
 Subjects produced different sentences (stored in the variable \texttt{sentence}), and the experiment manipulated whether the sentence was produced in a polite or an informal context, indicated by the variable \texttt{context}. Crucially, each row contains a measurement of pitch in Hz stored in the variable \texttt{pitch}.
 
-Often, we are interested in comparing a \textbf{dependent variable} (here \texttt{pitch})
-across different conditions or groups, i.e. \textbf{independent variables} (here \texttt{gender} and \texttt{context}). Before our data collection,
-we might have formulated concrete predictions about the relationship between the dependent
-variable and the independent variables. For example, we might have formulated the following three
-hypotheses:
+Often, we are interested in an \textbf{outcome variable} (also called \textbf{response} / \textbf{dependent variable}, here \texttt{pitch}). We want to know how this outcome variable behaves
+across different conditions or groups, i.e. \textbf{predictors} (also called \textbf{independent variable}, here \texttt{gender} and \texttt{context}). Before our data collection,
+we might have formulated concrete predictions about the relationship between the outcome and predictors. Let's assume previous research suggests that pitch is an indicator of politeness. Informal speech is accompanied by higher pitch in both men and women. Because the phyisiological difference between men and women is very large, we also assume that even in informal contexts, men still have lower pitch than women in polite contexts. We state following hypotheses:
 % \marginnote{Notice that our hypotheses are formulated explicitly as comparisons of
 %   means / averages. The statistical model we will use indeed compares means, and this is common
 %   practice, albeit a particular assumption worth highlighting. Commonly, this assumption is implicit: For example we could simply formulate H1 as something like
@@ -259,7 +257,7 @@ translate the data into an expression of \textbf{evidence}: does the data provid
 our research hypotheses? Or are the visually observable differences too meager? -- Also, notice that
 there is quite a lot of variability between different sentences (the semi-transparent points in Figure 1).
 For example, some values from the informal condition for female speakers (orange points in left
-column), are lower than their corresponding polite counterparts. Similarly, there could be differences between individual speakers. What we want are precise
+column) are lower than their corresponding polite counterparts. Similarly, there could be differences between individual speakers. What we want are precise
 estimates of potential differences between conditions. We also want a measure of how confident we can be in these estimates.
 
 \begin{figure}[h]
@@ -295,7 +293,7 @@ sampled from a population that is normally distributed, where each cell $c_i$ ha
 Figure~\ref{fig:coefficients_table} illustrates the encoding scheme of our cell means in terms of a regression analysis. It assumes that
 there is a \textbf{reference level} for each factor. Here it is the level \texttt{female} for
 the factor \texttt{gender} and the level \texttt{informal} for the factor
-\texttt{context}.\marginnote{This is so-called \textbf{dummy coding} of the regression
+\texttt{context}.\marginnote{This is so-called \textbf{dummy coding} (also referred to as \textbf{treatment coding}) of the regression
 coefficients. Other coding schemes exist, but are not discussed here.} 
   
 All cell means can then be expressed in terms of differences between the \textbf{intercept}
@@ -374,13 +372,12 @@ or both (C4). The $\beta$ terms are also called \textbf{coefficients}. They are 
 
 \section{A Bayesian analysis of a (fixed effects) regression model}
 
-Having spelled out a model like the above, a Bayesian analysis asks: What are credible values for the model's parameters, i.e., what should a rational reasoner believe about the values of,
-in particular, the coefficients $\beta_0$, $\beta_{\text{pol}}$, $\beta_{\text{male}}$ and $\beta_{\text{pol\&male}}$ given the reasoner's initial beliefs and the data, on the assumption that the model is true?
+Having spelled out a model like the above, a Bayesian analysis asks: What are credible values for the model's parameters, i.e., what should a rational reasoner believe about the values of the coefficients $\beta_0$, $\beta_{\text{pol}}$, $\beta_{\text{male}}$ and $\beta_{\text{pol\&male}}$ given the person's initial beliefs and the data, assuming that the model is true?
 %
 \marginnote{Info Box~1 provides some background on Bayesian reasoning.}
 %
 Formally, if $\theta$ is a vector of parameter values of the model, we are interested in the \textbf{posterior distribution} $P(\theta \mid D)$, which assigns a non-negative number to each tuple of parameters in proportion to how likely that tuple is.
-From a Bayesian point of view, the model consists of a \textbf{likelihood function} $P(D \mid \theta)$, which specifies how likely an observation of data $D$ is for each value of parameters $\theta$, and a \textbf{prior distribution} $P(\theta)$, which specifies how likely we (the rational reasoners) believe each tuple of parameter values is in the first place.
+From a Bayesian point of view, the model consists of a \textbf{likelihood function} $P(D \mid \theta)$, which specifies how likely an observation of data $D$ is for each value of parameters $\theta$, and a \textbf{prior distribution} $P(\theta)$, which specifies how likely we (the rational reasoner) believe each tuple of parameter values is in the first place.
 %
 \marginnote{Supplying a \textbf{prior}, really just \textit{any} prior, is important to get a
   Bayesian analysis off the ground; a circumstance which is discussed controversially. For many
@@ -405,7 +402,7 @@ formula_FE = pitch ~ gender * context
 \end{lstlisting}
 \end{minipage}
 
-The Bayesian model can then be fitted with the function \texttt{brm} from the \texttt{brms} package. We only need to specify the formula and supply the data:
+The Bayesian model can then be fitted with the function \texttt{brm} from the \texttt{brms} package. We only need to specify the formula and supply the data.
 
 \bigskip
 
@@ -423,11 +420,10 @@ model_FE = brm(
 \noindent The \texttt{brms} package uses the probabilistic programming language \texttt{Stan}
 in the background. \texttt{brms} basically translates our syntax into Stan code and
 executes it. The Stan code  is then translated to C++ (hence the message about ``compiling
-C++'' when you run this code). Conceptually, Stan obtains samples from the posterior
-distribution, based on an algorithm called \emph{Hamiltonian Monte Carlo}. This is an instance
-of a more general class of algorithms, called \emph{Markov Chain Monte Carlo (MCMC)} methods. The
-purpose of these methods is to return representative samples from the posterior distribution.
-If you are interested in finding out more about this 'sampling stuff', check out Info Box~2.
+C++'' when you run this code). Both the compilation in C++ and the sampling in Stan can sometimes take a while. It might also eat your battery in no time, so always make sure your laptop is plugged in. 
+Conceptually, Stan obtains samples from the posterior distribution, based on an algorithm called \emph{Hamiltonian Monte Carlo}. This is an instance
+of a more general class of algorithms, called \emph{Markov Chain Monte Carlo (MCMC)} methods. The purpose of these methods is to return representative samples from the posterior distribution.
+If you are interested in finding out more about this `sampling stuff', check out Info Box~2.
 
 \begin{InfoBox}[]
 \centering
@@ -440,7 +436,7 @@ If you are interested in finding out more about this 'sampling stuff', check out
     Bayesian ideas are old, but they have seen a revival recently, in large part due to
     advances in computer science (notably: clever algorithms, not just faster computers). To
     understand this, consider Bayes rule for data analysis. We have a prior $P(\theta)$ over
-    parameter vector $\theta$ and a likelihood function $P(D\mid\theta)$. We want to compute
+    parameter $\theta$ and a likelihood function $P(D\mid\theta)$. We want to compute
     the posterior distribution:
     \begin{eqnarray*}
       P(\theta \mid D) = \frac{P(\theta) \ P(D \mid \theta)}{ \int P(\theta') \ P(D \mid
@@ -474,7 +470,9 @@ If you are interested in finding out more about this 'sampling stuff', check out
 
     \medskip
   
-    In practice, the \texttt{brm} model summary and the messages during the fitting process will inform you about potential problems with convergence, and will frequently offer good advice for how to solve the issue. One quick and simple solution is increasing the number of samples (specifying the option \texttt{iter} in the \texttt{brm} function call).
+    In practice, the \texttt{brm} model summary and the messages during the fitting process will inform you about potential problems, and will frequently offer good advice for how to solve the issue. 
+   For example, sometimes the different chains do not converge on sufficiently similar results. 
+    One quick and simple solution to these ``convergence'' issues is increasing the number of samples (specifying the option \texttt{iter} in the \texttt{brm} function call).
    
   \end{minipage} \par
   } \par
@@ -519,12 +517,12 @@ Lines 2--5 give us information about the model and the data used. Lines 6 and 7 
 the sampling procedure (see Info Boxes~2 \& 3 for more information). Lines 9--14 contain information about our
 parameters of interest. We will discuss them in detail below. Lines 16--18 contain information
 that look similar to those in lines 9--14. This is the estimation of the standard deviation
-\texttt{sigma}, describing the variance of the assumed normal distributions (which describe the
+\texttt{sigma}, describing the variance of the assumed normal distribution (which describe the
 distribution of measures in each design cell). Finally, lines 20--22 contain general
 information about the model fit and the information presented in this summary.
  \marginnote{If the model failed to converge or other problems occurred, you would see an informative message in the last part of this summary. See Info Box~2 for more on ``convergence''.}
 
-Let us look at lines 9--14 in detail now. What these lines give us is a table with four rows, each of which corresponds to a parameter in the model, namely the coefficients shown in Figure~\ref{fig:coefficients_table}. The variable \texttt{Intercept} refers to our $\beta_0$, which represents the mean of our reference level in cell 1 (female speakers in polite contexts). The variable \texttt{genderM} corresponds to our $\beta_{\text{male}}$, \texttt{contextpol} corresponds to our $\beta_{\text{pol}}$, and \texttt{genderM:contextpol} is the interaction term $\beta_{\text{pol\&male}}$. For each of these parameters, the table contains very useful summary statistics based on the samples returned from the model fit.
+Let us look at lines 9--14 in detail now. What these lines give us is a table with four rows, each of which corresponds to a parameter in the model, namely the coefficients shown in Figure~\ref{fig:coefficients_table}. The variable \texttt{Intercept} refers to the coefficient $\beta_0$, which represents the mean of the reference level in cell 1 (female speakers in polite contexts). The variable \texttt{genderM} corresponds to the coefficient $\beta_{\text{male}}$, \texttt{contextpol} corresponds to the coefficient $\beta_{\text{pol}}$, and \texttt{genderM:contextpol} is the interaction  coefficient $\beta_{\text{pol\&male}}$. For each of these parameters, the table contains very useful summary statistics based on the samples returned from the model fit.
 %
 \marginnote[-2.5cm]{Intuitively, the 95\% credible interval is the range of values that we can often practically consider credible enough to care about.}
 %
@@ -562,14 +560,14 @@ More details about the information given in the other columns can be found in In
 
 For our current purposes, the information in  columns \texttt{l-95\% CI} and \texttt{u-95\% CI} is most important.
 These numbers give the lower and upper bounds of a \textbf{95\% credible interval}.
-Take the parameter \texttt{contextpol}, corresponding to our coefficient $\beta_{\text{pol}}$.
+Take the parameter \texttt{contextpol}, corresponding to the coefficient $\beta_{\text{pol}}$.
 This parameter corresponds to the estimated adjustment of the mean of the reference level when we change the context level to polite.
 The 95\% CI is roughly [-49;-6].
 We could take values outside of this interval to be sufficiently unlikely to be ignorable for most purposes.
-Consequently, this analysis suggests that 0 is a very unlikely value for the coefficient
+Consequently, this analysis suggests that zero is a very unlikely value for the coefficient
 $\beta_{\text{pol}}$.
 We should believe that, given the data and the model, $\beta_{\text{pol}}$ is most likely negative.
-This directly addresses our first research hypothesis.
+This directly addresses the first research hypothesis.
 In a research paper we could now write: ``Based on the regression model, the data suggests that H1 is likely true.''
 
 But how likely? How likely is it that $\beta_{\text{pol}}$ is smaller than 0? Instead of simply making a binary thumbs-up / thumbs-down decision, it would be even more elegant, if we could put a number to it. As Bayesians, we fortunately can. To see how this works, let us have a more intimate look at the samples that the \texttt{brm} function returns. We can access the samples of a model fitted with \texttt{brm} with the function \texttt{posterior\_samples}:
@@ -600,15 +598,16 @@ The output of this could look like this:
 \end{rc}
 \end{minipage}
 
-What you see here is the top 6 rows of a data frame with columns for each parameter and 4000 rows, corresponding to each sample of that parameter (so our sampling method has generated 4000 values for each parameter, where each row is a sample from the posterior distribution $P(\theta \mid D)$).
+What you see here is the top 6 rows of a data frame with columns for each parameter and 4000 rows, corresponding to each sample of that parameter (so the sampling method has generated 4000 values for each parameter, where each row is a sample from the posterior distribution $P(\theta \mid D)$).
 %
 \marginnote{The column \texttt{lp\_\_} contains the log-probability of the data for the parameterization in each row. This is useful for model comparison and model criticism but not important for our current adventures.}
 %
 We can use these samples to produce density plots reflecting our posterior distribution. The plot in Figure~\ref{fig:Posteriors_FE}
 shows, for each of the four main model parameters an estimate of the posterior density. Each
 curve shows how much credence we should put on particular parameter values. For example, we see
-that our beliefs concerning plausible values for the mean of cell 1 (female speakers in polite
-contexts, the reference cell) should hover around 261, roughly spreading from about 240 to 280. We also see that all values that receive substantial probability density for \texttt{context:pol} (our $\beta_{\text{pol}}$) are negative (as captured in the 95\% CI discussed above). Zero is estimated to be a comparatively unlikely value for this parameter.
+that our beliefs concerning plausible values for the mean of cell 1 (female speakers in informal
+contexts, the reference cell) should hover around 261, roughly spreading from about 240 to 280.
+We also see that all values that receive substantial probability density for \texttt{context:pol} (the coefficient $\beta_{\text{pol}}$) are negative (as captured in the 95\% CI discussed above), i.e. the voice pitch of women in polite contexts is likely to be lower than in informal contexts. Zero is estimated to be a comparatively unlikely value for this parameter.
 
 \begin{figure}
   \centering
@@ -629,22 +628,23 @@ Now, here comes a nice gadget. Based on the samples obtained for \texttt{context
 # proportion of negative samples for parameter b_contextpol
 # this number approximates P(b_contextpol < 0 | model, data)
 mean(post_samples_FE$b_contextpol < 0)
+>0.99375
 \end{lstlisting}
 \end{minipage}
 
 As an interim summary, we have seen how to run a Bayesian regression analysis with the
 \texttt{brms} package and how to deal with its output. We have also seen that the output can be interpreted in very intuitive ways (e.g., ``The probability of H1, given our model, priors, and data, is more than .99'').
 
-Unfortunately, what we have not seen yet is what our model and data say about hypotheses 2 or 3. This is because there is no single parameter in the (dummy-coded) regression model that corresponds to the differences between cells 3 and 4 (for hypothesis 2) and cells 2 and 3 (for hypothesis 3). Notice that this problem is not specific to Bayesian analyses, but inherent in the way the regression coefficients were set up.
+Unfortunately, what we have not seen yet is what the model and data say about hypotheses 2 or 3. This is because there is no single parameter in the (dummy-coded) regression model that corresponds to the differences between cells 3 and 4 (for hypothesis 2) and cells 2 and 3 (for hypothesis 3). Notice that this problem is not specific to Bayesian analyses, but inherent in the way the regression coefficients were set up.
 %
-\marginnote[-1cm]{A potential way of testing different hypotheses of the kind we have set our here, is to run different regression analyses, each with a different reference cell. This is a rather unhandy work flow. It wouldn't help with hypothesis 3 either, which compares the cell means in our design matrix``diagonally'': there is no way of changing the reference level of either factor such that dummy coding gives us a single coefficient as the difference between cells 2 and 3.}
+\marginnote[-1cm]{A potential way of testing different hypotheses of the kind we have set out here, is to run different regression analyses, each with a different reference cell. This is a rather unhandy work flow. It wouldn't help with hypothesis 3 either, which compares the cell means in the design matrix``diagonally'': there is no way of changing the reference level of either factor such that dummy coding gives us a single coefficient as the difference between cells 2 and 3.}
 %
 Fortunately, we can recover information about any derived measure from the obtained samples. Here's how:
 
 Take hypothesis 3 which requires us to compare cells 2 and 3. The hypothesis states that
 $\beta_0 + \beta_{\text{pol}} > \beta_0 + \beta_{\text{male}}$, which reduces to
 $\beta_{\text{pol}} > \beta_{\text{male}}$. We can approximate the posterior probability that
-this is true based on the samples that we obtained for our model in the same general way as
+this is true based on the samples that we obtained for the model in the same general way as
 before, namely:
 
 \bigskip
@@ -656,6 +656,7 @@ before, namely:
 # this number approximates the quantity:
 #    P(b_contextpol > b_genderM | model, data)
 mean(post_samples_FE$b_contextpol > post_samples_FE$b_genderM)
+>1
 \end{lstlisting}
 \end{minipage}
 
@@ -748,7 +749,7 @@ P('higher - lower' > 0):  1
 
 Using the \texttt{compare\_groups()} function, the source code for this tutorial provides a
 convenience function to produce the posterior probability of the three hypothesis relevant for
-this tutorial:
+this tutorial: 
 
 \medskip
 
@@ -771,9 +772,9 @@ Based on the currently assumed model and data, we would conclude that hypotheses
 
 \section{Priors}
 
-One important difference between traditional frequentist and Bayesian inference are priors. Priors are pieces of information about our data that we assume before actually looking at them. Specifying priors has several advantages, both technical and conceptual. First, as a technical advantage, we can use \textbf{regularizing priors} to implement soft constraints on what counts as a plausible parameter setting for the model, thereby reducing the computational resources needed to estimate the model parameters.
+One important difference between frequentist and Bayesian inference are priors. Priors are pieces of information about our data that we assume before actually looking at them. Specifying priors has several advantages, both technical and conceptual. First, as a technical advantage, we can use \textbf{regularizing priors} to implement soft constraints on what counts as a plausible parameter setting for the model, thereby reducing the computational resources needed to estimate the model parameters.
 %
-\marginnote[-1.5cm]{Defining regularizing priors is essential for more complex models which have to estimate many parameters. Regularizing priors can help our model to converge more quickly.}
+\marginnote[-1.5cm]{Defining regularizing priors is essential for more complex models which have to estimate many parameters. Regularizing priors can help the model to converge more quickly.}
 %
 As a conceptual advantage, priors can also express relevant \textbf{subjective prior beliefs} about the situation or problem at hand. For example, pitch values (and many other things we measure in nature) cannot be smaller than 0. Human pitch values are also limited to a certain range defined by physiological and bio-mechanical constraints on our laryngeal system. In adults, values larger than, let's say, 1000 Hz are very unlikely. 
  
@@ -788,7 +789,7 @@ we would like to test, we should \emph{not} engineer the conclusions we would li
 eventually draw, no matter what our subjective beliefs (possibly inspired by hope) are! If our
 research hypothesis is that female speakers lower their voices in polite contexts, we obviously
 don't want to specify a prior that assumes the hypothesized relationship before having seen the
-data. Instead, we can feed our model with a \textbf{skeptical prior} about the truth of our
+data. Instead, we can feed the model with a skeptical prior about the truth of our
 research hypothesis. Since there is probably little doubt about an effect of gender on voice
 pitch, the following explores what happens when we entertain a skeptical prior about the effect
 of context (on female speakers).
@@ -796,7 +797,7 @@ of context (on female speakers).
 % Concretely, we could believe \emph{a priori} that it is not
 % likely that   could be the assumption that there is likely \textit{no} relationship between speaker gender and voice pitch (i.e. the average difference is 0). Of course, there might be some variability around this average value (nature is messy after all), so we might want to assume that pitch differences between male and female speakers are normally distributed with an average of 0 and a standard deviation of, say, 50 Hz. Importantly, such a skeptical prior is conservative with regard to our research hypothesis. Our point of departure (before we observed new data) is to assume that there is no effect of gender on pitch. The data need to convince us otherwise.
 
-How does that look in practice? --- First of all, you do not have to specify priors by hand; a call to \texttt{brm} will invoke generically defensible priors for your model. For example, to see the priors for the model fit we obtained above, which is stored in \texttt{model\_FE}, we could type and inspect the automatically assumed priors like this:
+How does that look in practice? --- First of all, you do not have to specify priors by hand; a call to \texttt{brm} will invoke generically defensible priors for the model. For example, to see the priors for the model fit we obtained above, which is stored in \texttt{model\_FE}, we could type and inspect the automatically assumed priors like this:
 
 \medskip
 
@@ -829,7 +830,7 @@ Using unbiased priors for coefficients is a reasonable generic choice for \textt
 it cannot know which hypotheses you want to test. But, since you (should) know which hypotheses
 you care about, you can be more explicit, and use the priors for conservative inference. 
 \marginnote[-1.5cm]{You can specify priors for each class of parameters or every single
-  parameter of your model individually. To see all parameters, classes and default priors \emph{before} having to run a model, you can use the \texttt{get\_prior()} function of \texttt{brms}, which takes a model formula as input. (For comparison, the function \texttt{prior\_summary()} takes the fitted model as \texttt{brmsfit} object as input.)}
+  parameter of the model individually. To see all parameters, classes and default priors \emph{before} having to run a model, you can use the \texttt{get\_prior()} function of \texttt{brms}, which takes a model formula as input. (For comparison, the function \texttt{prior\_summary()} takes the fitted model as \texttt{brmsfit} object as input.)}
 %
 So,
 let's define some priors for the model with fixed effects. Our goal is not to provide the
@@ -871,7 +872,7 @@ model_FE_prior = brm(formula = pitch ~ gender * context,
 \end{lstlisting}
 \end{minipage}
 
-We then calculate the probability for our hypotheses again.
+We then calculate the probability for our hypotheses again. \marginnote{The argument `control' here allows us to tweak the sampling procedure in order to ensure convergence. \texttt{brms} will encourage you to do so whenever you run into such convergence issues.}
 
 \medskip
 
@@ -893,9 +894,9 @@ the data should nonetheless convince us that H1 is true.
 
 \section{Model criticism}
 
-So we know now how to extract relevant comparisons to quantify the evidence surrounding our hypotheses. We have also learned how to specify prior information. The next important step is being able to check if our model really reflects the observed data. A common and easy way to answer this question is to use so-called \textbf{posterior predictive checks}. These checks generate new hypothetical data, sampled from the so-called \textbf{posterior predicitive distribution}. This distribution quantifies how likely we would expect, given our posterior beliefs about parameters, to see a particular outcome if the experiment were repeated in the same way. We can compare samples from the posterior predictive distribution to the observed data. \texttt{brms} offers a neat function called \texttt{pp\_check()} for this. If the simulated data diverges systematically from the observed data, we should be concerned. It would suggest that the model does not capture some of important properties of our data. 
+So we know now how to extract relevant comparisons to quantify the evidence surrounding our hypotheses. We have also learned how to specify prior information. The next important step is being able to check if the model really reflects the observed data. A common and easy way to answer this question is to use so-called \textbf{posterior predictive checks}. These checks generate new hypothetical data, sampled from the so-called \textbf{posterior predicitive distribution}. This distribution quantifies how likely we would expect, given our posterior beliefs about parameters, to see a particular outcome if the experiment were repeated in the same way. We can compare samples from the posterior predictive distribution to the observed data. \texttt{brms} offers a neat function called \texttt{pp\_check()} for this. If the simulated data diverges systematically from the observed data, we should be concerned. It would suggest that the model does not capture some of important properties of the data. 
 
-To illustrate this point, let's run our model from above without the gender predictor. 
+To illustrate this point, let's run the model from above without the gender predictor. 
 
 \bigskip
 
@@ -911,11 +912,11 @@ model_FE_noGender= brm(formula = pitch ~ context,
 \end{minipage}
 
 We know that a big chunk of variation is accounted for by gender, so this model should be a
-poor fit. If we run \texttt{pp\_check()} on our model (we also specify how many samples we want
+poor fit. If we run \texttt{pp\_check()} on the model (we also specify how many samples we want
 to compare the observations to), we can see that a model without the \texttt{gender} predictor
-fails to capture an important property of our data: having pitch values from men and women
+fails to capture an important property of the data: having pitch values from men and women
 leads to a bimodal distribution of pitch values (i.e. two bumps).
-Figure~\ref{fig:PPC_without_gender} show the output of the following function call:
+Figure~\ref{fig:PPC} (left panel) shows the output of the following function call:
 
 \bigskip
 
@@ -927,22 +928,22 @@ pp_check(model_FE_noGender, nsample = 100)
 
 \begin{figure}[]
   \centering
-    \includegraphics[width = 0.8\textwidth]{pics/pp_check_FE_noGender.pdf}
-    \caption{Output of the posterior predictive check for a model \textbf{without} the predictor \texttt{gender}}
-    \label{fig:PPC_without_gender}
+    \includegraphics[width = 0.8\textwidth]{pics/pp_checks_plot.pdf}
+    \caption{Output of the posterior predictive check for a model \textbf{without} the predictor \texttt{gender} in the left panel and a model \textbf{including} the predictor \texttt{gender} in the right panel. Orange lines represent distribution of data, grey lines represent 100 posterior samples.}
+    \label{fig:PPC}
 \end{figure}
 
 
-The model overestimates the probability of very low and high pitch values, underestimates the probability of values that surround our two bumps and heavily overestimates the probability of values around 200 Hz.
-Our earlier model which takes \texttt{gender} into account looks quite a bit better, as shown
-in Figure~\ref{fig:PPC_with_gender}. While still showing much uncertainty surrounding the two bumps in the observed distribution, it clearly captures the evidence better. 
+The model overestimates the probability of very low and high pitch values, underestimates the probability of values that surround the two bumps and heavily overestimates the probability of values around 200 Hz.
+The earlier model which takes \texttt{gender} into account looks quite a bit better, as shown
+in Figure~\ref{fig:PPC} (right panel). While still showing much uncertainty surrounding the two bumps in the observed distribution, it clearly captures the evidence better. 
 
-\begin{figure}[]
-  \centering
-    \includegraphics[width = 0.8\textwidth]{pics/pp_check_FE.pdf}
-    \caption{Output of the posterior predictive check for a model with the predictor \texttt{gender}}
-    \label{fig:PPC_with_gender}
-\end{figure}
+%\begin{figure}[]
+%  \centering
+%    \includegraphics[width = 0.8\textwidth]{pics/pp_check_FE.pdf}
+%    \caption{Output of the posterior predictive check for a model with the predictor \texttt{gender}. Orange line represents distribution of data, grey lines represent 100 posterior samples.}
+%    \label{fig:PPC_with_gender}
+%\end{figure}
 
 
 \section{Adding random effects}
@@ -952,9 +953,9 @@ multiple sentences). We also have multiple measures for each sentence (as each s
 produced by multiple speakers). A crucial assumption of linear regression models is the
 assumption that all samples (data points) are independent of each other. But if two data points are produced by the same participant,
 and that participants voice is, say, particularly high, then observations will not be
-independent anymore. We need to inform our model about these dependencies between observations. The way we’re going to handle this is to add random effects to our model, just as we do in frequentists' frameworks. Random effects are additional parameters that our Bayesian model estimates.
+independent anymore. We need to inform the model about these dependencies between observations. The way we’re going to handle this is to add random effects to the model, just as we do in the frequentist framework. Random effects are additional parameters that the Bayesian model estimates and that account for dependencies between data points. The choice of the random effect structure is controversial. We follow the approach to include the maximal random effect structure justified by the design \citep{barr2013random} \citep[for an alternative view on random effect specifications, see][]{matuschek2017balancing}. For our case here, we estimate how much pitch values of individual sentences (\texttt{(1 | sentence)}) and subjects  (\texttt{(1 | subject)})  differ overall (random intercepts). We also estimate how much pitch values across sentences vary according to the context they appear in and the gender of the speaker (as well as their interaction, i.e. \texttt{(0 + gender * context | sentence)}). This so-called by-sentence random slope allows the interaction term to differ between sentences. In other words the impact of gender and context might be different for different sentences. Finally, we estimate how much pitch values vary across subjects as a function of context. In other words, our model takes into account that the context dependent effect on pitch might differ between individual subjects.
 
-Although the results look quite different, running hierarchical random effect models with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is the function call to a model with the maximal random effect structure licensed by the design.
+Running hierarchical random effect models with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is the function call to a model.
 The outcome of this model fit is shown below:
 
 \bigskip
@@ -964,8 +965,9 @@ The outcome of this model fit is shown below:
 
 # model
 model_MaxRE = brm(formula = pitch ~ gender * context +
-	(1 + gender * context | sentence) +
-	(1 + context | subject),
+	(1 | sentence) + (1 | subject) + 
+	(0 + gender * context | sentence) +
+	(0 + context | subject),
 	data = politedata,
 	control = list(adapt_delta = 0.99)
 	)
@@ -1054,7 +1056,7 @@ standard. But the following is one example for how to do it.
 
 \paragraph{Description of analysis.}
 
-We fitted Bayesian hierarchical linear models to pitch values as a function of dummy-coded
+``We fitted Bayesian hierarchical linear models to pitch values as a function of dummy-coded
 factors \texttt{gender} (reference level ``female''), and \texttt{context} (reference level
 ``informal'') and their two-way interaction, using the Stan modeling language
 \citep{carpenter2016stan} and the package \emph{brms} \citep{buerkner2016brms}. The models
@@ -1070,8 +1072,7 @@ and $\sigma = 20$), as well as for correlation coefficients in interaction model
 1$).
 
 Four sampling chains ran for 2000 iterations with a warm-up period of 1000 iterations for each
-model, thereby yielding 4000 samples for each parameter tuple. We ensured converges by
-examination of traceplots and $\hat{R}$-statistics. For all relevant cell means and differences
+model, thereby yielding 4000 samples for each parameter tuple. For all relevant cell means and differences
 between them, we report the expected values under the posterior distribution and their 95\%
 credible intervals (CIs). For differences between cells, we also report the posterior
 probability that a difference $\delta$ is bigger than zero. If a hypothesis states that
@@ -1084,31 +1085,25 @@ a reasonably clear margin) not included in the 95\%\,CI of $\delta$ and the post
 Female speakers produced higher voice pitch in informal contexts ($\mathbb{E}(\mu_{\text{fem,
     inf}}) = 261$, CI = [210, 312]) than in polite contexts ($\mathbb{E}(\mu_{\text{fem,
     pol}}) = 233$, CI = [179, 288]). There is compelling evidence for this difference
-($\mathbb{E}(\mu_{\text{fem, inf}} - \mu_{\text{fem, pol}}) = 28$, CI = [2, 53] $P(§\delta
+($\mathbb{E}(\mu_{\text{fem, inf}} - \mu_{\text{fem, pol}}) = 28$, CI = [2, 53], $P(§\delta
 > 0) = 0.982$). We conclude that the data and the model support H1.
 
 Male speakers also produced higher voice pitch in informal contexts
 ($\mathbb{E}(\mu_{\text{male, inf}}) = 145$, CI = [94, 191]) than in polite contexts
-($\mathbb{E}(\mu_{\text{male, pol}}) = 134$, CI = [77, 184]). However, there is no
-evidence for this difference being larger than zero ($\mathbb{E}(\mu_{\text{male, inf}} - \mu_{\text{male, pol}}) =$ 11, CI =
+($\mathbb{E}(\mu_{\text{male, pol}}) = 134$, CI = [77, 184]). However, there is no sufficient
+evidence that this difference is larger than zero ($\mathbb{E}(\mu_{\text{male, inf}} - \mu_{\text{male, pol}}) =$ 11, CI =
 [-16, 40], $P(\delta > 0) = 0.809$). We conclude that the data and the model do not
 support H2.
 
 Female speakers in polite contexts produced higher voice pitch ($\mathbb{E}(\mu_{\text{fem,
     pol}}) = 233$, CI = $[179, 288]$) than male speakers in informal contexts
 ($\mathbb{E}(\mu_{\text{male, inf}}) = 145$, CI = $[94, 191]$). There is compelling
-evidence that the difference between these cells is larger than 0 ($\mathbb{E}(\mu_{\text{fem,
+evidence that the difference between these cells is larger than zero ($\mathbb{E}(\mu_{\text{fem,
     pol}} - \mu_{\text{male, inf}}) = $ 86, CI = [18, 162], $P(\delta >
-0) = 0.985$). We conclude that the data and the model support H3.
+0) = 0.985$). We conclude that the data and the model support H3."
 
 
 \section{Further reading}
-
-Excellent textbooks on R are freely available online:
-\begin{itemize}
-\item R for Data Science: \url{https://r4ds.had.co.nz}
-\item Advanced R: \url{https://adv-r.hadley.nz}
-\end{itemize}
 
 The textbook by \citet{GelmanCarlin2014:Bayesian-Data-A} is a standard reference for Bayesian
 data analysis. \citet{Kruschke2011:Doing-Bayesian-} provides a less technical, lucid
