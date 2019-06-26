@@ -321,45 +321,27 @@ or both (C4). The $\beta$ terms are also called \textbf{coefficients}. They are 
     \emph{Bayesian inference: priors, likelihoods and posteriors}
     \medskip
 
-    Jones is a rational scientist. She has recently inherited her grandma's lucky coin. Jones suspects that grandma's coin might be a trick coin, but she is not
+    Jones is a rational scientist and become recently interested in speech patterns. She has read that women have higher pitch than men, but she is not
     sure. She is determined to find out. How? Well, naturally, by rationally updating her
-    \emph{prior beliefs} about the coin's bias to obtain a new \emph{posterior belief} based on
-    empirical observation (outcomes of coin flips). Central to this updating is Jones'
-    \emph{likelihood function}, which encodes how likely each relevant coin bias may have
-    generated the observed data.
+    \emph{prior beliefs} about the pitch differences between men and women to obtain a new \emph{posterior belief} based on
+    empirical observation. Central to this updating is Jones'
+    \emph{likelihood function}, which encodes how likely any pitch difference may have generated the observed data.
     
-    \paragraph{Prior beliefs.} Jones knows that there are two coin factories: one produces fair
-    coins, the other produces coins which give heads three times more often than tails. She
-    believes that it's equally likely that the coin is from either factory. In formal notation,
-    if $\theta$ is the coin's bias, i.e., the probability with which it lands heads when
-    tossed, Jones' \emph{prior beliefs} are:
-    \begin{align*}
-      P(\theta = \nicefrac{1}{2}) = P(\theta = \nicefrac{3}{4}) = \nicefrac{1}{2}
-    \end{align*}
+    \paragraph{Prior beliefs.} Jones is a roll model scientist and starts from the prior assumption that her intuition is wrong. She beliefs that men and women have the same voice pitch or in other words that the difference between male and female voice pitch is, on average, zero. Obviously she knows that nature is a messy beast, so she also departs from the assumption that this average difference has a standard deviation of say 50.
 
+    \paragraph{Likelihood.} Let's assume that Jones takes a microphone and records five  men and five women on the street. She measures their pitch values. Based on these data she can estimate the likelihood function (or simply likelihood). The likelihood is basically a function that maximizes the probability of getting an observed distribution.
 
-    \paragraph{Likelihood.} The bias $\theta$ is, by definition, the probability of the coin
-    landing heads on the next trial. Let's assume that Jones tosses the coin only once (hm,
-    maybe not so rational a scientist after all? or just too busy?). If $D\!=\!\set{\text{heads}, \text{tails}}$ is the set of potential outcomes of this experiment, the \emph{likelihood
-      function} determines the likelihood of observing each observation {$d\!\in D$} for each
-    $\theta$, which in our case is:
-    \begin{align*}
-      P(D = \text{heads} \mid \theta) & =  \theta \\
-      P(D = \text{tails} \mid \theta) & = 1 - \theta
-    \end{align*}
+    \paragraph{Posterior beliefs.} Jones' measurements show a mean difference in pitch of 100 Hz and a standard deviation of 70 Hz. Her empirical observations suggest women have higher pitch values than men. Based on these observations, should she
+still stick to her prior, i.e. believe that there is no difference between male and female pitch? By \emph{Bayes rule} her posterior beliefs are proportional to the product of her prior and the likelihood of her empirical observations.
 
-    \paragraph{Posterior beliefs.} Jones observes that the coin landed heads. What should she
-    believe now? By \emph{Bayes rule} her posterior beliefs are defined as:
-    \begin{align*}
-      P(\theta \mid D = \text{heads}) = \frac{P(\theta) P(D = \text{heads} \mid \theta)}{\sum_{\theta'}P(\theta') P(D = \text{heads} \mid \theta')}
-    \end{align*}
-    Jones' posterior belief that the coin is biased to land heads three times more likely than tails is therefore:
-    \begin{align*}
-      & P(\theta = \nicefrac{3}{4} \mid D = \text{heads}) =  \\
-      & \frac{P(\theta = \nicefrac{3}{4}) \ P(D = \text{heads} \mid \theta = \nicefrac{3}{4})}{P(\theta = \nicefrac{3}{4}) \ P(D = \text{heads} \mid \theta = \nicefrac{3}{4}) + P(\theta = \nicefrac{1}{2}) \ P(D = \text{heads} \mid \theta = \nicefrac{1}{2})} = \\
-      & \frac{\nicefrac{1}{2} \ \nicefrac{3}{4}}{\nicefrac{1}{2} \ \nicefrac{3}{4} + \nicefrac{1}{2} \ \nicefrac{1}{2}} = \frac{\nicefrac{3}{8}}{\nicefrac{7}{8}} = \frac{3}{5} 
-    \end{align*}
-    After making her observation, rational Jones has updated her initial level of credence of $0.5$ in the assumption that the coin is biased to $0.6$.
+%\begin{figure}[]
+%  \centering
+%    \includegraphics[width = 0.8\textwidth]{pics/prior_post.png}
+%    \caption{Possible relationship between prior, likelihood, and posterior. After observing the data, Jones  updates her prior and shifts her posterior beliefs towards the right.}
+%    \label{fig:prior_post}
+%\end{figure}
+
+    Jones' posterior belief in the voice pitch difference between men and women has shifted. After making her observation, rational Jones has updated her initial belief and is now more certain that there actually is a difference between men and women.
     
   \end{minipage} \par
   } \par
@@ -926,7 +908,7 @@ pp_check(model_FE_noGender, nsample = 100)
 \end{lstlisting}
 \end{minipage}
 
-\begin{figure}[]
+\begin{figure}
   \centering
     \includegraphics[width = 0.8\textwidth]{pics/pp_checks_plot.pdf}
     \caption{Output of the posterior predictive check for a model \textbf{without} the predictor \texttt{gender} in the left panel and a model \textbf{including} the predictor \texttt{gender} in the right panel. Orange lines represent distribution of data, grey lines represent 100 posterior samples.}
