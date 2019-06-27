@@ -295,16 +295,63 @@ model_FE_noGender = brm(formula =  pitch ~ context,
                        control = list(adapt_delta = 0.99),
                        seed = 1702)
 
-pp_check(model_FE_noGender, nsample = 100)
-
-# save the plotted figure
-ggsave(plot = last_plot(), filename = "../text/pics/pp_check_FE_noGender.pdf",
-       width = 6, height = 6)
+pp_check1 <- pp_check(model_FE_noGender, nsample = 100) +
+  scale_color_manual(values = c("#f1a340", "lightgrey")) +
+  scale_x_continuous(breaks = (c(0,100,200,300,400)), limits = c(-50,400)) +
+  scale_y_continuous(limits = c(0,0.01)) +
+  labs(title = "Model without gender") +
+  theme(legend.position = "none",
+        legend.key.height = unit(2,"line"),
+        legend.title = element_text(size = 18, face = "bold"),
+        legend.text = element_text(size = 16),
+        legend.background = element_rect(fill = "transparent"),
+        strip.background = element_blank(),
+        strip.text = element_text(size = 18, face = "bold"),
+        axis.line = element_blank(),
+        panel.spacing = unit(2, "lines"),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        panel.background = element_rect(fill = "transparent"),
+        axis.text = element_text(size = 16),
+        axis.title = element_text(size = 18, face = "bold"),
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+        plot.margin = unit(c(0.2,0.4,0.2,0.4),"cm"))
 
 # model with gender
-pp_check(model_FE, nsample = 100)
-ggsave(plot = last_plot(), filename = "../text/pics/pp_check_FE.pdf",
-       width = 6, height = 6)
+pp_check2 <- pp_check(model_FE, nsample = 100) +
+  scale_color_manual(values = c("#f1a340", "lightgrey")) +
+  scale_x_continuous(breaks = (c(0,100,200,300,400)), limits = c(-50,400)) +
+  scale_y_continuous(limits = c(0,0.01)) +
+  labs(title = "Model including gender") +
+  theme(legend.position = "none",
+        legend.key.height = unit(2,"line"),
+        legend.title = element_text(size = 18, face = "bold"),
+        legend.text = element_text(size = 16),
+        legend.background = element_rect(fill = "transparent"),
+        strip.background = element_blank(),
+        strip.text = element_text(size = 18, face = "bold"),
+        axis.line = element_blank(),
+        panel.spacing = unit(2, "lines"),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        panel.background = element_rect(fill = "transparent"),
+        axis.text = element_text(size = 16),
+        axis.title = element_text(size = 18, face = "bold"),
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+        plot.margin = unit(c(0.2,0.4,0.2,0.1),"cm"))
+
+# combine plots
+library(ggpubr)
+
+pp_checks_plot <- 
+  ggarrange(pp_check1, pp_check2,
+            heights = c(1,1),
+            widths = c(1,1),
+            #labels = c("A - Model without gender", "B - Model including gender"), 
+            font.label = list(size = 20), legend = "none",
+            align = "h",
+            ncol = 2, nrow = 1)
+
+ggsave(plot = pp_checks_plot, filename = "../text/pics/pp_checks_plot.pdf",
+       width = 8, height = 4)
 
 ###############################################
 ## models with additional random effects
