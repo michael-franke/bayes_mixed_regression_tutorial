@@ -62,7 +62,7 @@
   basicstyle=\footnotesize\ttfamily, % size and type of the fonts that are used for the code
   numbers=left,                   % where to put the line-numbers
   numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
-  stepnumber=1,                   % the step between two line-numbers. If it's 1, each line
+  stepnumber=0,                   % the step between two line-numbers. If it's 1, each line
                                   % will be numbered
   numbersep=5pt,                  % how far the line-numbers are from the code
   backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
@@ -86,9 +86,8 @@
   deletekeywords={_}         % remove keywords from list
 }
 
-
 % this is for showing the R output
-\lstnewenvironment{rc}[1][]{\lstset{language=R}}{}
+\lstnewenvironment{rc}[1][]{\lstset{language=R, stepnumber=1}}{}
 
 % this is for inline R code
 \newcommand{\ri}[1]{\lstinline{#1}}  %% Short for 'R inline'

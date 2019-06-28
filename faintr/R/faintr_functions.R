@@ -227,11 +227,24 @@ extract_posterior_cell_means = function(model) {
     by = "cell"
   ) 
     
+  ## transform samples for cells to tidy tibble
+  
+  t = expand.grid(factors)
+  for (f in length(factors)) {
+    t[,f] = as.character(t[,f])
+  }
+  
+  for (i in 1:nrow(t)) {
+    paste0(names(t[1,]),as.character(c("yo", "hu")))
+    select(predictor_values, paste0(factor_name, ))
+  }
+  
+  
   ## output
   
   return(
     list(
-      predictor_values =predictor_values,
+      predictor_values = predictor_values,
       all_cells_compared = all_cells_compared,
       cell_summary = cell_summary
     )
