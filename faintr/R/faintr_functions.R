@@ -226,19 +226,6 @@ extract_posterior_cell_means = function(model) {
     map_df(predictor_values, function(x){HDInterval::hdi(x)[2]}) %>% gather(key = "cell", value = "upper 95% CI"),
     by = "cell"
   ) 
-    
-  ## transform samples for cells to tidy tibble
-  
-  t = expand.grid(factors)
-  for (f in length(factors)) {
-    t[,f] = as.character(t[,f])
-  }
-  
-  for (i in 1:nrow(t)) {
-    paste0(names(t[1,]),as.character(c("yo", "hu")))
-    select(predictor_values, paste0(factor_name, ))
-  }
-  
   
   ## output
   
