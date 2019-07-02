@@ -608,7 +608,7 @@ Now, here comes a nice gadget. Based on the samples obtained for \texttt{context
 \begin{lstlisting}[language=R]
 # proportion of negative samples for parameter b_contextpol
 # this number approximates P(b_contextpol < 0 | model, data)
-mean(post_samples_FE$b_contextpol < 0)
+mean(post_samples_FE$b_contextpol < 0) 
 >0.99375
 \end{lstlisting}
 \end{minipage}
@@ -1030,6 +1030,126 @@ because the simpler model assumed independence where there was none and therefor
 underestimated the variance. Speech is a messy aspect of human behavior. Speakers differ quite
 drastically in their pronunciation and even the same speaker varies a lot in how they speak.
 This variation can evoke false positives when unaccounted for.
+
+\section{Model comparison}
+
+\marginnote{This section is a kind of excursion into more foundational matters. You
+  \emph{could} possibly skip it, but we \emph{strongly recommend} that you read it at some
+  point, and possibly even follow up on some of the references if you want to pursue the
+  Bayesian road further.}
+
+There are three major things we can do with models and data in Bayesian data analysis:
+
+\begin{enumerate}
+\item \textbf{parameter inference}: we consider one model, (tentatively) assume that this model is true, and ask
+  what we should believe about its parameters, given the data;
+\item \textbf{model criticism}: we consider one model and ask whether this model is sufficient
+  to deal with the data at hand; we can do that before showing the model any of the data, or
+  after feeding it with some or all of the data;
+\item \textbf{model comparison} we consider at least two models, and we ask which of these models (plural!) is better at
+  explaining the data.
+\end{enumerate}
+
+So far, we have dealt with parameter inference and model criticism. In fact, we used parameter
+inference to test our research hypotheses, and we used model criticism as a sanity check to
+make sure that the one model we used for parameter inference / hypothesis testing was adequate.
+
+This tutorial focused on parameter estimation for simplicity and parallelism with the
+frequentist approach to hypothesis testing via regression modeling, where we look for
+$p$-values that indicate that particular regression coefficients are significantly different
+from 0 --- clearly an inference-based approach like the one we pursuit so far.
+%
+\marginnote{An apparent exception is
+the use of model comparison in hierarchical regression models, for which the calculation of
+$p$-values is, let's say, difficult.} 
+%
+But if you dive deeper into Bayesian data analysis, you will quickly discover that there are
+very good arguments
+\citep[e.g.][]{VandekerckhoveMatzke2015:Model-Compariso}
+to prefer an approach to hypothesis testing based on Bayesian model comparison in terms of
+so-called \textbf{Bayes factors}
+\citep{Jeffreys1961:Theory-of-Proba,KassRaftery1995:Bayes-Factors}.
+%
+Unfortunately, Bayes factors can be difficult to compute in the general case.
+%
+Fortunately, there are practical solutions for recurring special cases (e.g., testing
+point-valued hypotheses; see \citet{WagenmakersLodewyckx2010:Bayesian-hypoth}), and smart
+algorithms exist and can deliver good results in reasonably short time
+\citep[e.g.][]{GronauSarafoglou2017:A-tutorial-on-b}.
+% 
+What is even better, when we are not testing a hypothesis about a single point value of a
+parameter (like in usual frequentist null-hypothesis significance testing), but rather research
+hypotheses that are ordinal statements (such as: ``average pitch is higher for female speakers
+than for male speakers''), we can do model comparison in terms of parameter inference.
+%
+Here is how.
+
+To use Bayesian model comparisong for hypothesis testing, we express hypotheses as Bayesian
+models.
+%
+Let $M_1$ be a model that expresses our research hypothesis (e.g., $\beta_{\text{gender}} <
+0$), and let $M_0$ capture the alternative (maybe null) hypothesis (e.g.,
+$\beta_{\text{gender}} \geq 0$).
+%
+% A model $M_i$ comprises a prior $P(\theta \mid M_i)$ over parameter vectors $\theta$ and a likelihood function $P(D
+% \mid \theta, M_i)$.
+%
+We are ultimately interested in the posterior odds $\nicefrac{P(M_1
+  \mid D)}{P(M_0 \mid D)}$, i.e., the ratio of subjective credence in these models, after
+having updated our beliefs in the light of data $D$.
+%
+We can use Bayes rule to express the posterior odds in terms of the prior odds
+$\nicefrac{P(M_1)}{P(M_0)}$ and the Bayes factor $\nicefrac{P(D \mid M_1)}{P(D \mid M_0)}$:
+%
+\begin{align*}
+  \frac{P(M_1 \mid D)}{P(M_0 \mid D)} = \frac{P(M_1)}{P(M_0)} \ \frac{P(D \mid M_1)}{P(D \mid M_0)}
+\end{align*}
+%
+Consequently, the Bayes factor is the factor by which we adjust our prior odds when
+learning $D$ to obtain posterior odds. A Bayes factor of at least 10 is often interpreted as
+substantial evidence in favor of $M_1$ over $M_0$.
+
+We can use parameter inference to approximate a Bayes factor for our research hypothesis $H_1$
+(higher pitch for female speakers than for male speakers) by using \emph{nested model
+  comparison}, in particular the so-called \emph{encompassing priors} method
+\citep{KlugkistKato2005:Bayesian-model-}. The regression model we assumed in this tutorial has
+the parameter of interest $\theta$ (actually it's $\beta_{\text{gernder}}$) take on values
+smaller or bigger than 0. The regression model is the encompassing model $M_e$ which contains
+both of the more specific models $M_1$ as $M_0$. We can construct a model $M_1$ as the special
+case of $M_e$, with priors updated with the information that $\theta < 0$; likewise $M_0$ is
+exactly like $M_e$ but with $M_e$'s priors updated with $\theta \geq 0$. For models nested in
+this way, we can calculate Bayes factors for comparison against the encompassing model,
+following \citet{KlugkistKato2005:Bayesian-model-}, using just parameter inference in the
+encompassing model,as follows:
+
+\begin{align*}
+  \frac{P(D \mid M_1)}{P(D \mid M_e)} = \frac{P(\theta < 0 \mid D, M_e)}{P(\theta < 0 \mid M_e)} && \text{ and} &&
+  \frac{P(D \mid M_o)}{P(D \mid M_e)} = \frac{P(\theta \geq 0 \mid D, M_e)}{P(\theta \geq 0 \mid M_e)} 
+\end{align*}
+
+It follows that we can express the Bayes factor in favor of our research hypothesis over its
+negation as:
+
+\begin{align*}
+   \frac{P(D \mid M_1)}{P(D \mid M_0)} =  \frac{P(\theta < 0 \mid D, M_e)}{P(\theta \geq 0 \mid D, M_e)} \ \frac{P(\theta \geq 0 \mid M_e)}{P(\theta < 0 \mid M_e)}
+\end{align*}
+
+For the model which specified priors for $\beta_{\text{pol}}$, we can directly express a Bayes
+factor in favor of our hypothesis. The priors were defined so that $\beta_{\text{pol}}$ is the
+median, so that $ \nicefrac{P(\theta \geq 0 \mid M_e)}{P(\theta < 0 \mid M_e)} = 1$. We have
+already calculated $P(\theta < 0 \mid D, M_e)$ as approximately $0.951$, and so we obtain a
+Bayes factor of $\nicefrac{0.951}{1-0.951} \approx 19$ in favor of our research hypothesis ---
+quite substantial evidence.
+
+The upshot of this discussion is that, under specific circumstances, we can use parameter
+estimation in Bayesian regression analysis to also approximate Bayes factors. If our hypothesis
+is directional, i.e., a statement of the form $\theta > x_0$, and if the prior in the
+regression model assigns equal probability to $\theta > x_0$ and $\theta \leq x_0$, then the
+Bayes factor in favor of the nested model which assumes $\theta > x_0$ is given by the posterior
+odds, which we derive immediately from parameter inference, just like we did above.
+
+
+
 
 \section{Reporting the results}
 How do we report our analysis and our results in a Bayesian framework? There is no gold
