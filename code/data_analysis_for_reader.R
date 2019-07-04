@@ -187,21 +187,8 @@ model_MaxRE = brm(formula = pitch ~ gender * context +
 # Extract posterior beliefs about our hypotheses
 get_posterior_beliefs_about_hypotheses(model_MaxRE)
 
-##################################
-## comparing selected hypotheses
-##################################
-
-get_posterior_beliefs_about_hypotheses(model_FE)
-get_posterior_beliefs_about_hypotheses(model_interceptOnly)
-get_posterior_beliefs_about_hypotheses(model_MaxRE)
-
-#################################
-## posteriors of cell differences
-## for final data report
-#################################
-
 compare_groups(
-  model = model_MaxRE, 
+  model = model_FE, 
   lower = list(gender = "F", context = "pol"), 
   higher = list(gender = "F", context = "inf")
 )
@@ -210,10 +197,4 @@ compare_groups(
   model = model_MaxRE, 
   lower = list(gender = "M", context = "pol"), 
   higher = list(gender = "M", context = "inf")
-)
-
-compare_groups(
-  model = model_MaxRE, 
-  lower = list(gender = "M", context = "inf"),
-  higher = list(gender = "F", context = "pol")
 )
