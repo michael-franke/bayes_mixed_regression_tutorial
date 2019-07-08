@@ -110,7 +110,7 @@
 \maketitle
 
 \begin{abstract}
-  \noindent Generalized linear mixed models are very well-rounded and handy tools for statistical inference. Bayesian approaches to applying these models have recently become increasingly popular. This tutorial provides an accessible, non-technical introduction to the use and feel of Bayesian mixed effects regression models. The focus is on data from a factorial-design experiment. \\
+  \noindent Generalized linear mixed models are handy tools for statistical inference, and Bayesian approaches to applying these are increasingly popular. This tutorial provides an accessible, non-technical introduction to the use and feel of Bayesian mixed effects regression models. The focus is on data from a factorial-design experiment. \\
   
   \medskip
   
@@ -119,16 +119,16 @@
 
 \section{Motivation \& intended audience}
 
-This tutorial provides a very basic introduction to Bayesian regression modeling using R \citep{Manual}. We wrote this tutorial with a particular reader in mind. If you have used R before and if you have a basic understanding of linear regression, and now you want to find out what a Bayesian approach has to offer, this tutorial is for you. In comparison to other introductions \citep[e.g.][]{SorensenHohensteinb2016:Bayesian-linear}, this tutorial remains very conceptual. We don’t want to ``sell Bayes'' to you, and we do not want to scare you away with mathematical details. We just want to give you an impression of how a Bayesian regression analysis looks and feels. So no reason to be afraid! But also: no reason to be bored, because we \emph{will} cover all the essential concepts and we \emph{will} explain how to run and interpret the output of a Bayesian regression analysis using the wonderful R package \texttt{brms} written by Paul \citet{buerkner2016brms}.
+This tutorial provides a very basic introduction to Bayesian regression modeling using R \citep{Manual}. We wrote this tutorial with a particular reader in mind. If you have used R before and if you have a basic understanding of linear regression, and now you want to find out what a Bayesian approach has to offer, this tutorial is for you. In comparison to other introductions \citep[e.g.][]{SorensenHohensteinb2016:Bayesian-linear}, this tutorial remains very conceptual. We don’t want to ``sell Bayes'' to you, and we do not want to scare you away with mathematical details. We just want to give you an impression of how a Bayesian regression analysis looks and feels. The tutorial covers the essential concepts and explains how to run and interpret the output of a Bayesian regression analysis using the wonderful R package \texttt{brms} written by Paul \citet{buerkner2016brms}.
 
 
 \marginnote{This tutorial contains text boxes (with a gray background) which contain additional background information on some topics.
 The information is sometimes a bit technical but never absolutely necessary for understanding the main ideas.
 So feel free to read or skip any of the text boxes to suit your needs.}
 
-If you don’t have any experience with regression modeling, you will probably still be able to follow, but you might also want to consider doing a crash course. To bring you up to speed, we recommend the excellent two-part tutorial by Bodo \citet{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~frequentist--- paradigm. In a sense, this tutorial could be considered part three of Bodo's nice and lofty introduction. We will for example use the same data set.
+If you don’t have any experience with regression modeling, you will probably still be able to follow, but you might also want to consider doing a crash course. To bring you up to speed, we recommend the excellent two-part tutorial by Bodo \citet{Winter2013:Linear-models-a} on mixed effects regression in a non-Bayesian ---a.k.a.~frequentist--- paradigm. In a sense, this tutorial could be considered part three of the series started by Winter. We will for example use the same data set.
 
-To follow this tutorial, you should have R installed on your computer (\url{https://www.r-project.org}).
+To actively follow this tutorial, you should have R installed on your computer (\url{https://www.r-project.org}).
 Unless you already have a favorite editor for tinkering with R scripts, we recommend to try out RStudio (\url{https://www.rstudio.com}).
 You will also need some packages,
 %\marginnote[-1cm]{Remember that you can install a package called \texttt{XYZ} %with the command \texttt{install.packages("XYZ")}.}
@@ -163,7 +163,7 @@ set.seed(1702)
 \section{Data, research questions \& hypotheses}
 \label{sec:data}
 
-As experimental researchers we collect data to answer questions of interest about how nature works. This tutorial looks at a data set relevant for investigating whether voice pitch differs across female and male speakers, and whether it differs across social contexts (say: informal and polite contexts).
+This tutorial looks at a data set relevant for investigating whether voice pitch differs across female and male speakers, and whether it differs across social contexts (say: informal and polite contexts).
 To load the data into your R environment, run the following code:
 %
 \marginnote{The data is originally from research
@@ -183,9 +183,6 @@ politedata = read_csv("https://raw.githubusercontent.com/michael-franke/bayes_mi
 
 \noindent Type \ri{head(politedata)} and you should see the first lines of the
 data:
-%
-\marginnote{Here, we show only part of the output that you can see when executing this 
-command.}
 
 \bigskip
 
@@ -203,16 +200,15 @@ command.}
 \end{rc}
 \end{minipage}
 
-
-\medskip
+\vspace*{-0.5cm}
 
 \noindent This data set contains information about different subjects, with an anonymous identifier stored in variable \texttt{subject}.
-Because voice pitch is highly dependent on gender (i.e. there are anatomical differences between women and men that affect voice pitch), the variable \texttt{gender} stored whether a subject is F(emale) or M(ale).
+Because voice pitch is highly dependent on gender (i.e. there are anatomical differences between women and men that affect voice pitch), the variable \texttt{gender} stores whether a subject is F(emale) or M(ale).
 Subjects produced different sentences (stored in the variable \texttt{sentence}), and the experiment manipulated whether the sentence was produced in a polite or an informal context, indicated by the variable \texttt{context}. Crucially, each row contains a measurement of pitch in Hz stored in the variable \texttt{pitch}.
 
 Often, we are interested in an \textbf{outcome variable} (also called \textbf{response} / \textbf{dependent variable}, here \texttt{pitch}). We want to know how this outcome variable behaves
 across different conditions or groups, i.e. \textbf{predictors} (also called \textbf{independent variable}, here \texttt{gender} and \texttt{context}). Before our data collection,
-we might have formulated concrete predictions about the relationship between the outcome and predictors. Let's assume previous research suggests that pitch is an indicator of politeness. Informal speech is accompanied by higher pitch in both men and women. Because the phyisiological difference between men and women is very large, we also assume that even in informal contexts, men still have lower pitch than women in polite contexts. We state following hypotheses:
+we might have formulated concrete predictions about the relationship between the outcome and predictors. Let's assume previous research suggests that pitch is an indicator of politeness. Informal speech is accompanied by higher pitch in both men and women. Since the physiological differences between men and women might affect pitch very strongly, we also speculate that even in informal contexts, men still have lower pitch than women in polite contexts. We state following hypotheses:
 % \marginnote{Notice that our hypotheses are formulated explicitly as comparisons of
 %   means / averages. The statistical model we will use indeed compares means, and this is common
 %   practice, albeit a particular assumption worth highlighting. Commonly, this assumption is implicit: For example we could simply formulate H1 as something like
@@ -250,14 +246,15 @@ slightly higher than purple points).
 \end{figure}
 
 
-Looking at the plot, we might want to shout: ``The data confirm all of our
-hypotheses!'' But, of course, we need to be more careful. As Bayesians, we would like to
-translate the data into an expression of \textbf{evidence}: does the data provide evidence for
-our research hypotheses? Or are the visually observable differences too meager? -- Also, notice that
-there is quite a lot of variability between different sentences (the semi-transparent points in Figure 1).
-For example, some values from the informal condition for female speakers (orange points in left
-column) are lower than their corresponding polite counterparts. Similarly, there could be differences between individual speakers. What we want are precise
-estimates of potential differences between conditions. We also want a measure of how confident we can be in these estimates.
+Looking at the plot, we might want to shout: ``The data confirm all of our hypotheses!'' But,
+of course, we need to be more careful. As Bayesians, we would like to translate the data into
+an expression of \textbf{evidence}: does the data provide evidence for our research hypotheses?
+-- Also, notice that there is quite a lot of variability between different sentences (the
+semi-transparent points in Figure 1). For example, some values from the informal condition for
+female speakers (orange points in left column) are lower than their corresponding polite
+counterparts. Similarly, there could be differences between individual speakers. What we want
+are precise estimates of potential differences between conditions. We also want a measure of
+how confident we can be in these estimates.
 
 \begin{figure}[h]
   \centering
@@ -282,12 +279,12 @@ observed pitch values for each cell.
 Our hypotheses can be related to the comparison between some of these cell-based means.
 H1 makes a statement about the comparison between C(ells) 1 and 2 (the context effect for female speakers); H2 makes a statement about C3 and C4 (the context effect for male speakers); and H3 makes a statement about C2 and C3 (the difference between informal male speakers and polite female speakers).
 
-One way of testing our hypotheses using a Bayesian approach, is to ask whether the relevant differences between cell means are \textit{credibly different from zero}. This is jargon for asking whether, given the observed data, we should believe that the relevant cell means are different from each other. The fact that we are now in Bayesian territory should hit us when we hear the phrases ``credibly different'' and ``should believe''. Bayesian thinking is about updating beliefs based on observations. And we express our beliefs as probability distributions. 
-At first, this may appear scary or technically involved. But at the end of the day, the intuitions captured by this approach are arguably very natural, and perhaps even easier to understand than the reasoning underlying other approaches to statistical inference. Let's walk through Bayesian approach step-by-step.
-
-First, let's look at the \textbf{regression model} we want to use.
+Before going into data analysis, let's look at the \textbf{regression model} we want to use.
+%
+\marginnote{The setup of this (non-hierarchical) regression model is not specific to a Bayesian approach. You would use the exact same for a frequentist analysis.}
+%
 Our regression model assumes that pitch values observed in each cell are
-sampled from a population that is normally distributed, where each cell $c_i$ has its own mean $\mu_i$. We are interested in the probability of one cell mean being larger than another cell mean, i.e., the probability that $\mu_i > \mu_j$. Put differently, we are interested in the probability that the difference between $\mu_i$ and $\mu_j$ is larger than zero: $\mu_i - \mu_j > 0$.
+sampled from a population that is normally distributed around a mean, where each cell $c_i$ has its own mean $\mu_i$. We are interested in the probability of one cell mean being larger than another cell mean, i.e., the probability that $\mu_i > \mu_j$. Put differently, we are interested in the probability that the difference between $\mu_i$ and $\mu_j$ is larger than zero: $\mu_i - \mu_j > 0$.
 %and since, let's say, it is easier to test whether a value is bigger than zero, we can encode the cell means like in Figure~\ref{fig:coefficients_table}. \tr{I cannot see this in the figure. The figure merely displays how we calculate the individual cell mean in a regression}
 Figure~\ref{fig:coefficients_table} illustrates the encoding scheme of our cell means in terms of a regression analysis. It assumes that
 there is a \textbf{reference level} for each factor. Here it is the level \texttt{female} for
@@ -312,55 +309,21 @@ or both (C4). The $\beta$ terms are also called \textbf{coefficients}. They are 
     \label{fig:coefficients_table}
 \end{figure}
 
-\begin{InfoBox}[]
-\centering
-\colorbox{mygray}{\centering
-  \begin{minipage}{1.0\textwidth}
-
-    \emph{Bayesian inference: priors, likelihoods and posteriors}
-    \medskip
-
-    Jones is a rational scientist and become recently interested in speech patterns. She has read that women have higher pitch than men, but she is not
-    sure. She is determined to find out. How? Well, naturally, by rationally updating her
-    \emph{prior beliefs} about the pitch differences between men and women to obtain a new \emph{posterior belief} based on
-    empirical observation. Central to this updating is Jones'
-    \emph{likelihood function}, which encodes how likely any pitch difference may have generated the observed data.
-    
-    \paragraph{Prior beliefs.} Jones is a roll model scientist and starts from the prior assumption that her intuition is wrong. She beliefs that men and women have the same voice pitch or in other words that the difference between male and female voice pitch is, on average, zero. Obviously she knows that nature is a messy beast, so she also departs from the assumption that this average difference has a standard deviation of say 50.
-
-    \paragraph{Likelihood.} Let's assume that Jones takes a microphone and records five  men and five women on the street. She measures their pitch values. Based on these data she can estimate the likelihood function (or simply likelihood). The likelihood is basically a function that maximizes the probability of getting an observed distribution.
-
-    \paragraph{Posterior beliefs.} Jones' measurements show a mean difference in pitch of 100 Hz and a standard deviation of 70 Hz. Her empirical observations suggest women have higher pitch values than men. Based on these observations, should she
-still stick to her prior, i.e. believe that there is no difference between male and female pitch? By \emph{Bayes rule} her posterior beliefs are proportional to the product of her prior and the likelihood of her empirical observations.
-
-%\begin{figure}[]
-%  \centering
-%    \includegraphics[width = 0.8\textwidth]{pics/prior_post.png}
-%    \caption{Possible relationship between prior, likelihood, and posterior. After observing the data, Jones  updates her prior and shifts her posterior beliefs towards the right.}
-%    \label{fig:prior_post}
-%\end{figure}
-
-    Jones' posterior belief in the voice pitch difference between men and women has shifted. After making her observation, rational Jones has updated her initial belief and is now more certain that there actually is a difference between men and women.
-    
-  \end{minipage} \par
-  } \par
-  \begin{center}
-    Info Box 1: Priors, likelihood and posteriors in Bayesian inference.
-  \end{center}
-  % \caption{\label{InfoBox:asymptotic_CIs} Here is my caption}  
-\end{InfoBox}
-
-
 \section{A Bayesian analysis of a (fixed effects) regression model}
 
-Having spelled out a model like the above, a Bayesian analysis asks: What are credible values for the model's parameters, i.e., what should a rational reasoner believe about the values of the coefficients $\beta_0$, $\beta_{\text{pol}}$, $\beta_{\text{male}}$ and $\beta_{\text{pol\&male}}$ given the person's initial beliefs and the data, assuming that the model is true?
+Having spelled out a model like the above, one way of testing our hypotheses in a Bayesian setting uses so-called \textbf{parameter inference}.
+%
+\marginnote[-2cm]{Another approach to testing hypotheses in a Bayesian setting is to use model comparison. This tutorial focuses on parameter estimation only for parallelism with the standard frequentist practice. We will briefly touch on model comparison at the end.}
+%
+Bayesian parameter inference asks: What should we believe about the values of the coefficients $\beta_0$, $\beta_{\text{pol}}$, $\beta_{\text{male}}$ and $\beta_{\text{pol\&male}}$ given the data, the model and whatever we believed before having seen the data?
 %
 \marginnote{Info Box~1 provides some background on Bayesian reasoning.}
 %
+
 Formally, if $\theta$ is a vector of parameter values of the model, we are interested in the \textbf{posterior distribution} $P(\theta \mid D)$, which assigns a non-negative number to each tuple of parameters in proportion to how likely that tuple is.
 From a Bayesian point of view, the model consists of a \textbf{likelihood function} $P(D \mid \theta)$, which specifies how likely an observation of data $D$ is for each value of parameters $\theta$, and a \textbf{prior distribution} $P(\theta)$, which specifies how likely we (the rational reasoner) believe each tuple of parameter values is in the first place.
 %
-\marginnote{Supplying a \textbf{prior}, really just \textit{any} prior, is important to get a
+\marginnote[-2cm]{Supplying a \textbf{prior}, really just \textit{any} prior, is important to get a
   Bayesian analysis off the ground; a circumstance which is discussed controversially. For many
   practical purposes, however, the precise choice of prior is not decisive and tools like the
   \texttt{brms} package which we will use here will default to generically reasonable choices
@@ -371,6 +334,47 @@ With these ingredients, we can compute the posterior distribution by Bayes rule,
   P(\theta \mid D) = \frac{P(\theta) \ P(D \mid \theta)}{ \int P(\theta') \ P(D \mid
   \theta') \textrm{d}\theta'}
 \end{eqnarray*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Info Box 1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{InfoBox}[]
+\centering
+\colorbox{mygray}{\centering
+  \begin{minipage}{1.0\textwidth}
+
+    \emph{Bayesian inference: priors, likelihoods and posteriors}
+    \medskip
+
+    Smith claims that the mean pitch frequency of female Korean speakers is 130\,Hz. Miller claims that it is 160\,Hz. Jones is a rational scientist, and she wants to use data to inform her beliefs about whose theory is more likely correct. She does this by updating her prior beliefs via a likelihood function to obtain posterior beliefs.    
+   
+    \paragraph{Prior beliefs.} Jones' prior beliefs encode what she believes at the outset. Her prior belief assigns probability to each two hypotheses, namely: H1, that the mean pitch of female Korean speakers is $\mu = \mu_1 = 130$ and, H2, that it is $\mu = \mu_2 = 160$. Let's assume that Jones initially believes that H1 is nine times more likely than H2 (for whatever reason), so that $P(\mu = \mu_1) = 0.9$ and, consequently, $P(\mu = \mu_2) = 0.1$.
+
+    \paragraph{Data.} Jones has recorded pitch frequencies of five speakers: \\ $D = \langle 140, 145, 150, 155, 160 \rangle$.
+    
+    \paragraph{Likelihood.} The likelihood function determines how likely any potential
+    observation is. It can depend on parameters, like the unknown $\mu$. In the case at hand,
+    let's assume that the data is generated by a normal distribution, with mean $\mu$ and a
+    fixed/known standard deviation $\sigma = 10$. The likelihood of the data is then $P(D \mid
+    \mu) = \prod_{i} \mathcal{N}(d_i, \mu, \sigma)$. This gives us $P(D \mid \mu_1) \approx
+    1.31e-12$ and $P(D \mid \mu_2) \approx 2.38-09$.
+
+     \paragraph{Posterior beliefs.} The data is more likely under the second hypothesis ($\mu = 160$), but Jones initially considered the first more likely. Bayesian inference combines prior beliefs and likelihood. By \emph{Bayes rule} we compute the posterior probability of $\mu_1$ to be:
+     \begin{align*}
+       P(\mu_1 \mid D) = \frac{P(\mu_1) \ P(D \mid \mu_1)}{ \sum_{i =1}^2 P(\mu_i) \ P(D \mid \mu_i)} = \frac{0.9 \cdot 1.31e-12}{ 0.9 \cdot 1.31e-12 + 0.1 \cdot 2.38-09} \approx 0.005
+     \end{align*}
+     The data has very substantially changes Jones' beliefs: after rational belief update, she now considers H2 almost 200 times more likely than H1.
+     
+  \end{minipage} \par
+  } \par
+  \begin{center}
+    Info Box 1: Priors, likelihood and posteriors in Bayesian inference.
+  \end{center}
+  % \caption{\label{InfoBox:asymptotic_CIs} Here is my caption}  
+\end{InfoBox}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 The R package \texttt{brms} \citep{buerkner2016brms} makes it easy to run Bayesian regression models. It uses a very similar formula syntax as related packages for regression analysis. In our case, we want to regress the dependent variable \texttt{pitch} against the independent variables \texttt{gender} and \texttt{context} and their two-way interaction. This model is expressed by the formula:
 
