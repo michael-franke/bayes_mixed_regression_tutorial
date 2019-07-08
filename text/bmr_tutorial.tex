@@ -429,7 +429,7 @@ Info Box~2.
       P(\theta \mid D) = \frac{P(\theta) \ P(D \mid \theta)}{ \int P(\theta') \ P(D \mid
       \theta') \textrm{d}\theta'}
     \end{eqnarray*}
-    If $\theta$ is a large vector of parameters (e.g., in a hierarchical regression model), it
+    If $\theta$ is a high-dimensional vector of parameters (e.g., in a hierarchical regression model), it
     might be quite impossible to compute the integral in the denominator. Fortunately, clever
     algorithms like MCMC allow us to draw \textbf{representative samples} from the
     posterior distribution without having to calculate the integral-of-doom.
@@ -442,24 +442,24 @@ Info Box~2.
     were to jump infinitely often, we will have visited any particular tuple of parameter
     values with a relative frequency that corresponds exactly to its posterior probability. So
     these algorithms are guaranteed to give us representative samples, given unlimited time to
-    jump around. Since we cannot wait forever, we make sure that the samples we have are good
-    enough by some diagnostic tools.
+    jump around.
 
     \medskip
     
-    To ensure the trustworthiness of our samples, we routinely run several \textbf{chains}, i.e., we
-    start the ``jumping around'' procedure at different random initial starting points and check whether
-    the different chains reached a similar outcome. We do this by plotting (so-called
-    \emph{trace plots}) and the \textbf{$\hat{R}$-value} which is included in the \texttt{brm}
-    model summary. An $\hat{R}$-statistic compares the variance of the samples within each
-    chain to that from all samples across chains. If the $\hat{R}$-value is
-    below 1.1, we commonly assume that the chains have converged sufficiently.
+    To ensure the trustworthiness of a finite set of samples, we routinely run several
+    \textbf{chains}, i.e., we start the ``jumping around'' procedure at different random
+    initial starting points and check whether the different chains reached a similar outcome.
+    We do this by plotting (so-called \emph{trace plots}) and the \textbf{$\hat{R}$-value}
+    which is included in the \texttt{brm} model summary. An $\hat{R}$-statistic compares the
+    variance of the samples within each chain to that from all samples across chains. If the
+    $\hat{R}$-value is below 1.1, we commonly assume that the chains have converged
+    sufficiently.
 
     \medskip
   
     In practice, the \texttt{brm} model summary and the messages during the fitting process will inform you about potential problems, and will frequently offer good advice for how to solve the issue. 
    For example, sometimes the different chains do not converge on sufficiently similar results. 
-    One quick and simple solution to these ``convergence'' issues is increasing the number of samples (specifying the option \texttt{iter} in the \texttt{brm} function call).
+    One quick and simple solution to these ``convergence issues'' is increasing the number of samples (specifying the option \texttt{iter} in the \texttt{brm} function call).
    
   \end{minipage} \par
   } \par
@@ -526,16 +526,17 @@ More about the information given in the columns can be found in Info Box~3.
     Lines 6--7 of the summary of \texttt{model\_FE} tell us that we collected a total of 4000 samples from the posterior distribution. These came from four chains, each running for 2000 iterations, but discarding the first 1000 samples as \textbf{warm up}, since the initial starting point might be quite ``unrepresentative'' (see also Info Box~2).
     
     From the table in lines 9--14, the column \emph{Estimate} gives the mean of the obtained
-    samples, thereby approximating the mean of the posterior distribution (beliefs we should
-    hold) about each parameter. For example, the parameter \texttt{Intercept} is estimated to
-    have a mean of about $261$, which (here) coincides with the mean of the data points in cell
-    1, as shown in Figure~\ref{fig:BasicPlotData_table}. \emph{Est.Error} is the estimation
-    error, an indication of the certainty we should have about the whole inference procedure.
-    The columns \texttt{l-95\% CI} and \texttt{u-95\% CI} give the lower and upper bound of the
-    95\% credible interval for each parameter, as discussed in the main text. The column
+    samples, thereby approximating the mean of the (marginal) posterior distribution for each
+    parameter. For example, the parameter \texttt{Intercept} is estimated to have a mean of
+    about $261$, which (here) coincides with the mean of the data points in cell 1, as shown in
+    Figure~\ref{fig:BasicPlotData_table}. \emph{Est.Error} is the estimation error, an
+    indication of the certainty we should have about the whole inference procedure. The columns
+    \texttt{l-95\% CI} and \texttt{u-95\% CI} give the lower and upper bound of the 95\%
+    credible interval for each parameter, as discussed in the main text. The column
     \texttt{Eff.Sample}, for efficient samples, gives us a rough measure of how many of all the
     samples we took (4000 in our case) are contributing non-redundant information to our
-    estimation. The higher this number, the better. Finally, we get the \texttt{Rhat} column with the $\hat{R}$-values for each parameter (see Info Box~2).
+    estimation. The higher this number, the better. Finally, we get the \texttt{Rhat} column
+    with the $\hat{R}$-values for each parameter (see Info Box~2).
     
   \end{minipage} \par
   } \par
