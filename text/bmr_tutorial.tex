@@ -135,9 +135,7 @@ You will also need some packages,
 which you can import with the following code:
 \marginnote[-1cm]{All code and data for this tutorial is also
   available for download here:
-  \url{https://github.com/michael-franke/bayes_mixed_regression_tutorial}}
-
-\bigskip
+  \url{https://tinyurl.com/bmr-tutorial}}
 
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
@@ -160,6 +158,8 @@ set.seed(1702)
 \end{lstlisting}
 \end{minipage}
 
+\vspace{-0.5cm}
+
 \section{Data, research questions \& hypotheses}
 \label{sec:data}
 
@@ -169,8 +169,6 @@ To load the data into your R environment, run the following code:
 \marginnote{The data is originally from research
 presented by \citet{WinterGrawunder2012:The-Phonetic-Pr}. It is used in the tutorials by \citet{Winter2013:Linear-models-a} as well, but here we `massaged' the data a bit, i.e., we renamed variables and removed a line with missing data.}
 %
-
-\medskip
 
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
@@ -183,8 +181,6 @@ politedata = read_csv("https://tinyurl.com/polite-data")
 
 \noindent Type \ri{head(politedata)} and you should see the first lines of the
 data:
-
-\bigskip
 
 \begin{minipage}[]{\textwidth}
 \begin{rc}
@@ -200,8 +196,8 @@ data:
 \end{rc}
 \end{minipage}
 
+\vspace{-0.5cm}
 
-\medskip
 
 \noindent This data set contains information about different subjects, with an anonymous identifier stored in variable \texttt{subject}.
 Because voice pitch is highly dependent on gender (i.e. there are anatomical differences between women and men that affect voice pitch), the variable \texttt{gender} stores whether a subject is F(emale) or M(ale).
@@ -259,7 +255,7 @@ how confident we can be in these estimates.
 
 \begin{figure}[h]
   \centering
-    \includegraphics[angle=270, width = 1\textwidth]{pics/table_mean_hypotheses.pdf}
+    \includegraphics[width = \textwidth]{pics/table_mean_hypotheses_cropped.png}
     \caption{Coefficients of a dummy-coded regression model for the factorial $2 \times 2$ design, together with research hypotheses as statements about ordinal relations between cell means.}
     \label{fig:BasicPlotData_table}
 \end{figure}
@@ -385,7 +381,9 @@ With these ingredients, we can compute the posterior distribution by Bayes rule,
 
     Smith claims that the mean pitch frequency of female Korean speakers is 130\,Hz. Miller claims that it is 160\,Hz. Jones is a rational scientist, and she wants to use data to inform her beliefs about whose theory is more likely correct. She does this by updating her prior beliefs via a likelihood function to obtain posterior beliefs.    
    
-    \paragraph{Prior beliefs.} Jones' prior beliefs encode what she believes at the outset. Her prior belief assigns probability to each two hypotheses, namely: H1, that the mean pitch of female Korean speakers is $\mu = \mu_1 = 130$ and, H2, that it is $\mu = \mu_2 = 160$. Let's assume that Jones initially believes that H1 is nine times more likely than H2 (for whatever reason), so that $P(\mu = \mu_1) = 0.9$ and, consequently, $P(\mu = \mu_2) = 0.1$.
+    \paragraph{Prior beliefs.} Jones' prior beliefs encode what she believes at the outset. She
+    considers two hypotheses, namely: H1, that the mean pitch of female Korean speakers is $\mu
+    = \mu_1 = 130$ and, H2, that it is $\mu = \mu_2 = 160$.  Jones initially believes that H1 is nine times more likely than H2 (for whatever reason), so that $P(\mu = \mu_1) = 0.9$ and, consequently, $P(\mu = \mu_2) = 0.1$.
 
     \paragraph{Data.} Jones has recorded pitch frequencies of five speakers: \\ $D = \langle 140, 145, 150, 155, 160 \rangle$.
     
@@ -396,11 +394,11 @@ With these ingredients, we can compute the posterior distribution by Bayes rule,
     \mu) = \prod_{i} \mathcal{N}(d_i, \mu, \sigma)$. This gives us $P(D \mid \mu_1) \approx
     1.31e-12$ and $P(D \mid \mu_2) \approx 2.38-09$.
 
-     \paragraph{Posterior beliefs.} The data is more likely under the second hypothesis ($\mu = 160$), but Jones initially considered the first more likely. Bayesian inference combines prior beliefs and likelihood. By \emph{Bayes rule} we compute the posterior probability of $\mu_1$ to be:
+     \paragraph{Posterior beliefs.} The data is more likely under the second hypothesis, but Jones initially considered the first more likely. Bayesian inference combines prior beliefs and likelihood. By \emph{Bayes rule} we compute the posterior probability of $\mu_1$ to be:
      \begin{align*}
        P(\mu_1 \mid D) = \frac{P(\mu_1) \ P(D \mid \mu_1)}{ \sum_{i =1}^2 P(\mu_i) \ P(D \mid \mu_i)} = \frac{0.9 \cdot 1.31e-12}{ 0.9 \cdot 1.31e-12 + 0.1 \cdot 2.38-09} \approx 0.005
      \end{align*}
-     The data has very substantially changes Jones' beliefs: after rational belief update, she now considers H2 almost 200 times more likely than H1.
+     The data has very substantially changed Jones' beliefs: after rational belief update, she now considers H2 almost 200 times more likely than H1.
      
   \end{minipage} \par
   } \par
@@ -414,8 +412,6 @@ With these ingredients, we can compute the posterior distribution by Bayes rule,
 
 The R package \texttt{brms} \citep{buerkner2016brms} makes it easy to run Bayesian regression models. It uses a very similar formula syntax as related packages for regression analysis. In our case, we want to regress the dependent variable \texttt{pitch} against the independent variables \texttt{gender} and \texttt{context} and their two-way interaction. This model is expressed by the formula:
 
-\bigskip
-
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
 # formula for (fixed effects) regression model
@@ -423,9 +419,9 @@ formula_FE = pitch ~ gender * context
 \end{lstlisting}
 \end{minipage}
 
-The Bayesian model can then be fitted with the function \texttt{brm} from the \texttt{brms} package. We only need to specify the formula and supply the data. Here, we also set a seed for reproducibility.
+\vspace{-0.5cm}
 
-\bigskip
+The Bayesian model can then be fitted with the function \texttt{brm} from the \texttt{brms} package. We only need to specify the formula and supply the data. Here, we also set a seed for reproducibility.
 
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
@@ -437,6 +433,8 @@ model_FE = brm(
 )
 \end{lstlisting}
 \end{minipage}
+
+\vspace{-0.5cm}
 
 \noindent The \texttt{brms} package uses the probabilistic programming language \texttt{Stan}
 in the background. \texttt{brms} basically translates our formula into Stan code that
@@ -509,8 +507,6 @@ Info Box~2.
 
 You can enter \texttt{model\_FE} in order to get a summary of the model fit. It should look like the following output.
 
-\bigskip
-
 \begin{minipage}[]{1.2\textwidth}
 \begin{rc}
 > model_FE
@@ -537,6 +533,8 @@ is a crude measure of effective sample size, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 \end{rc}
 \end{minipage}
+
+\vspace{-0.5cm}
 
 Lines 2--5 give us information about the model and the data used. Lines 6 and 7 tell us about
 the sampling procedure (see Info Boxes~2 \& 3 for more information). Lines 9--14 contain information about our
@@ -597,8 +595,6 @@ This directly addresses the first research hypothesis. Based on the regression m
 
 But how likely? How likely is it that $\beta_{\text{pol}}$ is smaller than zero? Instead of simply making a binary thumbs-up / thumbs-down decision, it would be even more elegant if we could put a number to it. As Bayesians we fortunately can. To see how this works, let us have a more intimate look at the samples that the \texttt{brm} function returns. We can access the samples of a model fitted with \texttt{brm} with the function \texttt{posterior\_samples}:
 
-\bigskip
-
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
 # extract posterior samples 
@@ -607,9 +603,9 @@ head(post_samples_FE %>% round(1))
 \end{lstlisting}
 \end{minipage}
 
-The output of this could look like this:
+\vspace{-0.5cm}
 
-\bigskip
+The output of this could look like this:
 
 \begin{minipage}[]{1.2\textwidth}
 \begin{rc}
@@ -622,6 +618,8 @@ The output of this could look like this:
 6       284.8    -127.8        -45.8                 39.7  40.6 -427.6
 \end{rc}
 \end{minipage}
+
+\vspace{-0.5cm}
 
 What you see here is the top 6 rows of a data frame with columns for each parameter and 4000 rows, corresponding to each sample of that parameter (so the sampling method has generated 4000 values for each parameter, where each row is a sample from the posterior distribution $P(\theta \mid D)$).
 %
@@ -646,8 +644,6 @@ We also see that all values that receive substantial probability density for \te
 
 Now, here comes a nice gadget. Based on the samples obtained for \texttt{contextpol} ($\beta_{\text{pol}}$), it is very easy to estimate our belief that $\beta_{\text{pol}}$ is indeed negative. We simply have to calculate the proportion of samples that were negative. That's all. For instance, with the code below, which reveals that the posterior probability of the proposition that $\beta_{\text{pol}} < 0$ is about 0.99375. This is very close to 1!  
 
-\bigskip
-
 \begin{minipage}[]{\textwidth}
 \begin{lstlisting}[language=R]
 # proportion of negative samples for parameter b_contextpol
@@ -656,6 +652,8 @@ mean(post_samples_FE$b_contextpol < 0)
 >0.99375
 \end{lstlisting}
 \end{minipage}
+
+\vspace{-0.5cm}
 
 As an interim summary, we have seen how to run a Bayesian regression analysis with the
 \texttt{brms} package and how to deal with its output. We have also seen that the output can be interpreted in very intuitive ways (e.g., ``The probability of H1, given our model, priors, and data, is more than .99'').
@@ -675,8 +673,6 @@ $\beta_{\text{pol}} > \beta_{\text{male}}$. We can approximate the posterior pro
 this is true based on the samples that we obtained for the model in the same general way as
 before, namely:
 
-\bigskip
-
 \begin{minipage}[]{1.1\textwidth}
 \begin{lstlisting}[language=R]
 # proportion of samples for which the mean of cell 2 was larger 
@@ -687,6 +683,8 @@ mean(post_samples_FE$b_contextpol > post_samples_FE$b_genderM)
 >1
 \end{lstlisting}
 \end{minipage}
+
+\vspace{-0.5cm}
 
 Based on the posterior samples, the estimated probability is 1. That's a strong result. If the model was true, (given the data) our certainty that hypothesis 3 is true should be pretty much almost at ceiling.
 
@@ -699,8 +697,6 @@ To make the comparison of pairs of cells even easier and applicable for even big
 % \marginnote[-1.5cm]{The name \texttt{faintr} is indicative of the possibility that the package might break down unexpectedly (we might consider renaming after more extensive testing), but also alludes to ``\emph{fa}ctorial design'' and ``\emph{int}erpretation'' somehow.}
 %
 You can install the package from GitHub with the \texttt{devtools} package, as follows:
-
-\medskip 
 
 \begin{minipage}[]{1.3\textwidth}
 \begin{lstlisting}[language=R]
@@ -715,9 +711,11 @@ library(faintr)
 \end{lstlisting}
 \end{minipage}
 
+\vspace{-0.5cm}
+
 The \texttt{faintr} package provides two main helper functions.
 %
-\marginnote{More on the use of the \texttt{faintr} package can be found here: \url{https://michael-franke.github.io/bayes_mixed_regression_tutorial/faintr/doc/faintr_basics.html}.}
+\marginnote{More on the use of the \texttt{faintr} package can be found here: \url{https://tinyurl.com/faintr-vignette}.}
 %
 The function \texttt{post\_cells()}
 takes as input the fitted regression model (technically: the \texttt{brmsfit} object returned
@@ -759,9 +757,9 @@ compare_groups(
 \end{lstlisting}
 \end{minipage}
 
-\noindent The output looks like this:
+\vspace{-0.5cm}
 
-\medskip
+\noindent The output looks like this:
 
 \begin{minipage}[]{\textwidth}
 \begin{rc}
@@ -774,11 +772,11 @@ P('higher - lower' > 0):  1
 \end{rc}
 \end{minipage}
 
-Using the \texttt{compare\_groups()} function, the source code for this tutorial provides a
-convenience function to produce the posterior probability of the three hypothesis relevant for
-this tutorial: 
+\vspace{-0.5cm}
 
-\medskip
+For the purposes of this tutorial, we gather the output of the \texttt{compare\_groups()} for
+all of the three hypotheses of current interest in a convenience function (which the interested
+reader will find in the source code, but which is of no further theoretical interest here): 
 
 \begin{minipage}[]{\textwidth}
 \begin{rc}
@@ -791,6 +789,8 @@ this tutorial:
 3 Male-informal < Female-polite         1
 \end{rc}
 \end{minipage}
+
+\vspace{-0.5cm}
 
 Based on the currently assumed model and data, we would conclude that hypotheses 1 and 3 are very likely true, but we can also see that there is quite a bit of uncertainty associated with hypothesis 2. The probability of H2 (given the data and the model) is only 0.849. So we should be sufficiently suspicious about H2 until more evidence is available.
 
@@ -826,8 +826,6 @@ of context (on female speakers).
 
 How does that look in practice? --- First of all, you do not have to specify priors by hand; a call to \texttt{brm} will invoke generically defensible priors for the model. For example, to see the priors for the model fit we obtained above, which is stored in \texttt{model\_FE}, we could type and inspect the automatically assumed priors like this:
 
-\medskip
-
 \begin{minipage}[]{\textwidth}
 \begin{rc}
 > prior_summary(model_FE)
@@ -841,7 +839,7 @@ How does that look in practice? --- First of all, you do not have to specify pri
 \end{rc}
 \end{minipage}
 
-\tr{copy paste issue here again (first command)}
+\vspace{-0.5cm}
 
 This table tells us about \texttt{brm} default priors for the model. The intercept was sampled from a Student's $t$ distribution with a mean at 204, a standard deviation of 83 and 3 degrees of freedom. These parameters have been determined for you behind the scenes by looking at the distribution of observed pitch values in the data set.
 \marginnote{Think of a Student's $t$ distribution as a normal distribution with thicker tails, where the thickness is determined by the degrees of freedom.}
@@ -873,21 +871,21 @@ between (female speakers') voice pitch in informal and polite contexts.
   effects of context on male speaker's pitch can be ``accommodated'' by the interaction term.}
 %
 
-
-\bigskip
-
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
 priorFE <- c(
-  # define a skeptical prior for the effect of context on female speakers
+  # define skeptical prior for context effect on female speakers
   prior(normal(0, 10), coef = contextpol)
 )
 \end{lstlisting}
 \end{minipage}
 
-We add this prior to the model as an argument, like so:
+\vspace{-0.5cm}
 
-\bigskip
+
+We add this prior to the model as an argument, like so:
+%
+\marginnote{The argument `control' here allows us to tweak the sampling procedure in order to ensure convergence. \texttt{brms} will encourage you to do so whenever you run into such convergence issues.}
 
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
@@ -900,18 +898,13 @@ model_FE_prior = brm(formula = pitch ~ gender * context,
 \end{lstlisting}
 \end{minipage}
 
-We then calculate the probability for our hypotheses again. \marginnote{The argument `control' here allows us to tweak the sampling procedure in order to ensure convergence. \texttt{brms} will encourage you to do so whenever you run into such convergence issues.}
+\vspace{-0.5cm}
 
-\medskip
-
-\begin{minipage}[]{1\textwidth}
-\begin{lstlisting}[language=R]
-get_posterior_beliefs_about_hypotheses(model_FE_prior)
-\end{lstlisting}
-\end{minipage}
+We then calculate the probability for our hypotheses again.
 
 \begin{minipage}[]{\textwidth}
 \begin{rc}
+> get_posterior_beliefs_about_hypotheses(model_FE_prior)
 # A tibble: 3 x 2
   hypothesis                      probability
   <chr>                                 <dbl>
@@ -920,6 +913,9 @@ get_posterior_beliefs_about_hypotheses(model_FE_prior)
 3 Male-informal < Female-polite         1   
 \end{rc}
 \end{minipage}
+
+\vspace{-0.5cm}
+
 
 \noindent We see that a very skeptical prior about H1 has decreased the posterior probability
 of the hypothesis being true. But nonetheless, the data still suggest that H1's probability is
@@ -932,8 +928,6 @@ So we know now how to extract relevant comparisons to quantify the evidence surr
 
 To illustrate this point, let's run the model from above without the gender predictor. 
 
-\bigskip
-
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
 model_FE_noGender= brm(formula = pitch ~ context,
@@ -945,17 +939,18 @@ model_FE_noGender= brm(formula = pitch ~ context,
 \end{lstlisting}
 \end{minipage}
 
+\vspace{-0.5cm}
+
 We know that a big chunk of variation is accounted for by gender, so this model should be a
 poor fit. Figure~\ref{fig:PPC} shows the output of the following function call:
-
-\bigskip
 
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
 pp_check(model_FE_noGender, nsample = 100)
-pp_check(model_FE_noGender, nsample = 100)
 \end{lstlisting}
 \end{minipage}
+
+\vspace{-0.5cm}
 
 If we run \texttt{pp\_check()} on the model with and without gender (we also specify how many samples we want
 to compare the observations to), we can see that a model without \texttt{gender} (left panel)
@@ -985,15 +980,29 @@ The earlier model which takes \texttt{gender} into account looks quite a bit bet
 
 In our experiment, we measured pitch multiple times for each subject (since they produced
 multiple sentences). We also have multiple measures for each sentence (as each sentence was
-produced by multiple speakers). The observant reader might have already noticed this, but it is probably worth reiterating that linear regression models make the crucial
-assumption that all samples (data points) are independent of each other. But if two data points are produced by the same participant,
-then observations will not be
-independent anymore. We need to inform the model about these dependencies between observations. The way we’re going to handle this is to add random effects to the model, just as we do in the frequentist framework. Random effects are additional parameters that the Bayesian model estimates and that account for dependencies between data points. The choice of the random effect structure is controversial. We follow the approach to include the maximal random effect structure justified by the design \citep{barr2013random} \citep[for a complementary view on random effect specifications, see][]{matuschek2017balancing}. For our case here, we estimate how  individual sentences (\texttt{(1 | sentence)})  and individual subjects  (\texttt{(1 | subject)})  differ in their overall pitch values (random intercepts). We also estimate how much pitch values across sentences vary according to the context they appear in and according to the gender of the speaker (as well as their interaction, i.e. \texttt{(0 + gender * context | sentence)}). This so-called by-sentence random slope allows the interaction term to vary between sentences. In other words, the impact of the predictors gender and context (and their interaction) might be different for different sentences. Finally, we estimate how much pitch values vary across subjects as a function of context. In other words, our model takes into account that the context dependent effect on pitch might differ between individual speakers.
+produced by multiple speakers). The observant reader might have already noticed this, but it is
+probably worth reiterating that linear regression models make the crucial assumption that all
+samples (data points) are independent of each other. But if two data points are produced by the
+same participant, then observations will not necessarily be independent anymore. We need to
+inform the model about these dependencies between observations. The way we’re going to handle
+this is to add random effects to the model, just as we do in the frequentist framework. Random
+effects are additional parameters that the Bayesian model estimates and that account for
+dependencies between data points. The choice of the random effect structure is controversial.
+This tutorial follows the approach advocated by \citet{barr2013random} to include the maximal
+random effect structure justified by the design \citep[for a complementary view on random
+effect specifications, see][]{matuschek2017balancing}. For our case here, we estimate how
+individual sentences (\texttt{(1 | sentence)}) and individual subjects (\texttt{(1 | subject)})
+differ in their overall pitch values (random intercepts). We also estimate how much pitch
+values across sentences vary according to the context they appear in and according to the
+gender of the speaker (as well as their interaction, i.e. \texttt{(0 + gender * context |
+  sentence)}). This so-called by-sentence random slope allows the interaction term to vary
+between sentences. In other words, the impact of the predictors gender and context (and their
+interaction) might be different for different sentences. Finally, we estimate how much pitch
+values vary across subjects as a function of context. In other words, our model takes into
+account that the context dependent effect on pitch might differ between individual speakers.
 
 Running hierarchical random effect models with \textrm{brms} is very similar to the look and feel of non-Bayesian approaches. Here is the function call to the model.
 The outcome of this model fit is shown below:
-
-\bigskip
 
 \begin{minipage}[]{1\textwidth}
 \begin{lstlisting}[language=R]
@@ -1003,13 +1012,11 @@ model_MaxRE = brm(formula = pitch ~ gender * context +
 	(1 | sentence) + (1 | subject) + 
 	(0 + gender * context | sentence) +
 	(0 + context | subject),
-	data = politedata,
-	control = list(adapt_delta = 0.99)
-	)
+	data = politedata, control = list(adapt_delta = 0.99)	)
 \end{lstlisting}
 \end{minipage}
 
-\medskip
+\vspace{-0.5cm}
 
 \begin{minipage}[]{1.5\textwidth}
 \begin{rc}
@@ -1057,14 +1064,14 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 \end{rc}
 \end{minipage}
 
-The model fit summary looks very similar to the summary of a fixed-effect only model. Lines 28--33 give the estimates of the fixed-effects coefficients. The mean estimates look very similar to the ones that we obtained in the fixed-effect only model. However, not surprisingly, our uncertainty surrounding these estimates is larger.  
+\vspace{-0.5cm}
+
+Lines 28--33 give the estimates of the fixed-effects coefficients. The mean estimates look very similar to the ones that we obtained in the fixed-effect only model. However, not surprisingly, our uncertainty surrounding these estimates is larger.  
 We now also get information about the parameters implied by the specified random effect
 structure. Lines 8--20 cover the by-sentence random effects, lines 22--26 cover the by-subject
 random effects.
 
 To check the probability of our hypotheses of interest, we can use the \texttt{faintr} package again, in conjunction with the convenience function for the specific hypotheses relevant for this tutorial:
-
-\medskip
 
 \begin{minipage}[]{\textwidth}
 \begin{rc}
@@ -1078,9 +1085,11 @@ To check the probability of our hypotheses of interest, we can use the \texttt{f
 \end{rc}
 \end{minipage}
 
+\vspace{-0.5cm}
+
 When we compare these values to the simpler model above, we can see that the evidence for our
 hypotheses seems a bit weaker for the maximal random effect model. This is not surprising
-because the simpler model assumed independence where there was none and therefore
+because the simpler model assumed independence where there likely was none and therefore
 underestimated the variance. Speech is a messy aspect of human behavior. Speakers differ quite
 drastically in their pronunciation and even the same speaker varies a lot in how they speak.
 If we do not inform our model about these sources of variation, we might end up being overly confident in our results.
@@ -1123,6 +1132,9 @@ Female speakers produced higher voice pitch in informal contexts ($\mathbb{E}(\m
     pol}}) = 233$, CI = [179, 288]). There is compelling evidence for this difference
 ($\mathbb{E}(\mu_{\text{fem, inf}} - \mu_{\text{fem, pol}}) = 28$, CI = [2, 53], $P(§\delta
 > 0) = 0.982$). We conclude that the data and the model support H1.
+%
+\marginnote{Notation $\mathbb{E}(\cdot)$ is shorthand for the expectation (mean) of the
+  posterior distribution of some (possibly derived) quantity of interest.}
 
 Male speakers also produced higher voice pitch in informal contexts
 ($\mathbb{E}(\mu_{\text{male, inf}}) = 145$, CI = [94, 191]) than in polite contexts
@@ -1141,14 +1153,15 @@ evidence that the difference between these cells is larger than zero ($\mathbb{E
 
 \section{Other forms of Bayesian inference}
 
-Alright, you made it! We have learned the basic reasoning behind Bayesian parameter estimation, we learned about priors and how to specify them, we learned how to criticize our models and how to write up our results. Phewww, if you feel a little overwhelmed by now, don't worry, it will come to you.
-
-Before we send you off into the Bayesian data analysis world, we would like to mention a couple of things that we were not able to cover here.
+Alright, you made it! We have learned the basic reasoning behind Bayesian parameter estimation,
+we learned about priors and how to specify them, we learned how to criticize our models and how
+to write up our results. Phewww, if you feel a little overwhelmed by now, don't worry, it will
+come to you. Before we send you off into the Bayesian data analysis world, we would like to mention a couple of things that we were not able to cover here.
 
 There are three major things we can do with models and data in Bayesian data analysis, two of which we have already seen:
 
 \begin{enumerate}
-\item \textbf{parameter inference}: we consider one model, (tentatively) assume that this model is true, and ask what we should believe about its parameters (given the data). 
+\item \textbf{parameter inference}: we consider one model, (tentatively) assume that this model is true, and ask what we should believe about its parameters (given the data);
 \item \textbf{model criticism}: we consider one model and ask whether this model is sufficient to deal with the data at hand; we can do that before showing the model any of the data, or after feeding it with some or all of the data;
 \item \textbf{model comparison} we consider at least two models and we ask which of these models (plural!) is better at explaining the data.
 \end{enumerate}
@@ -1156,24 +1169,29 @@ There are three major things we can do with models and data in Bayesian data ana
 So far, we have dealt with parameter inference and model criticism. In fact, we used parameter inference to test our research hypotheses, and we used model criticism as a sanity check to
 make sure that the one model we used was adequate.
 
-This tutorial focused on parameter estimation because it's simple and very familiar to those of your who have used null hypothesis significance testing before.
-
-But if you dive deeper into Bayesian data analysis, you will quickly discover that there are arguments
-\citep[e.g.][]{VandekerckhoveMatzke2015:Model-Compariso}
-for an approach to hypothesis testing that is based on Bayesian model comparison in terms of
-so-called \textbf{Bayes factors}
-\citep{Jeffreys1961:Theory-of-Proba,KassRaftery1995:Bayes-Factors} 
-or \textbf{Leave-One-Out (LOO)} procedures. These techniques lead us too deep into the rabbit hole of Bayesian inference for today, but we can offer some (hopefully) helpful departure points for further reading.
+This tutorial focused on parameter estimation because it's simple and very familiar to those
+who have used null hypothesis significance testing in a frequentist framework before. But if
+you dive deeper into Bayesian data analysis, you will quickly discover that there are good
+arguments \citep[e.g.][]{VandekerckhoveMatzke2015:Model-Compariso} for an approach to
+hypothesis testing that is based on Bayesian model comparison in terms of so-called
+\textbf{Bayes factors} \citep{Jeffreys1961:Theory-of-Proba,KassRaftery1995:Bayes-Factors} or
+cross-validation like \textbf{Leave-One-Out (LOO)} \citep{VehtariGelman2016:Practical-Bayes}.
+These techniques lead us too deep into the rabbit hole of Bayesian inference for today, but we
+can offer some (hopefully) helpful departure points for further reading.
 
 \section{Further reading}
 
 The textbook by \citet{GelmanCarlin2014:Bayesian-Data-A} is a standard reference for Bayesian
-data analysis. \citet{Kruschke2011:Doing-Bayesian-} provides a less technical introduction to Bayesian methods. \citet{McElreath2016:Statistical-Ret} is both an excellent introduction to core concepts of statistical analysis and and excellent point of departure into Bayesian analyses.\marginnote{A. Solomon Kurz has an online book based on
+data analysis. \citet{Kruschke2011:Doing-Bayesian-} provides a less technical introduction to
+Bayesian methods. \citet{McElreath2016:Statistical-Ret} is both an excellent introduction to
+core concepts of statistical analysis and and excellent point of departure into Bayesian
+analyses.
+%
+\marginnote{A. Solomon Kurz has an online book based on
   \citet{McElreath2016:Statistical-Ret}, which uses the same tools as we did here, namely the
-  \emph{tidyverse} and the \emph{brms} packages: \url{https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/}}
-  
-There are many useful tutorials to Bayesian analysis using \emph{brms} which are technically a little bit more involved such as (REFS)
-
+  \emph{tidyverse} and the \emph{brms} packages: \url{https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/}}.
+There are many other useful tutorials to Bayesian analysis using \emph{brms}, some of which are
+technically a little bit more involved \citep[e.g.][]{SorensenHohensteinb2016:Bayesian-linear}.
 If you want to explore Bayesian approaches to data analysis with a graphical user interface, check out JASP: \url{https://jasp-stats.org}. 
 
 
