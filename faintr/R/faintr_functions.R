@@ -84,7 +84,7 @@ The factor level(s) '", paste0(factor_levels[check_permitted_characters(factor_l
 }
 
 
-#' Extracting cell means
+#' Extracting posterior cell means
 #'
 #' This function takes a brms model fit for a factorial design and outputs a comparison of all factor levels against each other, and posterior samples of all cell means. 
 #' For more information see \code{vignette('faintr_basics')}.
@@ -96,8 +96,8 @@ The factor level(s) '", paste0(factor_levels[check_permitted_characters(factor_l
 #' @examples
 #' #' library(brms)
 #' m = brm(yield ~ N * P * K, npk)
-#' extract_posterior_cell_means(m)
-extract_posterior_cell_means = function(model) {
+#' post_cells(m)
+post_cells = function(model) {
   
   # get information about factors
   factor_info = get_factor_information(model)
@@ -296,7 +296,7 @@ compare_groups = function(model, higher, lower) {
   }
   
   # get posterior samples for all cell means
-  post_cell_samples = extract_posterior_cell_means(model)$predictor_values
+  post_cell_samples = post_cells(model)$predictor_values
   
   ## helper function :: recursive extraction of cell names
   collect_cell_names = function(remaining_names, remaining_factors) {

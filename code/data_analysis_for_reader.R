@@ -85,10 +85,10 @@ install_github(
 library(faintr)
 
 # extract posterior cell means
-extract_posterior_cell_means(model_FE)$predictor_values
+post_cells(model_FE)$predictor_values
 
 # extract cell means and plot them
-posterior_cell_means = extract_posterior_cell_means(model_FE)$predictor_values %>% 
+posterior_cell_means = post_cells(model_FE)$predictor_values %>% 
   gather(key = "parameter", value = "posterior") 
 
 # compare cell means with each other

@@ -22,6 +22,7 @@ set.seed(1702)
 #####################################################
 
 politedata = read_csv('https://raw.githubusercontent.com/michael-franke/bayes_mixed_regression_tutorial/master/code/politeness_data.csv') 
+# politedata = read_csv('politeness_data.csv')
 head(politedata)
 
 #####################################################
@@ -179,7 +180,7 @@ library(devtools)
 library(faintr)
 
 # extract cell means and plot them
-posterior_cell_means = extract_posterior_cell_means(model_FE)$predictor_values %>% 
+posterior_cell_means = post_cells(model_FE)$predictor_values %>% 
   gather(key = "parameter", value = "posterior") 
 
 posterior_cell_means_HDIs = posterior_cell_means %>% 
@@ -378,7 +379,7 @@ model_MaxRE = brm(formula = pitch ~ gender * context +
                   seed = 1702)
 
 # extract cell means and 95% CIs
-posterior_cell_means = extract_posterior_cell_means(model_MaxRE)$predictor_values %>% 
+posterior_cell_means = post_cells(model_MaxRE)$predictor_values %>% 
   gather(key = "parameter", value = "posterior") %>% 
   group_by(parameter) %>% 
   summarize(mean = mean(posterior),
