@@ -99,6 +99,12 @@ The factor level(s) '", paste0(factor_levels[check_permitted_characters(factor_l
 #' post_cells(m)
 post_cells = function(model) {
   
+  # check if repsonse variable is metric and abort if not
+  if (model$family$family != "gaussian") {
+    stop("Unfortunately, 'faintr' currently only works with metric response variables (family 'gaussian').")
+  }
+  
+  
   # get information about factors
   factor_info = get_factor_information(model)
   dependent_variable = factor_info[["dependent_variable"]]

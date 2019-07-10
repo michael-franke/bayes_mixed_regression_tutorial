@@ -2,8 +2,8 @@
 
 S3method(print,faintCompare)
 export(compare_groups)
-export(extract_posterior_cell_means)
 export(get_factor_information)
+export(post_cells)
 import(brms)
 import(tidyverse)
 importFrom(HDInterval,hdi)

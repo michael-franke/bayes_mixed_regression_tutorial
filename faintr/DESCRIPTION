@@ -1,13 +1,13 @@
 Package: faintr
 Title: Compare all Factor Levels in Factorial Design Bayesian Regression (using BRMS)
-Version: 0.0.6
-Date: 2019-05-05
+Version: 0.0.8
+Date: 2019-07-10
 Authors@R: person("Michael", "Franke", email = "mchfranke@gmail.com", role = c("aut", "cre"))
 Description: The 'faintr' package provides convenience functions to interpret output of model fits of Bayesian regression models for factorial designs, obtained with the package 'brms'.
 Depends: R (>= 3.5.0)
 License: MIT
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1.9000
+RoxygenNote: 6.1.1
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr

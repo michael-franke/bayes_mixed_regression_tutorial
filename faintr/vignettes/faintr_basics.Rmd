@@ -45,7 +45,7 @@ Consider a data set on pitch frequency in the speech of female and male speakers
 
 ```{r, error=FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
-politedata = read_csv('https://raw.githubusercontent.com/michael-franke/bayes_mixed_regression_tutorial/master/code/politeness_data.csv') 
+politedata = read_csv('https://tinyurl.com/polite-data') 
 head(politedata)
 ```
 
@@ -94,12 +94,12 @@ compare_groups(
 To explore all pairwise comparisons between design cells, try:
 
 ```{r}
-extract_posterior_cell_means(m_dummy)$all_cells_compared
+post_cells(m_dummy)$all_cells_compared
 ```
 
 We can also extract the estimated means of each cell:
 
 ```{r}
-extract_posterior_cell_means(m_dummy)$cell_summary
+post_cells(m_dummy)$cell_summary
 ```
 
