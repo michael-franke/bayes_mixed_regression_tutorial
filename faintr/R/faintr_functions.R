@@ -114,7 +114,7 @@ post_cells = function(model) {
   ref_levels = factor_info[["ref_levels"]]
   
   # get the posterior samples for all regression coefficients
-  post_samples = posterior_samples(model) %>% select(starts_with("b_"))
+  post_samples = posterior_samples(model) %>% dplyr::select(starts_with("b_"))
   
   # get a table of cells (factor-level combinations) in an ugly format (for internal use)
   cells = expand.grid(factors) 
@@ -220,7 +220,7 @@ post_cells = function(model) {
 
   ## safely remove column with sample number
   if ("n_sample" %in% names(predictor_values)) {
-    predictor_values = predictor_values %>% select(-n_sample)
+    predictor_values = predictor_values %>% dplyr::select(-n_sample)
   }
   
   cell_summary = full_join(
@@ -331,7 +331,7 @@ compare_groups = function(model, higher, lower) {
     }
     factors_group = get_group_names(group)
     cells_group = collect_cell_names(names(post_cell_samples), factors_group)
-    apply(as.matrix(post_cell_samples %>% select(cells_group)), 1, mean)
+    apply(as.matrix(post_cell_samples %>% dplyr::select(cells_group)), 1, mean)
   }
   
   post_samples_higher = extract_group_samples(higher)
@@ -343,8 +343,8 @@ compare_groups = function(model, higher, lower) {
     higher = get_group_names(higher),
     lower = get_group_names(lower),
     mean_diff = mean(post_samples_higher - post_samples_lower),
-    l95_ci = as.vector(hdi(post_samples_higher - post_samples_lower)[1]),
-    u95_ci = as.vector(hdi(post_samples_higher - post_samples_lower)[2]),
+    l95_ci = as.vector(HDInterval::hdi(post_samples_higher - post_samples_lower)[1]),
+    u95_ci = as.vector(HDInterval::hdi(post_samples_higher - post_samples_lower)[2]),
     probability = mean(post_samples_higher > post_samples_lower)
   )
   class(outlist) = "faintCompare"
